@@ -1,0 +1,47 @@
+{% extends 'layouts/admin_base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:600px">
+  <div class="card-header">
+    <h2>{{ title }}</h2>
+    <a href="{{ url_for('admin.testimonials') }}" class="btn btn-outline">← Back</a>
+  </div>
+  <div class="card-body">
+    <form method="POST" enctype="multipart/form-data">
+      {{ form.hidden_tag() }}
+      <div class="form-row">
+        <div class="form-group">
+          {{ form.name.label }}
+          {{ form.name(class="form-control") }}
+          {% for e in form.name.errors %}<span class="form-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-group">
+          {{ form.role.label }}
+          {{ form.role(class="form-control", placeholder="e.g. Parent, Alumni") }}
+        </div>
+      </div>
+      <div class="form-group">
+        {{ form.content.label }}
+        {{ form.content(class="form-control", rows=5, placeholder="Their testimonial…") }}
+        {% for e in form.content.errors %}<span class="form-error">{{ e }}</span>{% endfor %}
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          {{ form.rating.label }}
+          {{ form.rating(class="form-control", type="number", min=1, max=5) }}
+        </div>
+        <div class="form-group">
+          {{ form.avatar.label }}
+          {{ form.avatar(class="form-control") }}
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+        <a href="{{ url_for('admin.testimonials') }}" class="btn btn-outline">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

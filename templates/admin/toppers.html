@@ -1,0 +1,87 @@
+{% extends 'layouts/admin_base.html' %}
+{% block title %}Stream Toppers{% endblock %}
+{% block page_title %}Stream Toppers{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+  <div>
+    <p style="color:var(--text-muted);font-size:.9rem">Manage topper students shown on homepage. Max 20 per stream.</p>
+  </div>
+  <a href="{{ url_for('admin.topper_new') }}" class="btn btn-primary">+ Add Topper</a>
+</div>
+
+{% for stream_key, stream_label in stream_labels.items() %}
+{% set stream_toppers = toppers | selectattr('stream', 'equalto', stream_key) | list %}
+{% if stream_toppers %}
+<div class="card" style="margin-bottom:1.5rem">
+  <div class="card-header" style="display:flex;justify-content:space-between;align-items:center">
+    <h3 style="margin:0">{{ stream_label }}</h3>
+    <span style="font-size:.8rem;color:var(--text-muted)">{{ stream_toppers|length }} / 20</span>
+  </div>
+  <div class="card-body" style="padding:0">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Photo</th>
+          <th>Name</th>
+          <th>Percentage</th>
+          <th>Year</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in stream_toppers | sort(attribute='rank') %}
+        <tr>
+          <td><strong>#{{ t.rank }}</strong></td>
+          <td>
+            {% if t.photo %}
+            <img src="{{ url_for('static', filename='uploads/toppers/' + t.photo) }}"
+                 style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--border)">
+            {% else %}
+            <div style="width:44px;height:44px;border-radius:50%;background:var(--c-navy);
+                        display:flex;align-items:center;justify-content:center;
+                        color:#fff;font-weight:700;font-size:.95rem">
+              {{ t.name[0] }}
+            </div>
+            {% endif %}
+          </td>
+          <td><strong>{{ t.name }}</strong></td>
+          <td>{{ t.percentage ~ '%' if t.percentage else '—' }}</td>
+          <td>{{ t.year }}</td>
+          <td>
+            {% if t.is_published %}
+            <span class="badge badge-success">Published</span>
+            {% else %}
+            <span class="badge badge-muted">Hidden</span>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{{ url_for('admin.topper_edit', tid=t.id) }}" class="btn btn-sm btn-outline">Edit</a>
+            <form method="POST" action="{{ url_for('admin.topper_delete', tid=t.id) }}"
+                  style="display:inline"
+                  onsubmit="return confirm('Delete {{ t.name }}?')">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+{% endfor %}
+
+{% set all_empty = toppers | length == 0 %}
+{% if all_empty %}
+<div class="card">
+  <div class="card-body" style="text-align:center;padding:3rem">
+    <p style="color:var(--text-muted);font-size:1rem">No toppers added yet.</p>
+    <a href="{{ url_for('admin.topper_new') }}" class="btn btn-primary" style="margin-top:1rem">Add First Topper</a>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

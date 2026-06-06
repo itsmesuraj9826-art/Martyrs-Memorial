@@ -1,0 +1,267 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Academics | {{ school_name }}{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <h1 data-animate="fadeInUp">Academics</h1>
+    <p data-animate="fadeInUp">NEB +2 Programmes — Class 11 &amp; 12</p>
+  </div>
+</section>
+
+<!-- ═══════ STREAMS OVERVIEW ═══════ -->
+<section class="section">
+  <div class="container">
+    <div class="section-header" data-animate="fadeInUp">
+      <span class="section-badge">Programmes</span>
+      <h2>+2 Streams We Offer</h2>
+      <p>{{ school_name }} offers four streams under the National Examination Board (NEB) curriculum for Class 11 &amp; 12.</p>
+    </div>
+    <div class="streams-grid" data-animate="fadeInUp">
+
+      <!-- Science with Biology -->
+      <div class="stream-card">
+        <div class="stream-icon-wrap science"><i class="fa-solid fa-microscope"></i></div>
+        <div class="stream-body">
+          <span class="stream-badge science">Science</span>
+          <h3>Science <span class="stream-sub">(With Biology)</span></h3>
+          <p>For students targeting medicine, health sciences, and biology-based careers.</p>
+          <div class="subjects-block">
+            <h4>Compulsory Subjects</h4>
+            <ul>
+              <li>English</li>
+              <li>Nepali / Social Studies</li>
+            </ul>
+            <h4>Core Subjects</h4>
+            <ul>
+              <li>Physics</li>
+              <li>Chemistry</li>
+              <li>Biology</li>
+            </ul>
+            <h4>Optional Subject <span class="opt-note">(choose one)</span></h4>
+            <ul>
+              <li>Mathematics</li>
+              <li>Computer Science</li>
+            </ul>
+          </div>
+          <a href="{{ url_for('public.contact') }}" class="btn btn-sm btn-primary" style="margin-top:1rem">Enquire Now →</a>
+        </div>
+      </div>
+
+      <!-- Science without Biology -->
+      <div class="stream-card">
+        <div class="stream-icon-wrap science-math"><i class="fa-solid fa-square-root-variable"></i></div>
+        <div class="stream-body">
+          <span class="stream-badge science">Science</span>
+          <h3>Science <span class="stream-sub">(Without Biology)</span></h3>
+          <p>For students targeting engineering, IT, and mathematics-based careers.</p>
+          <div class="subjects-block">
+            <h4>Compulsory Subjects</h4>
+            <ul>
+              <li>English</li>
+              <li>Nepali / Social Studies</li>
+            </ul>
+            <h4>Core Subjects</h4>
+            <ul>
+              <li>Physics</li>
+              <li>Chemistry</li>
+              <li>Mathematics</li>
+            </ul>
+            <h4>Optional Subject <span class="opt-note">(choose one)</span></h4>
+            <ul>
+              <li>Computer Science</li>
+              <li>Economics</li>
+            </ul>
+          </div>
+          <a href="{{ url_for('public.contact') }}" class="btn btn-sm btn-primary" style="margin-top:1rem">Enquire Now →</a>
+        </div>
+      </div>
+
+      <!-- Management -->
+      <div class="stream-card">
+        <div class="stream-icon-wrap management"><i class="fa-solid fa-chart-line"></i></div>
+        <div class="stream-body">
+          <span class="stream-badge management">Management</span>
+          <h3>Management</h3>
+          <p>For students interested in business, commerce, finance, and entrepreneurship.</p>
+          <div class="subjects-block">
+            <h4>Compulsory Subjects</h4>
+            <ul>
+              <li>English</li>
+              <li>Nepali / Social Studies</li>
+            </ul>
+            <h4>Core Subjects</h4>
+            <ul>
+              <li>Business Studies &amp; Marketing</li>
+              <li>Accountancy</li>
+              <li>Economics</li>
+            </ul>
+            <h4>Optional Subject <span class="opt-note">(choose one)</span></h4>
+            <ul>
+              <li>Computer Science</li>
+              <li>Mathematics</li>
+              <li>Hotel Management</li>
+            </ul>
+          </div>
+          <a href="{{ url_for('public.contact') }}" class="btn btn-sm btn-primary" style="margin-top:1rem">Enquire Now →</a>
+        </div>
+      </div>
+
+      <!-- Law -->
+      <div class="stream-card">
+        <div class="stream-icon-wrap law"><i class="fa-solid fa-scale-balanced"></i></div>
+        <div class="stream-body">
+          <span class="stream-badge law">Law</span>
+          <h3>Law</h3>
+          <p>Foundation for legal studies, civil services, and public administration careers.</p>
+          <div class="subjects-block">
+            <h4>Compulsory Subjects</h4>
+            <ul>
+              <li>English</li>
+              <li>Nepali / Social Studies</li>
+            </ul>
+            <h4>Core Subjects</h4>
+            <ul>
+              <li>Law</li>
+              <li>Political Science</li>
+              <li>Economics</li>
+            </ul>
+            <h4>Optional Subject <span class="opt-note">(choose one)</span></h4>
+            <ul>
+              <li>Business Studies</li>
+              <li>Sociology</li>
+            </ul>
+          </div>
+          <a href="{{ url_for('public.contact') }}" class="btn btn-sm btn-primary" style="margin-top:1rem">Enquire Now →</a>
+        </div>
+      </div>
+
+      <!-- Arts / Humanities -->
+      <div class="stream-card">
+        <div class="stream-icon-wrap arts"><i class="fa-solid fa-palette"></i></div>
+        <div class="stream-body">
+          <span class="stream-badge arts">Arts / Humanities</span>
+          <h3>Arts &amp; Humanities</h3>
+          <p>Broad foundation for social sciences, education, literature, and cultural studies.</p>
+          <div class="subjects-block">
+            <h4>Compulsory Subjects</h4>
+            <ul>
+              <li>English</li>
+              <li>Nepali / Social Studies</li>
+            </ul>
+            <h4>Core Subjects</h4>
+            <ul>
+              <li>Sociology / Rural Development</li>
+              <li>History</li>
+              <li>Political Science</li>
+            </ul>
+            <h4>Optional Subject <span class="opt-note">(choose one)</span></h4>
+            <ul>
+              <li>Economics</li>
+              <li>Geography</li>
+              <li>Population Studies</li>
+            </ul>
+          </div>
+          <a href="{{ url_for('public.contact') }}" class="btn btn-sm btn-primary" style="margin-top:1rem">Enquire Now →</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ NEB CURRICULUM NOTE ═══════ -->
+<section class="section bg-light">
+  <div class="container">
+    <div class="section-header" data-animate="fadeInUp">
+      <span class="section-badge">Curriculum</span>
+      <h2>About the NEB Curriculum</h2>
+    </div>
+    <div class="curriculum-grid" data-animate="fadeInUp">
+      <div class="curriculum-card">
+        <h3>🎓 NEB Affiliated</h3>
+        <p>All programmes follow the National Examination Board (NEB) curriculum. Students appear in Grade 11 and Grade 12 board examinations conducted by NEB, Government of Nepal.</p>
+      </div>
+      <div class="curriculum-card">
+        <h3>📚 Two-Year Programme</h3>
+        <p>The +2 level spans two years — Class 11 and Class 12 — after completing SEE (Secondary Education Examination, formerly SLC). Stream selection is made at admission.</p>
+      </div>
+      <div class="curriculum-card">
+        <h3>🔬 Lab &amp; Practical Work</h3>
+        <p>Science students benefit from well-equipped Physics, Chemistry, and Biology laboratories. Regular practical sessions complement theory, as required by the NEB examination pattern.</p>
+      </div>
+      <div class="curriculum-card">
+        <h3>🏆 Board Exam &amp; Results</h3>
+        <p>Our students consistently achieve excellent results in NEB board examinations. Dedicated exam preparation, mock tests, and revision classes are conducted before board exams.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ SYLLABUS DOWNLOADS ═══════ -->
+{% if syllabi %}
+<section class="section">
+  <div class="container">
+    <div class="section-header" data-animate="fadeInUp">
+      <span class="section-badge">Resources</span>
+      <h2>Download Syllabus</h2>
+    </div>
+    <div class="download-list" data-animate="fadeInUp">
+      {% for item in syllabi %}
+      <div class="download-item">
+        <span class="file-icon">📄</span>
+        <div class="download-info">
+          <strong>{{ item.title }}</strong>
+          {% if item.description %}<p>{{ item.description }}</p>{% endif %}
+          <span class="file-size">{{ item.formatted_size() }}</span>
+        </div>
+        <a href="{{ url_for('public.download_file', file_id=item.id) }}" class="btn btn-sm btn-primary">⬇ Download</a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ═══════ ACADEMIC CALENDAR ═══════ -->
+{% if calendars %}
+<section class="section bg-light">
+  <div class="container">
+    <div class="section-header" data-animate="fadeInUp">
+      <span class="section-badge">Planning</span>
+      <h2>Academic Calendar</h2>
+    </div>
+    <div class="download-list" data-animate="fadeInUp">
+      {% for item in calendars %}
+      <div class="download-item">
+        <span class="file-icon">📅</span>
+        <div class="download-info">
+          <strong>{{ item.title }}</strong>
+          {% if item.description %}<p>{{ item.description }}</p>{% endif %}
+        </div>
+        <a href="{{ url_for('public.download_file', file_id=item.id) }}" class="btn btn-sm btn-primary">⬇ Download</a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ═══════ ADMISSIONS CTA ═══════ -->
+<section class="cta-section">
+  <div class="container cta-inner" data-animate="fadeInUp">
+    <div class="cta-gold-line"></div>
+    <h2>Ready to Join Us?</h2>
+    <p>Admissions are open for the academic year 2025–26. Choose your stream and take the first step towards a bright future.</p>
+    <div class="cta-actions">
+      <a href="{{ url_for('public.downloads') }}" class="btn btn-gold btn-lg">📥 Download Admission Form</a>
+      <a href="{{ url_for('public.contact') }}" class="btn btn-outline-white btn-lg">Contact Admissions</a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/animations.js') }}"></script>
+{% endblock %}

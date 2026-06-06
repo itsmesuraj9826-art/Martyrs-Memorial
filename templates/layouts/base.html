@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="{{ school_name }} — {{ school_tagline }}">
+  <title>{% block title %}{{ school_name }}{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/public.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- ── Top announcement ticker ── -->
+<div class="top-ticker" id="topTicker">
+  <span class="ticker-label"><i class="fa-solid fa-bullhorn"></i> Latest</span>
+  <div class="ticker-track-wrap">
+    <div class="ticker-track" id="tickerTrack">
+      {% set ticker_notices = [] %}
+      {% if latest_notices is defined %}
+        {% for n in latest_notices[:6] %}
+          <span class="ticker-item">
+            {% if n.is_pinned %}<i class="fa-solid fa-thumbtack ticker-pin"></i>{% endif %}
+            {{ n.title }}
+          </span>
+          <span class="ticker-sep">✦</span>
+        {% endfor %}
+      {% else %}
+        <span class="ticker-item"><i class="fa-solid fa-thumbtack ticker-pin"></i> Admissions open for 2025–26 academic year</span>
+        <span class="ticker-sep">✦</span>
+        <span class="ticker-item">NEB Results 2082 — Congratulations to all achievers!</span>
+        <span class="ticker-sep">✦</span>
+        <span class="ticker-item">Annual Sports Day — Register now at the front office</span>
+        <span class="ticker-sep">✦</span>
+      {% endif %}
+    </div>
+  </div>
+  <button class="ticker-close" id="tickerClose" aria-label="Close ticker">×</button>
+</div>
+
+<nav class="navbar {% block navbar_class %}{% endblock %}" id="navbar">
+  <div class="container nav-inner">
+    <a href="{{ url_for('public.index') }}" class="nav-logo">
+      <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="{{ school_name }} Logo" class="nav-logo-img">
+      <span class="logo-text">{{ school_name }}</span>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="{{ url_for('public.index') }}" class="{% if request.endpoint == 'public.index' %}active{% endif %}">Home</a></li>
+      <li><a href="{{ url_for('public.about') }}" class="{% if request.endpoint == 'public.about' %}active{% endif %}">About</a></li>
+      <li><a href="{{ url_for('public.academics') }}" class="{% if request.endpoint == 'public.academics' %}active{% endif %}">Academics</a></li>
+      <li class="has-dropdown">
+        <a href="#">Activities ▾</a>
+        <ul class="dropdown">
+          <li><a href="{{ url_for('public.notices') }}">📋 Notice Board</a></li>
+          <li><a href="{{ url_for('public.events') }}">📅 Events</a></li>
+          <li><a href="{{ url_for('public.gallery') }}">🖼️ Gallery</a></li>
+          <li><a href="{{ url_for('public.news') }}">📰 News & Blog</a></li>
+        </ul>
+      </li>
+      <li><a href="{{ url_for('public.downloads') }}" class="{% if request.endpoint == 'public.downloads' %}active{% endif %}">Downloads</a></li>
+      <li><a href="{{ url_for('public.contact') }}" class="{% if request.endpoint == 'public.contact' %}active{% endif %}">Contact</a></li>
+    </ul>
+    <div class="nav-actions">
+      <!-- Live clock -->
+      <div class="nav-clock" id="navClock" title="Local time — auto dark mode switches at 6 PM">
+        <span class="nav-clock-time" id="clockTime">--:--</span>
+        <span class="nav-clock-ampm" id="clockAmPm">--</span>
+        <span class="nav-clock-auto" id="clockAutoLabel" title="Auto mode: dark at night, light by day">AUTO</span>
+      </div>
+      <!-- Theme toggle (manual override) -->
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark / light mode">
+        <span class="theme-icon">🌙</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="flash-container">
+    {% for category, message in messages %}
+    <div class="flash flash-{{ category }}">
+      {{ message }}
+      <button class="flash-close" onclick="this.parentElement.remove()">×</button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+{% endwith %}
+
+{% block content %}{% endblock %}
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+
+      <!-- Brand -->
+      <div class="footer-brand">
+        <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="{{ school_name }} Logo" class="footer-logo-img">
+        <h3>{{ school_name }}</h3>
+        <p>{{ school_tagline }}. Shaping minds, building character, and preparing students for a lifetime of success.</p>
+        <div class="footer-social">
+          <a href="https://www.facebook.com/share/1GtWsNzRKn/" target="_blank" rel="noopener" aria-label="Facebook">
+            <i class="fa-brands fa-facebook-f"></i>
+          </a>
+          <a href="#" aria-label="Twitter / X">
+            <i class="fa-brands fa-x-twitter"></i>
+          </a>
+          <a href="#" aria-label="Instagram">
+            <i class="fa-brands fa-instagram"></i>
+          </a>
+          <a href="#" aria-label="YouTube">
+            <i class="fa-brands fa-youtube"></i>
+          </a>
+          <a href="#" aria-label="TikTok">
+            <i class="fa-brands fa-tiktok"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="footer-col">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="{{ url_for('public.about') }}">About Us</a></li>
+          <li><a href="{{ url_for('public.academics') }}">Academics</a></li>
+          <li><a href="{{ url_for('public.notices') }}">Notice Board</a></li>
+          <li><a href="{{ url_for('public.events') }}">Events</a></li>
+          <li><a href="{{ url_for('public.gallery') }}">Gallery</a></li>
+          <li><a href="{{ url_for('public.privacy_policy') }}">Privacy Policy</a></li>
+        </ul>
+      </div>
+
+      <!-- Programmes -->
+      <div class="footer-col">
+        <h4>+2 Programmes</h4>
+        <ul>
+          <li><a href="{{ url_for('public.academics') }}"><i class="fa-solid fa-flask footer-li-icon"></i> Science</a></li>
+          <li><a href="{{ url_for('public.academics') }}"><i class="fa-solid fa-laptop-code footer-li-icon"></i> Computer Science</a></li>
+          <li><a href="{{ url_for('public.academics') }}"><i class="fa-solid fa-chart-line footer-li-icon"></i> Management</a></li>
+          <li><a href="{{ url_for('public.academics') }}"><i class="fa-solid fa-hotel footer-li-icon"></i> Hotel Management</a></li>
+          <li><a href="{{ url_for('public.downloads') }}"><i class="fa-solid fa-file-arrow-down footer-li-icon"></i> Downloads</a></li>
+        </ul>
+      </div>
+
+      <!-- Contact -->
+      <div class="footer-col">
+        <h4>Contact Us</h4>
+        <ul class="contact-list">
+          <li><i class="fa-solid fa-location-dot"></i> Biratnagar-10, College Road</li>
+          <li><i class="fa-solid fa-phone"></i> <a href="tel:9805308807">9805308807</a></li>
+          <li><i class="fa-solid fa-phone"></i> <a href="tel:9842334007">9842334007</a></li>
+          <li><i class="fa-solid fa-phone"></i> <a href="tel:9810570644">9810570644</a></li>
+          <li><i class="fa-solid fa-envelope"></i> <a href="mailto:info@martyrsmemorial.edu.np">info@martyrsmemorial.edu.np</a></li>
+          <li><i class="fa-regular fa-clock"></i> Sun–Fri: 6am – 5pm</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+  <div style="border-top:1px solid #1a2d45">
+    <div class="container footer-bottom">
+      <span>© <span data-year></span> {{ school_name }}, Biratnagar-10. All rights reserved.</span>
+      <a href="{{ url_for('public.privacy_policy') }}" style="font-size:.78rem;color:#4a6fa5;text-decoration:none;transition:color .2s;white-space:nowrap" onmouseover="this.style.color='#d4920a'" onmouseout="this.style.color='#4a6fa5'"><i class="fa-solid fa-shield-halved" style="margin-right:.3rem;font-size:.7rem"></i>Privacy Policy</a>
+      <span>Developed by <a href="https://www.instagram.com/surajmehtahere_/" target="_blank" rel="noopener" style="color:#4a6fa5;font-weight:700;text-decoration:none;transition:color .2s" onmouseover="this.style.color='#e1306c'" onmouseout="this.style.color='#4a6fa5'"><i class="fa-brands fa-instagram" style="margin-right:.3rem"></i>Suraj Mehta</a> &amp; Team</span>
+      <a href="{{ url_for('auth.login') }}" style="font-size:.75rem;color:#4a6fa5;opacity:.55;text-decoration:none;transition:opacity .2s" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.55'">
+        <i class="fa-solid fa-lock" style="font-size:.68rem;margin-right:.3rem"></i>Admin
+      </a>
+    </div>
+  </div>
+</footer>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,82 @@
+{% extends 'layouts/admin_base.html' %}
+{% block title %}Announcement Popup{% endblock %}
+{% block page_title %}Announcement Popup{% endblock %}
+
+{% block content %}
+<div style="max-width:700px">
+  <div class="card">
+    <div class="card-header">
+      <h3>📢 Announcement Popup Settings</h3>
+      <a href="{{ url_for('admin.homepage') }}" class="btn btn-sm btn-outline">← Back</a>
+    </div>
+    <div class="card-body">
+
+      <div style="background:#dce8f8;border-radius:8px;padding:.85rem 1rem;margin-bottom:1.5rem;font-size:.85rem;color:#1a3570;line-height:1.6">
+        💡 <strong>Tips:</strong><br>
+        • <strong>Enable Popup</strong> — toggles the popup on/off site-wide<br>
+        • <strong>Title</strong> — main heading shown in the popup, e.g. "Admissions Now Open"<br>
+        • <strong>Subtitle / Badge</strong> — small label shown over the image, e.g. "2025 – 26" or "Important Notice"<br>
+        • <strong>Body Text</strong> — the announcement paragraph<br>
+        • <strong>Popup Image</strong> — optional left-panel image (portrait works best, ~900×700)
+      </div>
+
+      <form method="POST" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+
+        <!-- Enable / disable toggle -->
+        <div class="form-group" style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem;
+             background:#f8f9fa;padding:1rem;border-radius:8px;border:1.5px solid var(--border)">
+          <input type="checkbox" name="popup_enabled" id="popup_enabled" value="1"
+                 {% if content and content.extra_data and content.extra_data.get('enabled') %}checked{% endif %}
+                 style="width:18px;height:18px;accent-color:#1a3570">
+          <label for="popup_enabled" style="margin:0;font-size:1rem;font-weight:700;color:var(--text)">
+            Enable Popup — show announcement on homepage
+          </label>
+        </div>
+
+        <!-- Title -->
+        <div class="form-group">
+          {{ form.title.label(text="Title") }}
+          {{ form.title(class="form-control", placeholder="e.g. Admissions Now Open") }}
+          {% for e in form.title.errors %}<span class="form-error">{{ e }}</span>{% endfor %}
+        </div>
+
+        <!-- Subtitle / Badge -->
+        <div class="form-group">
+          {{ form.subtitle.label(text="Subtitle / Badge Text") }}
+          {{ form.subtitle(class="form-control", placeholder="e.g. 2025 – 26  or  Important Notice") }}
+          {% for e in form.subtitle.errors %}<span class="form-error">{{ e }}</span>{% endfor %}
+        </div>
+
+        <!-- Body Text -->
+        <div class="form-group">
+          {{ form.content.label(text="Body Text") }}
+          {{ form.content(class="form-control", rows=5,
+             placeholder="Write your announcement here...") }}
+          {% for e in form.content.errors %}<span class="form-error">{{ e }}</span>{% endfor %}
+        </div>
+
+        <!-- Popup Image -->
+        <div class="form-group">
+          {{ form.image.label(text="Popup Image (left panel)") }}
+          {% if content and content.image %}
+          <div style="margin-bottom:.5rem">
+            <img src="{{ url_for('static', filename='uploads/misc/' + content.image) }}"
+                 alt="Current popup image"
+                 style="height:120px;width:auto;border-radius:6px;border:1px solid var(--border);object-fit:cover">
+            <p style="font-size:.8rem;color:var(--text-muted);margin-top:.35rem">Current image — upload a new one to replace it</p>
+          </div>
+          {% endif %}
+          {{ form.image(class="form-control") }}
+          {% for e in form.image.errors %}<span class="form-error">{{ e }}</span>{% endfor %}
+        </div>
+
+        <div class="form-actions">
+          {{ form.submit(class="btn btn-primary", value="Save Popup") }}
+          <a href="{{ url_for('admin.homepage') }}" class="btn btn-outline">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

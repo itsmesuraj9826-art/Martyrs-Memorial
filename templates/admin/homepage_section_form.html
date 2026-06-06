@@ -1,0 +1,82 @@
+{% extends 'layouts/admin_base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div style="max-width:700px">
+  <div class="card">
+    <div class="card-header">
+      <h3>{{ title }}</h3>
+      <a href="{{ url_for('admin.homepage') }}" class="btn btn-sm btn-outline">← Back</a>
+    </div>
+    <div class="card-body">
+
+      {% if 'Principal' in title %}
+      <div style="background:#dce8f8;border-radius:8px;padding:.85rem 1rem;margin-bottom:1.5rem;font-size:.85rem;color:#1a3570;line-height:1.6">
+        💡 <strong>Tips:</strong><br>
+        • <strong>Title</strong> = "Principal's Message" or a heading<br>
+        • <strong>Subtitle</strong> = Principal's full name and designation (e.g. "Dr. Sarah Johnson, Principal")<br>
+        • <strong>Description</strong> = The principal's message text<br>
+        • <strong>Image</strong> = Principal's photo (portrait, ideally 400×500px)
+      </div>
+      {% elif 'Hero' in title %}
+      <div style="background:#dce8f8;border-radius:8px;padding:.85rem 1rem;margin-bottom:1.5rem;font-size:.85rem;color:#1a3570;line-height:1.6">
+        💡 <strong>Tips:</strong><br>
+        • <strong>Title</strong> = Main headline (e.g. "Welcome to Greenwood Academy")<br>
+        • <strong>Subtitle</strong> = School tagline<br>
+        • <strong>Description</strong> = Short intro paragraph shown under the headline<br>
+        • <strong>Image</strong> = Hero background photo (landscape, ideally 1920×900px)
+      </div>
+      {% elif 'About' in title %}
+      <div style="background:#dce8f8;border-radius:8px;padding:.85rem 1rem;margin-bottom:1.5rem;font-size:.85rem;color:#1a3570;line-height:1.6">
+        💡 <strong>Tips:</strong><br>
+        • <strong>Title</strong> = Section heading (e.g. "A Legacy of Learning")<br>
+        • <strong>Description</strong> = Your school's story — history, achievements, values<br>
+        • <strong>Image</strong> = School building or campus photo
+      </div>
+      {% endif %}
+
+      <form method="POST" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+
+        <div class="form-group">
+          {{ form.title.label }}
+          {{ form.title(class="form-control", placeholder="Section heading or title") }}
+          {% for e in form.title.errors %}<span class="form-error">{{ e }}</span>{% endfor %}
+        </div>
+
+        <div class="form-group">
+          {{ form.subtitle.label }}
+          {{ form.subtitle(class="form-control", placeholder="Subtitle, name or tagline") }}
+          {% for e in form.subtitle.errors %}<span class="form-error">{{ e }}</span>{% endfor %}
+        </div>
+
+        <div class="form-group">
+          {{ form.content.label }}
+          {{ form.content(class="form-control", rows=6, placeholder="Write your content here...") }}
+          {% for e in form.content.errors %}<span class="form-error">{{ e }}</span>{% endfor %}
+        </div>
+
+        <div class="form-group">
+          {{ form.image.label }}
+          {% if content and content.image %}
+          <div style="margin-bottom:.75rem">
+            <img src="{{ url_for('static', filename='uploads/misc/' + content.image) }}"
+                 style="max-height:140px;border-radius:8px;border:1px solid var(--border)">
+            <small style="display:block;margin-top:.35rem;color:var(--text-muted)">Current image — upload a new one to replace</small>
+          </div>
+          {% endif %}
+          {{ form.image(class="form-control") }}
+          <small style="color:var(--text-muted);font-size:.8rem">Accepted: PNG, JPG, WEBP</small>
+          {% for e in form.image.errors %}<span class="form-error">{{ e }}</span>{% endfor %}
+        </div>
+
+        <div class="form-actions">
+          {{ form.submit(class="btn btn-primary") }}
+          <a href="{{ url_for('admin.homepage') }}" class="btn btn-outline">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
