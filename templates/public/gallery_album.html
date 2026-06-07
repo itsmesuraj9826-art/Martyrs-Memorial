@@ -16,8 +16,7 @@
     <div class="photo-grid" id="photoGrid">
       {% for img in images %}
       <div class="photo-item" onclick="openLightbox({{ loop.index0 }})">
-        <img src="{{ url_for('static', filename='uploads/gallery/' + img.filename) }}"
-             alt="{{ img.caption or 'Photo ' + loop.index|string }}" loading="lazy">
+        <img src="{{ img.filename }}" alt="{{ img.caption or 'Photo ' + loop.index|string }}" loading="lazy">
         {% if img.caption %}<div class="photo-caption">{{ img.caption }}</div>{% endif %}
       </div>
       {% endfor %}
@@ -28,7 +27,6 @@
   </div>
 </section>
 
-<!-- Lightbox -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
   <button class="lightbox-close" onclick="closeLightbox()">×</button>
   <button class="lightbox-prev" onclick="changeSlide(-1); event.stopPropagation()">❮</button>
@@ -44,7 +42,7 @@
 <script>
 const photos = [
   {% for img in images %}
-  { src: "{{ url_for('static', filename='uploads/gallery/' + img.filename) }}", caption: "{{ img.caption or '' }}" }{% if not loop.last %},{% endif %}
+  { src: "{{ img.filename }}", caption: "{{ img.caption or '' }}" }{% if not loop.last %},{% endif %}
   {% endfor %}
 ];
 let currentSlide = 0;

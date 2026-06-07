@@ -13,8 +13,7 @@
   <div class="container article-layout">
     <article class="article-content">
       {% if event.banner_image %}
-      <img src="{{ url_for('static', filename='uploads/events/' + event.banner_image) }}"
-           alt="{{ event.title }}" class="article-hero-image">
+      <img src="{{ event.banner_image }}" alt="{{ event.title }}" class="article-hero-image">
       {% endif %}
       <div class="event-meta-bar">
         <span>📅 {{ event.event_date.strftime('%d %B %Y') }}</span>

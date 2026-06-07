@@ -13,7 +13,7 @@
   <div class="album-admin-card card">
     <div class="album-cover-thumb">
       {% if album.cover_image %}
-      <img src="{{ url_for('static', filename='uploads/gallery/' + album.cover_image) }}" alt="{{ album.name }}">
+      <img src="{{ album.cover_image }}" alt="{{ album.name }}">
       {% else %}
       <div class="cover-placeholder">🖼️</div>
       {% endif %}

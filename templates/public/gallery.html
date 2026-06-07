@@ -24,7 +24,7 @@
 
           {% if cover %}
           <img
-            src="{{ url_for('static', filename='uploads/gallery/' + cover) }}"
+            src="{{ cover }}"
             alt="{{ album.name }}"
             style="width:100% !important;height:100% !important;object-fit:cover !important;object-position:center center !important;display:block !important;position:absolute !important;top:0 !important;left:0 !important;right:0 !important;bottom:0 !important;min-width:100% !important;min-height:100% !important;opacity:1 !important;z-index:1 !important"
             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">

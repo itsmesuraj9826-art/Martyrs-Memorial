@@ -22,7 +22,7 @@
       <article class="event-card" data-animate="fadeIn">
         {% if event.banner_image %}
         <div class="event-image">
-          <img src="{{ url_for('static', filename='uploads/events/' + event.banner_image) }}" alt="{{ event.title }}">
+          <img src="{{ event.banner_image }}" alt="{{ event.title }}">
         </div>
         {% else %}
         <div class="event-image placeholder">📅</div>

@@ -23,7 +23,6 @@
       <form method="POST" enctype="multipart/form-data">
         {{ form.hidden_tag() }}
 
-        <!-- Enable / disable toggle -->
         <div class="form-group" style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem;
              background:#f8f9fa;padding:1rem;border-radius:8px;border:1.5px solid var(--border)">
           <input type="checkbox" name="popup_enabled" id="popup_enabled" value="1"
@@ -34,21 +33,18 @@
           </label>
         </div>
 
-        <!-- Title -->
         <div class="form-group">
           {{ form.title.label(text="Title") }}
           {{ form.title(class="form-control", placeholder="e.g. Admissions Now Open") }}
           {% for e in form.title.errors %}<span class="form-error">{{ e }}</span>{% endfor %}
         </div>
 
-        <!-- Subtitle / Badge -->
         <div class="form-group">
           {{ form.subtitle.label(text="Subtitle / Badge Text") }}
           {{ form.subtitle(class="form-control", placeholder="e.g. 2025 – 26  or  Important Notice") }}
           {% for e in form.subtitle.errors %}<span class="form-error">{{ e }}</span>{% endfor %}
         </div>
 
-        <!-- Body Text -->
         <div class="form-group">
           {{ form.content.label(text="Body Text") }}
           {{ form.content(class="form-control", rows=5,
@@ -56,12 +52,11 @@
           {% for e in form.content.errors %}<span class="form-error">{{ e }}</span>{% endfor %}
         </div>
 
-        <!-- Popup Image -->
         <div class="form-group">
           {{ form.image.label(text="Popup Image (left panel)") }}
           {% if content and content.image %}
           <div style="margin-bottom:.5rem">
-            <img src="{{ url_for('static', filename='uploads/misc/' + content.image) }}"
+            <img src="{{ content.image }}"
                  alt="Current popup image"
                  style="height:120px;width:auto;border-radius:6px;border:1px solid var(--border);object-fit:cover">
             <p style="font-size:.8rem;color:var(--text-muted);margin-top:.35rem">Current image — upload a new one to replace it</p>

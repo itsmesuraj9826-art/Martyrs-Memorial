@@ -61,7 +61,7 @@
     <div class="admin-photo-grid">
       {% for img in images %}
       <div class="admin-photo-item">
-        <img src="{{ url_for('static', filename='uploads/gallery/' + img.filename) }}"
+        <img src="{{ img.filename }}"
              alt="{{ img.caption or 'Photo' }}" loading="lazy">
         {% if img.caption %}
         <div class="admin-photo-caption">{{ img.caption }}</div>

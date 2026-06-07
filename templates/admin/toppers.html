@@ -37,8 +37,9 @@
           <td><strong>#{{ t.rank }}</strong></td>
           <td>
             {% if t.photo %}
-            <img src="{{ url_for('static', filename='uploads/toppers/' + t.photo) }}"
-                 style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--border)">
+            <img src="{{ t.photo }}"
+                 style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--border)"
+                 alt="{{ t.name }} Preview">
             {% else %}
             <div style="width:44px;height:44px;border-radius:50%;background:var(--c-navy);
                         display:flex;align-items:center;justify-content:center;

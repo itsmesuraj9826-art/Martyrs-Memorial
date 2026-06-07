@@ -3,7 +3,6 @@
 
 {% block content %}
 
-<!-- ═══ PAGE HERO ═══ -->
 <section class="page-hero">
   <div class="container">
     <h1 data-animate="fadeInUp">About Us</h1>
@@ -11,7 +10,6 @@
   </div>
 </section>
 
-<!-- ═══ SUB-NAV TABS ═══ -->
 <div class="about-subnav">
   <div class="container">
     <a href="#story">Our Story</a>
@@ -22,12 +20,11 @@
   </div>
 </div>
 
-<!-- ═══ INTRO PARAGRAPH ═══ -->
 <section class="section" id="story">
   <div class="container about-intro-layout">
     <div class="about-intro-image" data-animate="slideInLeft">
       {% if about and about.image %}
-      <img src="{{ url_for('static', filename='uploads/misc/' + about.image) }}" alt="About {{ school_name }}">
+      <img src="{{ about.image }}" alt="About {{ school_name }}">
       {% else %}
       <div class="image-placeholder large">🏫</div>
       {% endif %}
@@ -45,7 +42,6 @@
   </div>
 </section>
 
-<!-- ═══ VISION / MISSION / VALUES — numbered like SXG ═══ -->
 <section class="section bg-light" id="vision">
   <div class="container">
     <div class="numbered-sections">
@@ -90,13 +86,11 @@
   </div>
 </section>
 
-<!-- ═══ PRINCIPAL MESSAGE ═══ -->
 <section class="section" id="principal">
   <div class="container principal-grid">
     <div class="principal-photo-wrap" data-animate="fadeIn">
       {% if principal and principal.image %}
-      <img src="{{ url_for('static', filename='uploads/misc/' + principal.image) }}"
-           alt="Principal" class="principal-photo">
+      <img src="{{ principal.image }}" alt="Principal" class="principal-photo">
       {% else %}
       <div class="image-placeholder principal-ph">👨‍💼</div>
       {% endif %}
@@ -110,7 +104,6 @@
   </div>
 </section>
 
-<!-- ═══ FACULTY & BOARD — fully from admin Board of Directors panel ═══ -->
 <section class="section bg-light" id="team">
   <div class="container">
     <div class="section-header" data-animate="fadeInUp">
@@ -141,8 +134,7 @@
             <div class="people-card">
               <div class="people-photo-wrap">
                 {% if m.photo %}
-                <img src="{{ url_for('static', filename='uploads/board/' + m.photo) }}"
-                     alt="{{ m.name }}" class="people-photo">
+                <img src="{{ m.photo }}" alt="{{ m.name }}" class="people-photo">
                 {% else %}
                 <div class="people-photo-placeholder"><i class="fa-solid fa-user"></i></div>
                 {% endif %}
@@ -166,7 +158,6 @@
       {% endfor %}
 
     {% else %}
-    <!-- fallback until admin adds members via Board of Directors panel -->
     <div data-animate="fadeInUp">
       <div class="people-category-block">
         <div class="people-category-header">
@@ -201,7 +192,6 @@
   </div>
 </section>
 
-<!-- ═══ STATS ═══ -->
 <section class="stats-bar">
   <div class="container stats-grid">
     <div class="stat-item"><span class="stat-number" data-target="1500">0</span><span class="stat-suffix">+</span><span class="stat-label">Students Enrolled</span></div>
@@ -211,7 +201,6 @@
   </div>
 </section>
 
-<!-- ═══ FACILITIES ═══ -->
 <section class="section bg-light" id="facilities">
   <div class="container">
     <div class="section-header" data-animate="fadeInUp">
@@ -240,7 +229,6 @@
   </div>
 </section>
 
-<!-- ═══ WHY CHOOSE US ═══ -->
 <section class="section">
   <div class="container">
     <div class="section-header" data-animate="fadeInUp">
@@ -266,7 +254,6 @@
   </div>
 </section>
 
-<!-- ═══ CTA ═══ -->
 <section class="cta-section">
   <div class="container cta-inner" data-animate="fadeInUp">
     <div class="cta-gold-line"></div>
