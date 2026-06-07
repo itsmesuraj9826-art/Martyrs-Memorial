@@ -645,7 +645,7 @@ def inject_globals():
     except Exception:
         ticker_notices = []
     return {
-        'now':            datetime.utcnow(),
+        'now':            datetime.now(UTC),
         'school_name':    app.config['SCHOOL_NAME'],
         'school_tagline': app.config['SCHOOL_TAGLINE'],
         'latest_notices': ticker_notices,
