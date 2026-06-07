@@ -208,7 +208,7 @@ class Event(db.Model):
     updated_at   = db.Column(db.DateTime,    default=datetime.now(UTC), onupdate=datetime.now(UTC))
 
     def is_upcoming(self):
-        return self.event_date >= datetime.now(UTC)()
+        return self.event_date >= datetime.now(UTC)
 
 
 class GalleryAlbum(db.Model):
