@@ -29,7 +29,8 @@
       <article class="news-card" data-animate="fadeIn">
         {% if post.featured_image %}
         <div class="news-image">
-          <img src="{{ url_for('static', filename='uploads/blog/' + post.featured_image) }}" alt="{{ post.title }}">
+          <img src="{{ post.featured_image }}" alt="{{ post.title }}">
+
         </div>
         {% endif %}
         <div class="news-body">
