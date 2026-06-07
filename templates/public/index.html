@@ -5,26 +5,23 @@
 {% block content %}
 
 
-<!-- ═══════ HERO — full-screen background slideshow ═══════ -->
 <section class="hero" id="heroSection">
 
-  <!-- Background slides (images cycle behind the text) -->
   {% if slides %}
   <div class="hero-bg-slideshow" id="heroBgSlideshow">
     {% for slide in slides %}
     <div class="hero-bg-slide {% if loop.first %}active{% endif %}"
-         style="background-image:url('{{ url_for('static', filename='uploads/misc/' + slide.image) }}')"></div>
+         style="background-image:url('{{ slide.image }}')">
+    </div>
     {% endfor %}
   </div>
   {% elif hero and hero.image %}
   <div class="hero-bg-slide active"
-       style="position:absolute;inset:0;background-image:url('{{ url_for('static',filename='uploads/misc/'+hero.image) }}');background-size:cover;background-position:center"></div>
+       style="position:absolute;inset:0;background-image:url('{{ hero.image }}');background-size:cover;background-position:center"></div>
   {% endif %}
 
-  <!-- Dark gradient overlay — keeps text readable over any photo -->
   <div class="hero-overlay"></div>
 
-  <!-- Centered text content -->
   <div class="hero-content">
     <div class="hero-eyebrow">
       <span>Est. 1990</span>
@@ -42,7 +39,6 @@
     </div>
   </div>
 
-  <!-- Slide navigation (arrows + dots) -->
   {% if slides %}
   <button class="slide-arrow slide-prev" id="heroPrev" aria-label="Previous">&#8249;</button>
   <button class="slide-arrow slide-next" id="heroNext" aria-label="Next">&#8250;</button>
@@ -57,7 +53,6 @@
 </section>
 
 
-<!-- ═══════ STATS ═══════ -->
 <section class="stats-bar" style="position:relative">
   <div class="container stats-grid">
     <div class="stat-item" data-animate="fadeIn" data-delay="1">
@@ -79,13 +74,11 @@
   </div>
 </section>
 
-<!-- ═══════ ABOUT ═══════ -->
 <section class="section about-section">
   <div class="container about-grid">
     <div class="about-image-wrap" data-animate="slideInLeft">
       {% if about and about.image %}
-      <img src="{{ url_for('static', filename='uploads/misc/' + about.image) }}"
-           alt="About {{ school_name }}">
+      <img src="{{ about.image }}" alt="About {{ school_name }}">
       {% else %}
       <div class="image-placeholder large">🏫</div>
       {% endif %}
@@ -99,13 +92,12 @@
   </div>
 </section>
 
-<!-- ═══════ PRINCIPAL ═══════ -->
 {% if principal %}
 <section class="section principal-section bg-light">
   <div class="container principal-grid">
     <div class="principal-photo-wrap" data-animate="fadeIn">
       {% if principal.image %}
-      <img src="{{ url_for('static',filename='uploads/misc/'+principal.image) }}" alt="Principal" class="principal-photo">
+      <img src="{{ principal.image }}" alt="Principal" class="principal-photo">
       {% else %}
       <div class="image-placeholder principal-ph">👨‍💼</div>
       {% endif %}
@@ -120,7 +112,6 @@
 </section>
 {% endif %}
 
-<!-- ═══════ NOTICES ═══════ -->
 {% if latest_notices %}
 <section class="section notices-section">
   <div class="container">
@@ -155,7 +146,6 @@
 </section>
 {% endif %}
 
-<!-- ═══════ EVENTS ═══════ -->
 {% if upcoming_events %}
 <section class="section events-section bg-light">
   <div class="container">
@@ -169,7 +159,7 @@
       <article class="event-card" data-delay="{{ loop.index }}">
         {% if event.banner_image %}
         <div class="event-image">
-          <img src="{{ url_for('static',filename='uploads/events/'+event.banner_image) }}" alt="{{ event.title }}">
+          <img src="{{ event.banner_image }}" alt="{{ event.title }}">
         </div>
         {% else %}
         <div class="event-image placeholder">📅</div>
@@ -194,7 +184,6 @@
 </section>
 {% endif %}
 
-<!-- ═══════ GALLERY ═══════ -->
 {% if gallery_albums %}
 <section class="section gallery-section">
   <div class="container">
@@ -208,7 +197,7 @@
       <a href="{{ url_for('public.gallery_album',album_id=album.id) }}" class="album-card">
         <div class="album-cover">
           {% if album.cover_image %}
-          <img src="{{ url_for('static',filename='uploads/gallery/'+album.cover_image) }}" alt="{{ album.name }}">
+          <img src="{{ album.cover_image }}" alt="{{ album.name }}">
           {% else %}
           <div class="album-cover-placeholder">🖼️</div>
           {% endif %}
@@ -227,7 +216,6 @@
 </section>
 {% endif %}
 
-<!-- ═══════ NEWS ═══════ -->
 {% if featured_posts %}
 <section class="section news-section bg-light">
   <div class="container">
@@ -241,7 +229,7 @@
       <article class="news-card" data-delay="{{ loop.index }}">
         {% if post.featured_image %}
         <div class="news-image">
-          <img src="{{ url_for('static',filename='uploads/blog/'+post.featured_image) }}" alt="{{ post.title }}">
+          <img src="{{ post.featured_image }}" alt="{{ post.title }}">
         </div>
         {% endif %}
         <div class="news-body">
@@ -263,7 +251,6 @@
 </section>
 {% endif %}
 
-<!-- ═══════ TESTIMONIALS ═══════ -->
 {% if testimonials %}
 <section class="section testimonials-section">
   <div class="container">
@@ -279,7 +266,7 @@
         <p class="testimonial-text">"{{ t.content }}"</p>
         <div class="testimonial-author">
           {% if t.avatar %}
-          <img src="{{ url_for('static',filename='uploads/misc/'+t.avatar) }}" alt="{{ t.name }}" class="testimonial-avatar">
+          <img src="{{ t.avatar }}" alt="{{ t.name }}" class="testimonial-avatar">
           {% else %}
           <div class="avatar-placeholder">{{ t.name[0] }}</div>
           {% endif %}
@@ -295,7 +282,6 @@
 </section>
 {% endif %}
 
-<!-- ═══════ STREAM TOPPERS ═══════ -->
 {% set stream_meta = [
   ('science_bio',  '🔬 Science (Bio)',    'sci-bio'),
   ('science_math', '📐 Science (Math)',   'sci-math'),
@@ -313,7 +299,6 @@
       <p>Congratulating our brilliant students who have excelled in their respective programmes.</p>
     </div>
 
-    <!-- Stream tab buttons -->
     <div class="topper-tabs" data-animate="fadeInUp">
       {% for key, label, cls in stream_meta %}
       {% if toppers_by_stream[key] %}
@@ -326,7 +311,6 @@
       {% endfor %}
     </div>
 
-    <!-- Stream panels -->
     {% for key, label, cls in stream_meta %}
     {% if toppers_by_stream[key] %}
     <div class="topper-panel {% if loop.first %}active{% endif %}"
@@ -337,8 +321,7 @@
           <div class="topper-rank-badge">#{{ t.rank }}</div>
           <div class="topper-photo-wrap stream-{{ cls }}">
             {% if t.photo %}
-            <img src="{{ url_for('static', filename='uploads/toppers/' + t.photo) }}"
-                 alt="{{ t.name }}" class="topper-photo">
+            <img src="{{ t.photo }}" alt="{{ t.name }}" class="topper-photo">
             {% else %}
             <div class="topper-initials stream-{{ cls }}">
               {{ t.name.split()[0][0] }}{{ t.name.split()[-1][0] if t.name.split()|length > 1 else '' }}
@@ -363,7 +346,6 @@
 </section>
 {% endif %}
 
-<!-- ═══════ CTA ═══════ -->
 <section class="cta-section">
   <div class="container cta-inner" data-animate="fadeInUp">
     <div class="cta-gold-line"></div>
@@ -376,22 +358,19 @@
   </div>
 </section>
 
-<!-- ═══════ ANNOUNCEMENT POPUP ═══════ -->
 {% if popup_show %}
 <div class="pop-overlay" id="admissionPopup" role="dialog" aria-modal="true">
   <div class="pop-card">
 
-    <!-- X close button -->
     <button class="pop-close" id="closePopup" aria-label="Close">
       <i class="fa-solid fa-xmark"></i>
     </button>
 
-    <!-- Left — image panel -->
     <div class="pop-image">
       {% if popup and popup.image %}
-      <img src="{{ url_for('static', filename='uploads/misc/' + popup.image) }}" alt="{{ popup.title or school_name }}">
+      <img src="{{ popup.image }}" alt="{{ popup.title or school_name }}">
       {% elif about and about.image %}
-      <img src="{{ url_for('static', filename='uploads/misc/' + about.image) }}" alt="{{ school_name }}">
+      <img src="{{ about.image }}" alt="{{ school_name }}">
       {% else %}
       <div class="pop-image-fallback">
         <span class="pop-logo-icon">📢</span>
@@ -407,7 +386,6 @@
       {% endif %}
     </div>
 
-    <!-- Right — content -->
     <div class="pop-body">
       <p class="pop-eyebrow">📢 Official Announcement</p>
       <h2 class="pop-heading">{{ popup.title if popup and popup.title else 'Notice' }}</h2>
@@ -459,7 +437,6 @@
 </script>
 {% endif %}
 
-<!-- Toppers tab switching -->
 <script>
 (function(){
   var btns   = document.querySelectorAll('.topper-tab-btn');
