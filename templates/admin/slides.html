@@ -24,10 +24,9 @@
     <tbody>
       {% for s in slides %}
       <tr>
-        <td>
-          <img src="{{ s.image }}">
-               style="width:120px;height:60px;object-fit:cover;border-radius:6px;border:1px solid var(--border)">
-        </td>
+    <td>
+    <img src="{{ s.image }}" style="width: 120px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border);" alt="Slide Preview">
+</td>
         <td>
           <strong>{{ s.title or '(No title)' }}</strong>
           {% if s.subtitle %}<br><small style="color:var(--text-muted)">{{ s.subtitle }}</small>{% endif %}
