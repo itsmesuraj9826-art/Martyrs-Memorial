@@ -208,7 +208,8 @@ class Event(db.Model):
     updated_at   = db.Column(db.DateTime,    default=datetime.now(UTC), onupdate=datetime.now(UTC))
 
     def is_upcoming(self):
-        return self.event_date >= datetime.now(UTC)
+        # Using .replace(tzinfo=None) removes the timezone info
+        return self.event_date >= datetime.now(UTC).replace(tzinfo=None)
 
 
 class GalleryAlbum(db.Model):
