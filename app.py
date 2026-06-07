@@ -156,7 +156,7 @@ class Admin(UserMixin, db.Model):
     password_hash = db.Column(db.String(255), nullable=False)
     full_name     = db.Column(db.String(150), nullable=False)
     is_active          = db.Column(db.Boolean, default=True, nullable=False)
-    created_at         = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at         = db.Column(db.DateTime, default=datetime.now(UTC))
     last_login         = db.Column(db.DateTime, nullable=True)
     reset_token        = db.Column(db.String(100), nullable=True)
     reset_token_expiry = db.Column(db.DateTime, nullable=True)
@@ -185,13 +185,13 @@ class Notice(db.Model):
     is_published = db.Column(db.Boolean,     default=True)
     attachment   = db.Column(db.String(255), nullable=True)
     expiry_date  = db.Column(db.Date,        nullable=True)
-    created_at   = db.Column(db.DateTime,    default=datetime.utcnow, index=True)
-    updated_at   = db.Column(db.DateTime,    default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at   = db.Column(db.DateTime,    default=datetime.now(UTC), index=True)
+    updated_at   = db.Column(db.DateTime,    default=datetime.now(UTC), onupdate=datetime.now(UTC))
 
     def is_expired(self):
         if self.expiry_date is None:
             return False
-        return self.expiry_date < datetime.utcnow().date()
+        return self.expiry_date < datetime.now(UTC).date()
 
 
 class Event(db.Model):
@@ -204,11 +204,11 @@ class Event(db.Model):
     end_date     = db.Column(db.DateTime,    nullable=True)
     banner_image = db.Column(db.String(255), nullable=True)
     is_published = db.Column(db.Boolean,     default=True)
-    created_at   = db.Column(db.DateTime,    default=datetime.utcnow)
-    updated_at   = db.Column(db.DateTime,    default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at   = db.Column(db.DateTime,    default=datetime.now(UTC), index=True)
+    updated_at   = db.Column(db.DateTime,    default=datetime.now(UTC), onupdate=datetime.now(UTC))
 
     def is_upcoming(self):
-        return self.event_date >= datetime.utcnow()
+        return self.event_date >= datetime.now(UTC)()
 
 
 class GalleryAlbum(db.Model):
@@ -218,7 +218,7 @@ class GalleryAlbum(db.Model):
     description  = db.Column(db.Text,        nullable=True)
     cover_image  = db.Column(db.String(255), nullable=True)
     is_published = db.Column(db.Boolean,     default=True)
-    created_at   = db.Column(db.DateTime,    default=datetime.utcnow)
+    created_at   = db.Column(db.DateTime,    default=datetime.now(UTC))
     images       = db.relationship('GalleryImage', backref='album', lazy='dynamic',
                                    cascade='all, delete-orphan')
 
@@ -234,7 +234,7 @@ class GalleryImage(db.Model):
     filename   = db.Column(db.String(255), nullable=False)
     caption    = db.Column(db.String(255), nullable=True)
     sort_order = db.Column(db.Integer,     default=0)
-    created_at = db.Column(db.DateTime,    default=datetime.utcnow)
+    created_at = db.Column(db.DateTime,    default=datetime.now(UTC))
 
 
 class BlogPost(db.Model):
@@ -249,8 +249,8 @@ class BlogPost(db.Model):
     is_published   = db.Column(db.Boolean,     default=True)
     is_featured    = db.Column(db.Boolean,     default=False)
     views          = db.Column(db.Integer,     default=0)
-    created_at     = db.Column(db.DateTime,    default=datetime.utcnow, index=True)
-    updated_at     = db.Column(db.DateTime,    default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at     = db.Column(db.DateTime,    default=datetime.now(UTC), index=True)
+    updated_at     = db.Column(db.DateTime,    default=datetime.now(UTC), onupdate=datetime.now(UTC))
 
 
 class ContactMessage(db.Model):
@@ -262,7 +262,7 @@ class ContactMessage(db.Model):
     subject    = db.Column(db.String(255), nullable=False)
     message    = db.Column(db.Text,        nullable=False)
     is_read    = db.Column(db.Boolean,     default=False)
-    created_at = db.Column(db.DateTime,    default=datetime.utcnow, index=True)
+    created_at = db.Column(db.DateTime,    default=datetime.now(UTC), index=True)
 
 
 class Download(db.Model):
@@ -276,7 +276,7 @@ class Download(db.Model):
     file_size      = db.Column(db.Integer,     nullable=True)
     download_count = db.Column(db.Integer,     default=0)
     is_published   = db.Column(db.Boolean,     default=True)
-    created_at     = db.Column(db.DateTime,    default=datetime.utcnow, index=True)
+    created_at     = db.Column(db.DateTime,    default=datetime.now(UTC), index=True)
 
     def formatted_size(self):
         if not self.file_size:
@@ -297,7 +297,7 @@ class HomepageContent(db.Model):
     content    = db.Column(db.Text,        nullable=True)
     image      = db.Column(db.String(255), nullable=True)
     extra_data = db.Column(db.JSON,        nullable=True)
-    updated_at = db.Column(db.DateTime,    default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = db.Column(db.DateTime,    default=datetime.now(UTC), onupdate=datetime.now(UTC))
 
 
 class Slide(db.Model):
@@ -310,7 +310,7 @@ class Slide(db.Model):
     btn_url     = db.Column(db.String(255), nullable=True)
     sort_order  = db.Column(db.Integer, default=0)
     is_active   = db.Column(db.Boolean, default=True)
-    created_at  = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at  = db.Column(db.DateTime, default=datetime.now(UTC))
 
 
 class BoardMember(db.Model):
@@ -325,8 +325,8 @@ class BoardMember(db.Model):
     phone        = db.Column(db.String(30),  nullable=True)
     is_published = db.Column(db.Boolean,     default=True)
     sort_order   = db.Column(db.Integer,     default=0)
-    created_at   = db.Column(db.DateTime,    default=datetime.utcnow)
-    updated_at   = db.Column(db.DateTime,    default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at   = db.Column(db.DateTime,    default=datetime.now(UTC))
+    updated_at   = db.Column(db.DateTime,    default=datetime.now(UTC), onupdate=datetime.now(UTC))
 
 
 class Testimonial(db.Model):
@@ -339,7 +339,7 @@ class Testimonial(db.Model):
     rating       = db.Column(db.Integer,     default=5)
     is_published = db.Column(db.Boolean,     default=True)
     sort_order   = db.Column(db.Integer,     default=0)
-    created_at   = db.Column(db.DateTime,    default=datetime.utcnow)
+    created_at   = db.Column(db.DateTime,    default=datetime.now(UTC))
 
 
 class Topper(db.Model):
@@ -353,7 +353,7 @@ class Topper(db.Model):
     rank         = db.Column(db.Integer,     default=1)
     is_published = db.Column(db.Boolean,     default=True)
     sort_order   = db.Column(db.Integer,     default=0)
-    created_at   = db.Column(db.DateTime,    default=datetime.utcnow)
+    created_at   = db.Column(db.DateTime,    default=datetime.now(UTC))
 
 
 # ─────────────────────────────────────────────
@@ -373,33 +373,45 @@ def allowed_image(filename):
     return ext in app.config['ALLOWED_IMAGE_EXTENSIONS']
 
 
+import cloudinary
+import cloudinary.uploader
+
+# Automatically connects using the CLOUDINARY_URL you saved in Render
+cloudinary.config(
+    cloudinary_url=os.environ.get('CLOUDINARY_URL')
+)
+
+
 def save_file(file_obj, subfolder, resize=None):
     from werkzeug.datastructures import FileStorage
     if not file_obj or isinstance(file_obj, str) or not isinstance(file_obj, FileStorage) or not file_obj.filename:
         return None
-    original = secure_filename(file_obj.filename)
-    ext = original.rsplit('.', 1)[-1].lower() if '.' in original else 'bin'
-    unique_name = f"{uuid.uuid4().hex}.{ext}"
-    dest_dir = os.path.join(app.config['UPLOAD_FOLDER'], subfolder)
-    os.makedirs(dest_dir, exist_ok=True)
-    dest_path = os.path.join(dest_dir, unique_name)
-    file_obj.save(dest_path)
-    if resize and ext in app.config['ALLOWED_IMAGE_EXTENSIONS']:
-        try:
-            img = Image.open(dest_path)
-            img.thumbnail(resize, Image.LANCZOS)
-            img.save(dest_path, optimize=True, quality=85)
-        except Exception:
-            pass
-    return unique_name
+
+    try:
+        # Stream directly to your Cloudinary storage environment
+        upload_result = cloudinary.uploader.upload(
+            file_obj,
+            folder=f"martyrs/{subfolder}",
+            overwrite=True
+        )
+        # Return the absolute cloud HTTPS URL string
+        return upload_result['secure_url']
+    except Exception as e:
+        print(f"⚠ Cloudinary Upload Failure: {e}")
+        return None
 
 
-def delete_file(filename, subfolder):
-    if not filename:
+def delete_file(file_url, subfolder):
+    """Deletes an image asset out of Cloudinary using its secure URL."""
+    if not file_url or not isinstance(file_url, str) or 'cloudinary' not in file_url:
         return
-    path = os.path.join(app.config['UPLOAD_FOLDER'], subfolder, filename)
-    if os.path.exists(path):
-        os.remove(path)
+    try:
+        # Extract the specific asset name from the full URL string
+        public_id = file_url.split('/')[-1].split('.')[0]
+        full_public_id = f"martyrs/{subfolder}/{public_id}"
+        cloudinary.uploader.destroy(full_public_id)
+    except Exception as e:
+        print(f"⚠ Cloudinary Delete Failure: {e}")
 
 
 _ALLOWED_TAGS = [
@@ -882,7 +894,7 @@ Message:
 {form.message.data}
 
 ---
-Received at {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}
+Received at {datetime.now(UTC)().strftime('%Y-%m-%d %H:%M UTC')}
 """
         email_msg = MailMessage(subject=subject, recipients=[receiver],
                                 body=body, reply_to=form.email.data)
@@ -965,7 +977,7 @@ def login():
         admin = Admin.query.filter_by(username=form.username.data).first()
         if admin and admin.is_active and admin.check_password(form.password.data):
             login_user(admin, remember=form.remember_me.data)
-            admin.last_login = datetime.utcnow()
+            admin.last_login = datetime.now(UTC)()
             db.session.commit()
             next_page = request.args.get('next')
             flash('Welcome back!', 'success')
@@ -1007,7 +1019,7 @@ def forgot_password():
         if admin:
             token = secrets.token_urlsafe(32)
             admin.reset_token = token
-            admin.reset_token_expiry = datetime.utcnow() + timedelta(hours=1)
+            admin.reset_token_expiry = datetime.now(UTC)() + timedelta(hours=1)
             db.session.commit()
             # Send reset email
             reset_url = url_for('auth.reset_password', token=token, _external=True)
@@ -1047,7 +1059,7 @@ def reset_password(token):
     if current_user.is_authenticated:
         return redirect(url_for('admin.dashboard'))
     admin = Admin.query.filter_by(reset_token=token).first()
-    if not admin or not admin.reset_token_expiry or admin.reset_token_expiry < datetime.utcnow():
+    if not admin or not admin.reset_token_expiry or admin.reset_token_expiry < datetime.now(UTC)():
         flash('This reset link is invalid or has expired. Please request a new one.', 'danger')
         return redirect(url_for('auth.forgot_password'))
     form = ResetPasswordForm()
@@ -1818,7 +1830,7 @@ def privacy_policy_admin():
             attributes={'a': ['href', 'target', 'rel']},
             strip=True
         )
-        last_updated = datetime.utcnow().strftime('%d %B %Y')
+        last_updated = datetime.now(UTC)().strftime('%d %B %Y')
         if content:
             content.content = body
             if content.extra_data is None:
@@ -1921,7 +1933,7 @@ def seed_database():
             title='Annual Sports Day 2025',
             description='Join us for an exciting day of athletics, field events, and team sports.',
             location='School Sports Ground',
-            event_date=datetime.utcnow() + timedelta(days=30),
+            event_date=datetime.now(UTC)() + timedelta(days=30),
             is_published=True))
 
     if not Testimonial.query.first():
