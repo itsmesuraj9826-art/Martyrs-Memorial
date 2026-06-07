@@ -57,19 +57,19 @@
           {% for e in form.content.errors %}<span class="form-error">{{ e }}</span>{% endfor %}
         </div>
 
-        <div class="form-group">
-          {{ form.image.label }}
-          {% if content and content.image %}
-          <div style="margin-bottom:.75rem">
-            <img src="{{ url_for('static', filename='uploads/misc/' + content.image) }}"
-                 style="max-height:140px;border-radius:8px;border:1px solid var(--border)">
-            <small style="display:block;margin-top:.35rem;color:var(--text-muted)">Current image — upload a new one to replace</small>
-          </div>
-          {% endif %}
-          {{ form.image(class="form-control") }}
-          <small style="color:var(--text-muted);font-size:.8rem">Accepted: PNG, JPG, WEBP</small>
-          {% for e in form.image.errors %}<span class="form-error">{{ e }}</span>{% endfor %}
-        </div>
+<div class="form-group">
+  {{ form.image.label }}
+  {% if content and content.image %}
+  <div style="margin-bottom:.75rem">
+    <img src="{{ content.image }}"
+         style="max-height:140px;border-radius:8px;border:1px solid var(--border)">
+    <small style="display:block;margin-top:.35rem;color:var(--text-muted)">Current image — upload a new one to replace</small>
+  </div>
+  {% endif %}
+  {{ form.image(class="form-control") }}
+  <small style="color:var(--text-muted);font-size:.8rem">Accepted: PNG, JPG, WEBP</small>
+  {% for e in form.image.errors %}<span class="form-error">{{ e }}</span>{% endfor %}
+</div>
 
         <div class="form-actions">
           {{ form.submit(class="btn btn-primary") }}
