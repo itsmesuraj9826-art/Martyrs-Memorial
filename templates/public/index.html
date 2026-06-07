@@ -11,8 +11,7 @@
   <div class="hero-bg-slideshow" id="heroBgSlideshow">
     {% for slide in slides %}
     <div class="hero-bg-slide {% if loop.first %}active{% endif %}"
-         style="background-image:url('{{ slide.image }}')">
-    </div>
+         style="background-image:url('{{ slide.image }}')"></div>
     {% endfor %}
   </div>
   {% elif hero and hero.image %}
