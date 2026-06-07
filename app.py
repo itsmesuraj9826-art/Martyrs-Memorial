@@ -31,7 +31,7 @@ from dotenv import load_dotenv
 load_dotenv()
 import uuid
 import unicodedata
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from functools import wraps
 from urllib.parse import quote_plus
 
@@ -707,7 +707,7 @@ def index():
                        .order_by(Notice.is_pinned.desc(), Notice.created_at.desc())
                        .limit(5).all())
     upcoming_events = (Event.query
-                       .filter(Event.is_published == True, Event.event_date >= datetime.utcnow())
+                       .filter(Event.is_published == True, Event.event_date >= datetime.now(UTC))
                        .order_by(Event.event_date.asc()).limit(4).all())
     featured_posts  = (BlogPost.query.filter_by(is_published=True, is_featured=True)
                        .order_by(BlogPost.created_at.desc()).limit(3).all())
@@ -780,7 +780,7 @@ def notices():
 def events():
     page = request.args.get('page', 1, type=int)
     tab  = request.args.get('tab', 'upcoming')
-    now  = datetime.utcnow()
+    now  = datetime.now(UTC)
     if tab == 'past':
         query = Event.query.filter(Event.is_published == True, Event.event_date < now).order_by(Event.event_date.desc())
     else:
