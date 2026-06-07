@@ -1873,14 +1873,19 @@ def seed_database():
     db.create_all()
     print("✓ Database tables ready.")
 
-    admin = Admin.query.filter_by(username='admin').first()
-    if not admin:
-        admin = Admin(username='msuraj24', email='msuraj24@tbc.edu.np', full_name='Site Administrator')
-        admin.set_password('suraj@123')
-        db.session.add(admin)
-        print("✓ Default admin created  →  username: admin  |  password: Admin@1234")
+    # Force create msuraj24 regardless of existing database data
+    custom_admin = Admin.query.filter_by(username='msuraj24').first()
+    if not custom_admin:
+        custom_admin = Admin(username='msuraj24', email='msuraj24@school.edu', full_name='Suraj Admin')
+        custom_admin.set_password('suraj@123')
+        db.session.add(custom_admin)
+        db.session.commit()
+        print("✓ FORCE CREATED: Default admin msuraj24 is now active!")
     else:
-        print("  Admin already exists — password unchanged.")
+        # If he exists, force reset his password just in case
+        custom_admin.set_password('suraj@123')
+        db.session.commit()
+        print("✓ FORCE RESET: msuraj24 password synchronized!")
 
     if not HomepageContent.query.filter_by(section='hero').first():
         db.session.add(HomepageContent(
