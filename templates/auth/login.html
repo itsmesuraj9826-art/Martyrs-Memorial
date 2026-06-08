@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login | {{ school_name }}</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+  <style>
+    :root {
+      --c-green:      #2d5a27;
+      --c-green-dark: #1a2e1a;
+      --c-amber:      #f4a826;
+      --c-amber-lt:   #fff8e8;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      min-height:100vh;display:flex;align-items:center;justify-content:center;
+      font-family:'DM Sans',system-ui,sans-serif;
+      background: linear-gradient(135deg, #1a2e1a 0%, #2d5a27 50%, #1e3d1a 100%);
+      padding:1.5rem;
+    }
+    /* Subtle pattern overlay */
+    body::before{
+      content:'';position:fixed;inset:0;
+      background-image:repeating-linear-gradient(
+        45deg,rgba(255,255,255,.015) 0px,rgba(255,255,255,.015) 1px,
+        transparent 1px,transparent 30px);
+      pointer-events:none;
+    }
+    .login-wrapper{width:100%;max-width:440px;position:relative;z-index:1}
+    .login-card{
+      background:#fff;border-radius:20px;padding:2.75rem 2.5rem;
+      box-shadow:0 32px 80px rgba(0,0,0,.35);
+    }
+    .login-header{text-align:center;margin-bottom:2rem}
+    .login-header .icon-wrap{
+      width:72px;height:72px;border-radius:16px;
+      background:linear-gradient(135deg,var(--c-green),#3a7032);
+      display:flex;align-items:center;justify-content:center;
+      font-size:2rem;margin:0 auto 1.25rem;
+      box-shadow:0 8px 24px rgba(45,90,39,.35);
+    }
+    .login-header h1{
+      font-family:'DM Serif Display',Georgia,serif;
+      font-size:1.75rem;color:var(--c-green-dark);font-weight:400;
+      margin-bottom:.3rem;
+    }
+    .login-header p{color:#6b7a52;font-size:.88rem;font-weight:500;letter-spacing:.04em;text-transform:uppercase}
+
+    .alert{
+      padding:.85rem 1.1rem;border-radius:10px;font-size:.88rem;
+      font-weight:500;margin-bottom:1.25rem;
+    }
+    .alert-danger,.alert-error{background:#fee2e2;color:#991b1b;border-left:3px solid #ef4444}
+    .alert-success{background:#dcfce7;color:#166534;border-left:3px solid #22c55e}
+    .alert-info{background:#dbeafe;color:#1e40af;border-left:3px solid #3b82f6}
+    .alert-warning{background:#fef9c3;color:#854d0e;border-left:3px solid #f59e0b}
+
+    .form-group{margin-bottom:1.25rem}
+    .form-group label{display:block;font-weight:600;font-size:.85rem;color:#374151;margin-bottom:.45rem}
+    .form-control{
+      width:100%;padding:.72rem 1rem;border:1.5px solid #d4e4cc;
+      border-radius:10px;font-size:.95rem;font-family:inherit;
+      color:#1a2e1a;background:#fff;transition:border-color .2s,box-shadow .2s;
+    }
+    .form-control:focus{outline:none;border-color:var(--c-green);box-shadow:0 0 0 3px rgba(45,90,39,.12)}
+    .form-error{color:#dc2626;font-size:.78rem;margin-top:.3rem;display:block}
+
+    .password-wrapper{position:relative}
+    .password-wrapper .form-control{padding-right:3rem}
+    .password-toggle{
+      position:absolute;right:.75rem;top:50%;transform:translateY(-50%);
+      background:none;border:none;cursor:pointer;font-size:1.1rem;color:#6b7a52;
+      padding:.25rem;transition:color .2s;
+    }
+    .password-toggle:hover{color:var(--c-green)}
+
+    .form-group-inline{display:flex;align-items:center;gap:.5rem;margin-bottom:1.5rem;font-size:.88rem;color:#374151}
+    .form-group-inline input[type=checkbox]{
+      width:16px;height:16px;accent-color:var(--c-green);cursor:pointer;
+    }
+
+    .btn-login{
+      width:100%;padding:.85rem;border:none;border-radius:10px;
+      background:linear-gradient(135deg,var(--c-green),#3a7032);
+      color:#fff;font-size:.95rem;font-weight:700;
+      font-family:inherit;cursor:pointer;letter-spacing:.04em;
+      transition:all .25s;box-shadow:0 4px 16px rgba(45,90,39,.3);
+    }
+    .btn-login:hover{
+      background:linear-gradient(135deg,#1a2e1a,var(--c-green));
+      transform:translateY(-1px);box-shadow:0 8px 24px rgba(45,90,39,.4);
+    }
+    .btn-login:active{transform:translateY(0)}
+
+    .auth-links{
+      display:flex;justify-content:space-between;align-items:center;
+      margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid #e8f5e3;
+      font-size:.84rem;
+    }
+    .auth-links a{color:var(--c-green);font-weight:500;text-decoration:none;transition:color .2s}
+    .auth-links a:hover{color:var(--c-amber)}
+
+    .divider{display:flex;align-items:center;gap:.75rem;margin:1.5rem 0}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:#e8f5e3}
+    .divider span{font-size:.75rem;color:#6b7a52;letter-spacing:.06em;text-transform:uppercase}
+  </style>
+</head>
+<body>
+<div class="login-wrapper">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="icon-wrap">🎓</div>
+      <h1>{{ school_name }}</h1>
+      <p>Admin Portal</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('auth.login') }}">
+      {{ form.hidden_tag() }}
+      <div class="form-group">
+        {{ form.username.label }}
+        {{ form.username(class="form-control", placeholder="Enter your username", autocomplete="username") }}
+        {% for e in form.username.errors %}<span class="form-error">{{ e }}</span>{% endfor %}
+      </div>
+      <div class="form-group">
+        {{ form.password.label }}
+        <div class="password-wrapper">
+          {{ form.password(class="form-control", placeholder="Enter your password", autocomplete="current-password", id="loginPwd") }}
+          <button type="button" class="password-toggle" onclick="togglePwd('loginPwd',this)">👁</button>
+        </div>
+        {% for e in form.password.errors %}<span class="form-error">{{ e }}</span>{% endfor %}
+      </div>
+      <div class="form-group-inline">
+        {{ form.remember_me() }}
+        {{ form.remember_me.label }}
+      </div>
+      <button type="submit" class="btn-login">Log In</button>
+    </form>
+
+    <div class="auth-links">
+      <a href="{{ url_for('public.index') }}">← Back to website</a>
+      <a href="{{ url_for('auth.forgot_password') }}">Forgot password?</a>
+    </div>
+  </div>
+</div>
+<script>
+function togglePwd(id, btn) {
+  const inp = document.getElementById(id);
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  btn.textContent = inp.type === 'password' ? '👁' : '🙈';
+}
+</script>
+</body>
+</html>

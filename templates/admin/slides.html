@@ -1,0 +1,67 @@
+{% extends 'layouts/admin_base.html' %}
+{% block title %}Slideshow Manager{% endblock %}
+{% block page_title %}Homepage Slideshow{% endblock %}
+
+{% block content %}
+<div class="page-actions">
+  <span></span>
+  <a href="{{ url_for('admin.slide_new') }}" class="btn btn-primary">+ Add Slide</a>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    {% if slides %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Title</th>
+          <th>Button</th>
+          <th>Order</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in slides %}
+        <tr>
+          <td>
+            <img src="{{ s.image if s.image.startswith('http') else url_for('static', filename='uploads/misc/' + s.image) }}"
+                 alt="{{ s.title }}"
+                 style="width:80px;height:50px;object-fit:cover;border-radius:6px;">
+          </td>
+          <td>
+            <strong>{{ s.title or 'Untitled' }}</strong><br>
+            <small class="text-muted">{{ s.subtitle or '' }}</small>
+          </td>
+          <td>{{ s.btn_text }} →</td>
+          <td>{{ s.sort_order }}</td>
+          <td>
+            {% if s.is_active %}
+              <span class="badge badge-success">Active</span>
+            {% else %}
+              <span class="badge badge-warning">Inactive</span>
+            {% endif %}
+          </td>
+          <td class="actions">
+            <a href="{{ url_for('admin.slide_edit', slide_id=s.id) }}" class="btn btn-sm btn-outline">Edit</a>
+            <form method="POST" action="{{ url_for('admin.slide_delete', slide_id=s.id) }}"
+                  class="inline-form" onsubmit="return confirm('Delete this slide?')">
+              {{ csrf_token_field() }}
+              <button class="btn btn-sm btn-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+      <span>🎠</span>
+      <p>No slides yet. Add your first slide!</p>
+      <a href="{{ url_for('admin.slide_new') }}" class="btn btn-primary" style="margin-top:1rem">+ Add Slide</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

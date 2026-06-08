@@ -1,0 +1,65 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Events | {{ school_name }}{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <h1>Events</h1>
+    <p>Upcoming and past school events</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="tab-bar">
+      <a href="{{ url_for('public.events', tab='upcoming') }}" class="tab {% if tab == 'upcoming' %}active{% endif %}">Upcoming</a>
+      <a href="{{ url_for('public.events', tab='past') }}" class="tab {% if tab == 'past' %}active{% endif %}">Past Events</a>
+    </div>
+
+    {% if pagination.items %}
+    <div class="events-grid">
+      {% for event in pagination.items %}
+      <article class="event-card" data-animate="fadeIn">
+        {% if event.banner_image %}
+        <div class="event-image">
+          <img src="{{ event.banner_image }}" alt="{{ event.title }}">
+        </div>
+        {% else %}
+        <div class="event-image placeholder">📅</div>
+        {% endif %}
+        <div class="event-body">
+          <div class="event-date-badge">
+            <span class="day">{{ event.event_date.strftime('%d') }}</span>
+            <span class="month">{{ event.event_date.strftime('%b %Y') }}</span>
+          </div>
+          <h3>{{ event.title }}</h3>
+          <p>{{ event.description[:150] }}{% if event.description|length > 150 %}…{% endif %}</p>
+          {% if event.location %}<p class="event-location">📍 {{ event.location }}</p>{% endif %}
+          <a href="{{ url_for('public.event_detail', event_id=event.id) }}" class="btn btn-sm btn-primary">Read More</a>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+
+    <div class="pagination">
+      {% if pagination.has_prev %}
+      <a href="{{ url_for('public.events', page=pagination.prev_num, tab=tab) }}" class="page-link">← Previous</a>
+      {% endif %}
+      <span class="page-info">Page {{ pagination.page }} of {{ pagination.pages }}</span>
+      {% if pagination.has_next %}
+      <a href="{{ url_for('public.events', page=pagination.next_num, tab=tab) }}" class="page-link">Next →</a>
+      {% endif %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <span>📅</span>
+      <p>No {{ tab }} events at the moment.</p>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/animations.js') }}"></script>
+{% endblock %}

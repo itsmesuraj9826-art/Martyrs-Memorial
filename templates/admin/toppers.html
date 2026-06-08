@@ -1,0 +1,72 @@
+{% extends 'layouts/admin_base.html' %}
+{% block title %}Toppers{% endblock %}
+{% block page_title %}Toppers Gallery{% endblock %}
+
+{% block content %}
+<div class="page-actions">
+  <span></span>
+  <a href="{{ url_for('admin.topper_new') }}" class="btn btn-primary">+ Add Topper</a>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    {% if toppers %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Photo</th>
+          <th>Name</th>
+          <th>Stream</th>
+          <th>Percentage</th>
+          <th>Year</th>
+          <th>Rank</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in toppers %}
+        <tr>
+          <td>
+            {% if t.photo %}
+            <img src="{{ t.photo if t.photo.startswith('http') else url_for('static', filename='uploads/toppers/' + t.photo) }}"
+                 alt="{{ t.name }}"
+                 style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--c-gold)">
+            {% else %}
+            <div style="width:48px;height:48px;border-radius:50%;background:var(--color-primary-light);display:flex;align-items:center;justify-content:center;font-size:1.4rem">👨‍🎓</div>
+            {% endif %}
+          </td>
+          <td><strong>{{ t.name }}</strong></td>
+          <td>{{ stream_labels.get(t.stream, t.stream) }}</td>
+          <td>{{ t.percentage or '—' }}%</td>
+          <td>{{ t.year }}</td>
+          <td>{{ t.rank }}</td>
+          <td>
+            {% if t.is_published %}
+              <span class="badge badge-success">Published</span>
+            {% else %}
+              <span class="badge badge-warning">Hidden</span>
+            {% endif %}
+          </td>
+          <td class="actions">
+            <a href="{{ url_for('admin.topper_edit', tid=t.id) }}" class="btn btn-sm btn-outline">Edit</a>
+            <form method="POST" action="{{ url_for('admin.topper_delete', tid=t.id) }}"
+                  class="inline-form" onsubmit="return confirm('Delete {{ t.name }} from toppers?')">
+              {{ csrf_token_field() }}
+              <button class="btn btn-sm btn-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+      <span style="font-size:3rem">🏆</span>
+      <p>No toppers added yet. Add your first topper!</p>
+      <a href="{{ url_for('admin.topper_new') }}" class="btn btn-primary" style="margin-top:1rem">+ Add Topper</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

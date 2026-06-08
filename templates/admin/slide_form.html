@@ -1,0 +1,71 @@
+{% extends 'layouts/admin_base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:700px">
+  <div class="card-header">
+    <h2>{{ title }}</h2>
+    <a href="{{ url_for('admin.slides') }}" class="btn btn-outline">← Back</a>
+  </div>
+  <div class="card-body">
+    <form method="POST" enctype="multipart/form-data">
+      {{ form.hidden_tag() }}
+
+      <!-- Current slide preview -->
+      {% if slide and slide.image %}
+      <div style="margin-bottom:1.25rem">
+        <p style="font-size:.85rem;color:var(--color-text-muted);margin-bottom:.5rem">Current Slide Image</p>
+        <img src="{{ slide.image if slide.image.startswith('http') else url_for('static', filename='uploads/misc/' + slide.image) }}"
+             alt="{{ slide.title }}"
+             style="width:100%;max-height:200px;object-fit:cover;border-radius:8px;border:2px solid var(--c-gold)">
+      </div>
+      {% endif %}
+
+      <div class="form-group">
+        {{ form.image.label }}
+        {{ form.image(class="form-control") }}
+        <small>Recommended size: 1920×700px. JPG, PNG, or WEBP.</small>
+        {% for e in form.image.errors %}<span class="form-error">{{ e }}</span>{% endfor %}
+      </div>
+
+      <div class="form-group">
+        {{ form.title.label }}
+        {{ form.title(class="form-control", placeholder="Slide title (optional)") }}
+      </div>
+
+      <div class="form-group">
+        {{ form.subtitle.label }}
+        {{ form.subtitle(class="form-control", placeholder="Slide subtitle (optional)") }}
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          {{ form.btn_text.label }}
+          {{ form.btn_text(class="form-control", placeholder="Learn More") }}
+        </div>
+        <div class="form-group">
+          {{ form.btn_url.label }}
+          {{ form.btn_url(class="form-control", placeholder="https:// or /page") }}
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          {{ form.sort_order.label }}
+          {{ form.sort_order(class="form-control") }}
+        </div>
+        <div class="form-group" style="display:flex;align-items:center;gap:.6rem;padding-top:2rem">
+          {{ form.is_active(id="is_active") }}
+          <label for="is_active" style="margin:0;font-weight:500">Active (shown on homepage)</label>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+        <a href="{{ url_for('admin.slides') }}" class="btn btn-outline">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

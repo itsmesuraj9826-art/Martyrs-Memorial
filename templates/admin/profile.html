@@ -1,0 +1,91 @@
+{% extends 'layouts/admin_base.html' %}
+{% block title %}My Profile{% endblock %}
+{% block page_title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="profile-layout">
+
+  <!-- Profile Card -->
+  <div class="profile-card card">
+    <div class="profile-avatar-large">{{ current_user.full_name[0] }}</div>
+    <h2>{{ current_user.full_name }}</h2>
+    <p class="profile-role">Administrator</p>
+    <p class="profile-email">{{ current_user.email }}</p>
+    <p class="profile-joined">Member since {{ current_user.created_at.strftime('%B %Y') }}</p>
+    {% if current_user.last_login %}
+    <p class="profile-last-login">Last login: {{ current_user.last_login.strftime('%d %b %Y, %H:%M') }}</p>
+    {% endif %}
+    <div class="profile-actions">
+      <a href="{{ url_for('auth.change_password') }}" class="btn btn-outline btn-sm">🔒 Change Password</a>
+      <a href="{{ url_for('public.index') }}" target="_blank" class="btn btn-sm" style="background:#e8f5e3;color:#2d5a27;border:1px solid #d4e4cc">🌐 View Site</a>
+    </div>
+  </div>
+
+  <!-- Edit Profile Form -->
+  <div class="card">
+    <div class="card-header">
+      <h3>Edit Profile</h3>
+    </div>
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('admin.profile') }}">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+          {{ form.full_name.label }}
+          {{ form.full_name(class="form-control") }}
+          {% for e in form.full_name.errors %}<span class="form-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-group">
+          {{ form.email.label }}
+          {{ form.email(class="form-control") }}
+          <small class="current-file">This email is used for password reset and notifications.</small>
+          {% for e in form.email.errors %}<span class="form-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-actions">
+          {{ form.submit(class="btn btn-primary") }}
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Security Section -->
+  <div class="card">
+    <div class="card-header"><h3>🔐 Security</h3></div>
+    <div class="card-body">
+      <div class="security-item">
+        <div>
+          <strong>Password</strong>
+          <p style="color:var(--text-muted);font-size:.88rem;margin-top:.2rem">Keep your account secure with a strong password.</p>
+        </div>
+        <a href="{{ url_for('auth.change_password') }}" class="btn btn-sm btn-outline">Change Password</a>
+      </div>
+      <div class="security-item" style="margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--border)">
+        <div>
+          <strong>Active Sessions</strong>
+          <p style="color:var(--text-muted);font-size:.88rem;margin-top:.2rem">You are currently logged in on this device.</p>
+        </div>
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-danger">Log Out</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<style>
+.profile-layout{display:grid;grid-template-columns:300px 1fr;gap:1.5rem;align-items:start}
+@media(max-width:768px){.profile-layout{grid-template-columns:1fr}}
+.profile-card{text-align:center;padding:2.5rem 2rem}
+.profile-avatar-large{
+  width:88px;height:88px;border-radius:50%;
+  background:linear-gradient(135deg,#2d5a27,#3a7032);
+  color:#fff;font-size:2.2rem;font-family:'DM Serif Display',serif;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 1.25rem;box-shadow:0 8px 24px rgba(45,90,39,.3);
+}
+.profile-card h2{font-family:'DM Serif Display',serif;font-size:1.4rem;font-weight:400;margin-bottom:.3rem}
+.profile-role{color:#2d5a27;font-weight:700;font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.5rem}
+.profile-email{color:var(--text-muted);font-size:.9rem;margin-bottom:.35rem}
+.profile-joined,.profile-last-login{color:var(--text-muted);font-size:.82rem;margin-bottom:.2rem}
+.profile-actions{display:flex;gap:.75rem;justify-content:center;margin-top:1.5rem;flex-wrap:wrap}
+.security-item{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+</style>
+{% endblock %}

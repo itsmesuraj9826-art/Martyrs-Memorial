@@ -1,0 +1,31 @@
+{% extends 'layouts/admin_base.html' %}
+{% block title %}Message from {{ msg.name }}{% endblock %}
+{% block page_title %}Message Detail{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:700px">
+  <div class="card-header">
+    <h2>{{ msg.subject }}</h2>
+    <a href="{{ url_for('admin.messages') }}" class="btn btn-outline">← Back</a>
+  </div>
+  <div class="card-body">
+    <div class="message-detail-meta">
+      <div><strong>From:</strong> {{ msg.name }}</div>
+      <div><strong>Email:</strong> <a href="mailto:{{ msg.email }}">{{ msg.email }}</a></div>
+      {% if msg.phone %}<div><strong>Phone:</strong> {{ msg.phone }}</div>{% endif %}
+      <div><strong>Received:</strong> {{ msg.created_at.strftime('%d %B %Y at %H:%M') }}</div>
+    </div>
+    <hr>
+    <div class="message-body">
+      <p>{{ msg.message }}</p>
+    </div>
+    <div class="form-actions">
+      <a href="mailto:{{ msg.email }}?subject=Re: {{ msg.subject }}" class="btn btn-primary">Reply via Email</a>
+      <form method="POST" action="{{ url_for('admin.message_delete', msg_id=msg.id) }}" class="inline-form" onsubmit="return confirm('Delete this message?')">
+        {{ csrf_token_field() }}
+        <button class="btn btn-danger">Delete</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

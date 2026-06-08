@@ -1,0 +1,130 @@
+{% extends 'layouts/admin_base.html' %}
+{% block title %}Homepage Content{% endblock %}
+{% block page_title %}Homepage Content{% endblock %}
+
+{% block content %}
+<p style="color:var(--text-muted);margin-bottom:1.5rem">
+  Edit the content that appears on the public homepage and About page. Click any section to edit it.
+</p>
+
+<div class="homepage-sections-grid">
+
+  <!-- Hero -->
+  <div class="section-card">
+    <div class="section-card-icon">🦸</div>
+    <div class="section-card-body">
+      <h3>Hero Section</h3>
+      <p>Main banner — school name, tagline, description and background image.</p>
+      {% if section_map.get('hero') %}
+      <small class="section-preview">{{ section_map.hero.title[:60] if section_map.hero.title else 'Not set' }}</small>
+      {% endif %}
+    </div>
+    <a href="{{ url_for('admin.homepage_hero') }}" class="btn btn-sm btn-primary">Edit</a>
+  </div>
+
+  <!-- About -->
+  <div class="section-card">
+    <div class="section-card-icon">📖</div>
+    <div class="section-card-body">
+      <h3>About Section</h3>
+      <p>The "Our Story" section shown on homepage and About page.</p>
+      {% if section_map.get('about') %}
+      <small class="section-preview">{{ section_map.about.title[:60] if section_map.about.title else 'Not set' }}</small>
+      {% endif %}
+    </div>
+    <a href="{{ url_for('admin.homepage_section', section_name='about') }}" class="btn btn-sm btn-primary">Edit</a>
+  </div>
+
+  <!-- Principal -->
+  <div class="section-card">
+    <div class="section-card-icon">👨‍💼</div>
+    <div class="section-card-body">
+      <h3>Principal's Message</h3>
+      <p>Principal's name, title, photo and message shown on homepage & About page.</p>
+      {% if section_map.get('principal') %}
+      <small class="section-preview">{{ section_map.principal.subtitle[:60] if section_map.principal.subtitle else 'Not set' }}</small>
+      {% endif %}
+    </div>
+    <a href="{{ url_for('admin.homepage_section', section_name='principal') }}" class="btn btn-sm btn-primary">Edit</a>
+  </div>
+
+  <!-- Mission -->
+  <div class="section-card">
+    <div class="section-card-icon">🎯</div>
+    <div class="section-card-body">
+      <h3>Mission & Vision</h3>
+      <p>School mission statement and vision shown on the About page.</p>
+      {% if section_map.get('mission') %}
+      <small class="section-preview">{{ section_map.mission.title[:60] if section_map.mission.title else 'Not set' }}</small>
+      {% endif %}
+    </div>
+    <a href="{{ url_for('admin.homepage_section', section_name='mission') }}" class="btn btn-sm btn-primary">Edit</a>
+  </div>
+
+  <!-- Announcement Popup -->
+  <div class="section-card">
+    <div class="section-card-icon">📢</div>
+    <div class="section-card-body">
+      <h3>Announcement Popup</h3>
+      <p>Show any announcement on the homepage — admissions, events, notices. Enable/disable and upload an image.</p>
+      {% set popup = section_map.get('popup') %}
+      {% if popup and popup.extra_data and popup.extra_data.get('enabled') %}
+      <small class="section-preview" style="background:#d4edda;color:#155724">✅ Popup is ENABLED</small>
+      {% else %}
+      <small class="section-preview" style="background:#f8d7da;color:#721c24">❌ Popup is DISABLED</small>
+      {% endif %}
+    </div>
+    <a href="{{ url_for('admin.homepage_popup') }}" class="btn btn-sm btn-primary">Edit</a>
+  </div>
+
+</div>
+
+<div class="card" style="margin-top:2rem">
+  <div class="card-header"><h3>📰 Stories & News</h3></div>
+  <div class="card-body">
+    <p style="color:var(--text-muted);margin-bottom:1.25rem">
+      Stories, news articles and blog posts are managed in the <strong>News & Blog</strong> section.
+      Featured posts appear on the homepage automatically.
+    </p>
+    <div style="display:flex;gap:1rem;flex-wrap:wrap">
+      <a href="{{ url_for('admin.blog_new') }}" class="btn btn-primary">✏️ Write New Story / Post</a>
+      <a href="{{ url_for('admin.blog') }}"     class="btn btn-outline">📰 Manage All Posts</a>
+    </div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:1.5rem">
+  <div class="card-header"><h3>🖼️ Gallery & Photos</h3></div>
+  <div class="card-body">
+    <p style="color:var(--text-muted);margin-bottom:1.25rem">
+      Upload and manage photo albums. Cover images appear on the homepage gallery preview.
+    </p>
+    <div style="display:flex;gap:1rem;flex-wrap:wrap">
+      <a href="{{ url_for('admin.album_new') }}" class="btn btn-primary">➕ Create New Album</a>
+      <a href="{{ url_for('admin.gallery') }}"   class="btn btn-outline">🖼️ Manage Gallery</a>
+    </div>
+  </div>
+</div>
+
+<style>
+.homepage-sections-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.25rem;
+}
+.section-card{
+  background:var(--surface);border:1.5px solid var(--border);
+  border-radius:14px;padding:1.5rem;
+  display:flex;align-items:flex-start;gap:1rem;
+  transition:border-color .25s,box-shadow .25s;
+}
+.section-card:hover{border-color:#1a3570;box-shadow:0 4px 20px rgba(26,53,112,.12)}
+.section-card-icon{font-size:2rem;flex-shrink:0;margin-top:.1rem}
+.section-card-body{flex:1;min-width:0}
+.section-card-body h3{font-size:.95rem;font-weight:700;margin-bottom:.3rem}
+.section-card-body p{font-size:.82rem;color:var(--text-muted);line-height:1.5;margin-bottom:.35rem}
+.section-preview{
+  display:block;font-size:.78rem;color:#1a3570;
+  background:#dce8f8;padding:.2rem .5rem;border-radius:4px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+</style>
+{% endblock %}

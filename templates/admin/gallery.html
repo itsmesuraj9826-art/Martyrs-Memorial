@@ -1,0 +1,38 @@
+{% extends 'layouts/admin_base.html' %}
+{% block title %}Gallery{% endblock %}
+{% block page_title %}Gallery{% endblock %}
+
+{% block content %}
+<div class="page-actions">
+  <span></span>
+  <a href="{{ url_for('admin.album_new') }}" class="btn btn-primary">+ New Album</a>
+</div>
+
+<div class="albums-admin-grid">
+  {% for album in albums %}
+  <div class="album-admin-card card">
+    <div class="album-cover-thumb">
+      {% if album.cover_image %}
+      <img src="{{ album.cover_image if album.cover_image.startswith('http') else url_for('static', filename='uploads/gallery/' + album.cover_image) }}" alt="{{ album.name }}">
+      {% else %}
+      <div class="cover-placeholder">🖼️</div>
+      {% endif %}
+    </div>
+    <div class="card-body">
+      <h3>{{ album.name }}</h3>
+      <p>{{ album.image_count() }} photos · {% if album.is_published %}Published{% else %}Hidden{% endif %}</p>
+      <div class="card-actions">
+        <a href="{{ url_for('admin.album_images', album_id=album.id) }}" class="btn btn-sm btn-primary">Manage Photos</a>
+        <a href="{{ url_for('admin.album_edit', album_id=album.id) }}" class="btn btn-sm btn-outline">Edit</a>
+        <form method="POST" action="{{ url_for('admin.album_delete', album_id=album.id) }}" class="inline-form" onsubmit="return confirm('Delete album and all photos?')">
+          {{ csrf_token_field() }}
+          <button class="btn btn-sm btn-danger">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="empty-state"><span>🖼️</span><p>No albums yet. Create your first album!</p></div>
+  {% endfor %}
+</div>
+{% endblock %}

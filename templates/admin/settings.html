@@ -1,0 +1,127 @@
+{% extends 'layouts/admin_base.html' %}
+{% block title %}Settings{% endblock %}
+{% block page_title %}Settings{% endblock %}
+
+{% block content %}
+<div class="settings-layout">
+
+  <div class="card">
+    <div class="card-header"><h3>⚙️ Quick Actions</h3></div>
+    <div class="card-body">
+      <div class="settings-actions-grid">
+        <a href="{{ url_for('admin.notice_new') }}" class="settings-action-card">
+          <span class="action-icon">📋</span>
+          <strong>Add Notice</strong>
+          <p>Post a new school notice</p>
+        </a>
+        <a href="{{ url_for('admin.event_new') }}" class="settings-action-card">
+          <span class="action-icon">📅</span>
+          <strong>Add Event</strong>
+          <p>Schedule a new event</p>
+        </a>
+        <a href="{{ url_for('admin.album_new') }}" class="settings-action-card">
+          <span class="action-icon">🖼️</span>
+          <strong>New Gallery Album</strong>
+          <p>Create a photo album</p>
+        </a>
+        <a href="{{ url_for('admin.blog_new') }}" class="settings-action-card">
+          <span class="action-icon">📰</span>
+          <strong>Write Blog Post</strong>
+          <p>Publish news or announcement</p>
+        </a>
+        <a href="{{ url_for('admin.download_new') }}" class="settings-action-card">
+          <span class="action-icon">📥</span>
+          <strong>Upload File</strong>
+          <p>Add a downloadable resource</p>
+        </a>
+        <a href="{{ url_for('admin.testimonial_new') }}" class="settings-action-card">
+          <span class="action-icon">💬</span>
+          <strong>Add Testimonial</strong>
+          <p>Share community feedback</p>
+        </a>
+        <a href="{{ url_for('admin.homepage_hero') }}" class="settings-action-card">
+          <span class="action-icon">🏠</span>
+          <strong>Edit Homepage</strong>
+          <p>Update hero & about sections</p>
+        </a>
+        <a href="{{ url_for('admin.profile') }}" class="settings-action-card">
+          <span class="action-icon">👤</span>
+          <strong>My Profile</strong>
+          <p>Update name & email</p>
+        </a>
+        <a href="{{ url_for('auth.change_password') }}" class="settings-action-card">
+          <span class="action-icon">🔒</span>
+          <strong>Change Password</strong>
+          <p>Update your admin password</p>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:1.5rem">
+    <div class="card-header"><h3>📊 Site Overview</h3></div>
+    <div class="card-body">
+      <div class="overview-grid">
+        <div class="overview-item">
+          <span class="ov-icon">📋</span>
+          <a href="{{ url_for('admin.notices') }}">Manage Notices</a>
+          <p>Create, edit, pin and delete school notices. Set expiry dates and categories.</p>
+        </div>
+        <div class="overview-item">
+          <span class="ov-icon">📅</span>
+          <a href="{{ url_for('admin.events') }}">Manage Events</a>
+          <p>Add upcoming events with dates, locations, descriptions and banner images.</p>
+        </div>
+        <div class="overview-item">
+          <span class="ov-icon">🖼️</span>
+          <a href="{{ url_for('admin.gallery') }}">Manage Gallery</a>
+          <p>Create albums, upload multiple photos, set cover images and captions.</p>
+        </div>
+        <div class="overview-item">
+          <span class="ov-icon">📰</span>
+          <a href="{{ url_for('admin.blog') }}">Manage Blog</a>
+          <p>Write and publish news posts. Feature posts on the homepage.</p>
+        </div>
+        <div class="overview-item">
+          <span class="ov-icon">📥</span>
+          <a href="{{ url_for('admin.downloads') }}">Manage Downloads</a>
+          <p>Upload PDFs, forms, syllabi and other resources for parents and students.</p>
+        </div>
+        <div class="overview-item">
+          <span class="ov-icon">✉️</span>
+          <a href="{{ url_for('admin.messages') }}">View Messages</a>
+          <p>Read and manage contact form submissions from the public website.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<style>
+.settings-layout{max-width:1000px}
+.settings-actions-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;
+}
+.settings-action-card{
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+  padding:1.5rem 1rem;border-radius:12px;
+  border:1.5px solid var(--border);
+  transition:all .25s;text-decoration:none;color:var(--text);
+  background:var(--bg);
+}
+.settings-action-card:hover{
+  border-color:#2d5a27;background:#e8f5e3;color:#2d5a27;
+  transform:translateY(-3px);box-shadow:0 8px 24px rgba(45,90,39,.15);
+}
+.action-icon{font-size:2rem;margin-bottom:.75rem}
+.settings-action-card strong{font-size:.9rem;font-weight:700;margin-bottom:.3rem}
+.settings-action-card p{font-size:.78rem;color:#5a7a52;line-height:1.4;margin:0}
+.overview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.25rem}
+.overview-item{padding:1.25rem;border-radius:10px;border:1px solid var(--border);background:var(--bg-alt)}
+.ov-icon{font-size:1.5rem;display:block;margin-bottom:.5rem}
+.overview-item a{font-weight:700;color:#2d5a27;font-size:.95rem}
+.overview-item a:hover{color:#f4a826}
+.overview-item p{color:#5a7a52;font-size:.85rem;margin-top:.35rem;line-height:1.5}
+</style>
+{% endblock %}

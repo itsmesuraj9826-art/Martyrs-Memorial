@@ -1,0 +1,535 @@
+{% extends 'layouts/base.html' %}
+{% block title %}{{ school_name }} — {{ school_tagline }}{% endblock %}
+{% block navbar_class %}{% endblock %}
+
+{% block content %}
+
+
+<!-- ═══════ HERO — full-screen background slideshow ═══════ -->
+<section class="hero" id="heroSection">
+
+  <!-- Background slides (images cycle behind the text) -->
+  {% if slides %}
+  <div class="hero-bg-slideshow" id="heroBgSlideshow">
+    {% for slide in slides %}
+    <div class="hero-bg-slide {% if loop.first %}active{% endif %}"
+         style="background-image:url('{{ slide.image }}')"></div>
+    {% endfor %}
+  </div>
+  {% elif hero and hero.image %}
+  <div class="hero-bg-slide active"
+       style="position:absolute;inset:0;background-image:url('{{ hero.image }}');background-size:cover;background-position:center"></div>
+  {% endif %}
+
+  <!-- Dark gradient overlay — keeps text readable over any photo -->
+  <div class="hero-overlay"></div>
+
+  <!-- Centered text content -->
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <span>Est. 1990</span>
+      <span>·</span>
+      <span>Welcome to {{ school_name }}</span>
+    </div>
+    <h1>
+      Welcome to
+      <em>{{ school_name }}</em>
+    </h1>
+    <p>{{ hero.content if hero and hero.content else 'A premier institution committed to holistic education, nurturing bright minds and building tomorrow\'s leaders in an inspiring environment.' }}</p>
+    <div class="hero-actions">
+      <a href="{{ url_for('public.about') }}" class="btn btn-gold btn-lg">Discover Our Story</a>
+      <a href="{{ url_for('public.contact') }}" class="btn btn-outline-white btn-lg">Get in Touch</a>
+    </div>
+  </div>
+
+  <!-- Slide navigation (arrows + dots) -->
+  {% if slides %}
+  <button class="slide-arrow slide-prev" id="heroPrev" aria-label="Previous">&#8249;</button>
+  <button class="slide-arrow slide-next" id="heroNext" aria-label="Next">&#8250;</button>
+  <div class="hero-dots slide-dots">
+    {% for slide in slides %}
+    <button class="dot {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}" aria-label="Slide {{ loop.index }}"></button>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="hero-scroll-hint">Scroll</div>
+</section>
+
+
+<!-- ═══════ STATS ═══════ -->
+<section class="stats-bar" style="position:relative">
+  <div class="container stats-grid">
+    <div class="stat-item" data-animate="fadeIn" data-delay="1">
+      <span class="stat-number" data-target="1500">0</span><span class="stat-suffix">+</span>
+      <span class="stat-label">Students Enrolled</span>
+    </div>
+    <div class="stat-item" data-animate="fadeIn" data-delay="2">
+      <span class="stat-number" data-target="120">0</span><span class="stat-suffix">+</span>
+      <span class="stat-label">Expert Teachers</span>
+    </div>
+    <div class="stat-item" data-animate="fadeIn" data-delay="3">
+      <span class="stat-number" data-target="35">0</span><span class="stat-suffix">+</span>
+      <span class="stat-label">Years of Excellence</span>
+    </div>
+    <div class="stat-item" data-animate="fadeIn" data-delay="4">
+      <span class="stat-number" data-target="98">0</span><span class="stat-suffix">%</span>
+      <span class="stat-label">Pass Rate</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ ABOUT ═══════ -->
+<section class="section about-section">
+  <div class="container about-grid">
+    <div class="about-image-wrap" data-animate="slideInLeft">
+      {% if about and about.image %}
+      <img src="{{ about.image }}"
+           alt="About {{ school_name }}">
+      {% else %}
+      <div class="image-placeholder large">🏫</div>
+      {% endif %}
+    </div>
+    <div class="about-text" data-animate="slideInRight">
+      <span class="section-badge">About Us</span>
+      <h2>{{ about.title if about else 'A Legacy of Learning' }}</h2>
+      <p>{{ about.content if about else 'We are committed to providing a world-class education in a safe, inclusive, and inspiring environment. Our school blends academic rigour with holistic development to prepare students for the challenges of tomorrow.' }}</p>
+      <a href="{{ url_for('public.about') }}" class="btn btn-primary">Our Story →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ PRINCIPAL ═══════ -->
+{% if principal %}
+<section class="section principal-section bg-light">
+  <div class="container principal-grid">
+    <div class="principal-photo-wrap" data-animate="fadeIn">
+      {% if principal.image %}
+      <img src="{{ principal.image }}" alt="Principal" class="principal-photo">
+      {% else %}
+      <div class="image-placeholder principal-ph">👨‍💼</div>
+      {% endif %}
+    </div>
+    <div class="principal-text" data-animate="slideInRight">
+      <span class="section-badge">A Message From Leadership</span>
+      <h2>{{ principal.title }}</h2>
+      <blockquote>{{ principal.content }}</blockquote>
+      <p class="principal-name">— {{ principal.subtitle }}</p>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ═══════ NOTICES ═══════ -->
+{% if latest_notices %}
+<section class="section notices-section">
+  <div class="container">
+    <div class="section-header" data-animate="fadeInUp">
+      <span class="section-badge">Stay Updated</span>
+      <h2>Latest Notices</h2>
+      <p>Important announcements and updates from the school administration.</p>
+    </div>
+    <div class="notices-list" data-animate="fadeInUp">
+      {% for notice in latest_notices %}
+      <div class="notice-item {% if notice.is_pinned %}pinned{% endif %}">
+        {% if notice.is_pinned %}<span class="pin-badge">📌 PINNED</span>{% endif %}
+        <div class="notice-meta">
+          <span class="notice-category {{ notice.category }}">{{ notice.category|title }}</span>
+          <span class="notice-date">{{ notice.created_at.strftime('%d %b %Y') }}</span>
+          {% if notice.expiry_date and not notice.is_expired() %}
+          <span class="notice-expiry">Expires {{ notice.expiry_date.strftime('%d %b') }}</span>
+          {% endif %}
+        </div>
+        <h3 class="notice-title">{{ notice.title }}</h3>
+        <p class="notice-excerpt">{{ notice.content[:160] }}{% if notice.content|length > 160 %}…{% endif %}</p>
+        {% if notice.attachment %}
+        <a href="{{ url_for('public.notice_attachment',notice_id=notice.id) }}" class="btn btn-sm btn-outline-gold">📎 Download Attachment</a>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    <div class="section-cta">
+      <a href="{{ url_for('public.notices') }}" class="btn btn-primary btn-lg">View All Notices</a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ═══════ EVENTS ═══════ -->
+{% if upcoming_events %}
+<section class="section events-section bg-light">
+  <div class="container">
+    <div class="section-header" data-animate="fadeInUp">
+      <span class="section-badge">Calendar</span>
+      <h2>Upcoming Events</h2>
+      <p>Mark your calendars — exciting things are happening at {{ school_name }}.</p>
+    </div>
+    <div class="events-grid" data-animate="fadeInUp">
+      {% for event in upcoming_events %}
+      <article class="event-card" data-delay="{{ loop.index }}">
+        {% if event.banner_image %}
+        <div class="event-image">
+          <img src="{{ event.banner_image }}" alt="{{ event.title }}">
+        </div>
+        {% else %}
+        <div class="event-image placeholder">📅</div>
+        {% endif %}
+        <div class="event-body">
+          <div class="event-date-badge">
+            <span class="day">{{ event.event_date.strftime('%d') }}</span>
+            <span class="month">{{ event.event_date.strftime('%b %Y') }}</span>
+          </div>
+          <h3>{{ event.title }}</h3>
+          <p>{{ event.description[:110] }}{% if event.description|length > 110 %}…{% endif %}</p>
+          {% if event.location %}<p class="event-location">📍 {{ event.location }}</p>{% endif %}
+          <a href="{{ url_for('public.event_detail',event_id=event.id) }}" class="btn btn-sm btn-primary" style="margin-top:.75rem">Details →</a>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+    <div class="section-cta">
+      <a href="{{ url_for('public.events') }}" class="btn btn-primary btn-lg">All Events</a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ═══════ GALLERY ═══════ -->
+{% if gallery_albums %}
+<section class="section gallery-section">
+  <div class="container">
+    <div class="section-header" data-animate="fadeInUp">
+      <span class="section-badge">Memories</span>
+      <h2>Our Photo Gallery</h2>
+      <p>Glimpses of life, learning and laughter at {{ school_name }}.</p>
+    </div>
+    <div class="albums-grid" data-animate="fadeInUp">
+      {% for album in gallery_albums %}
+      <a href="{{ url_for('public.gallery_album',album_id=album.id) }}" class="album-card">
+        <div class="album-cover">
+          {% if album.cover_image %}
+          <img src="{{ album.cover_image }}" alt="{{ album.name }}">
+          {% else %}
+          <div class="album-cover-placeholder">🖼️</div>
+          {% endif %}
+          <div class="album-overlay">
+            <span class="album-overlay-name">{{ album.name }}</span>
+            <span class="img-count">{{ album.image_count() }} photos</span>
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    <div class="section-cta">
+      <a href="{{ url_for('public.gallery') }}" class="btn btn-primary btn-lg">Browse Full Gallery</a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ═══════ NEWS ═══════ -->
+{% if featured_posts %}
+<section class="section news-section bg-light">
+  <div class="container">
+    <div class="section-header" data-animate="fadeInUp">
+      <span class="section-badge">Stories</span>
+      <h2>Latest News &amp; Insights</h2>
+      <p>Stories of achievement, innovation, and community from our campus.</p>
+    </div>
+    <div class="news-grid" data-animate="fadeInUp">
+      {% for post in featured_posts %}
+      <article class="news-card" data-delay="{{ loop.index }}">
+        {% if post.featured_image %}
+        <div class="news-image">
+          <img src="{{ post.featured_image }}" alt="{{ post.title }}">
+        </div>
+        {% endif %}
+        <div class="news-body">
+          <span class="news-category">{{ post.category|title }}</span>
+          <h3><a href="{{ url_for('public.news_detail',slug=post.slug) }}">{{ post.title }}</a></h3>
+          <p>{{ post.excerpt or (post.content[:130] + '…') }}</p>
+          <div class="news-meta">
+            <span>{{ post.created_at.strftime('%d %b %Y') }}</span>
+            <a href="{{ url_for('public.news_detail',slug=post.slug) }}" class="read-more">Read more →</a>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+    <div class="section-cta">
+      <a href="{{ url_for('public.news') }}" class="btn btn-primary btn-lg">All News</a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ═══════ TESTIMONIALS ═══════ -->
+{% if testimonials %}
+<section class="section testimonials-section">
+  <div class="container">
+    <div class="section-header" data-animate="fadeInUp">
+      <span class="section-badge">Voices</span>
+      <h2>What Our Community Says</h2>
+      <p>Hear from the parents, alumni, and students who call {{ school_name }} home.</p>
+    </div>
+    <div class="testimonials-slider" data-animate="fadeInUp">
+      {% for t in testimonials %}
+      <div class="testimonial-card" data-delay="{{ loop.index }}">
+        <div class="testimonial-stars">{{ '★' * (t.rating or 5) }}{{ '☆' * (5 - (t.rating or 5)) }}</div>
+        <p class="testimonial-text">"{{ t.content }}"</p>
+        <div class="testimonial-author">
+          {% if t.avatar %}
+          <img src="{{ t.avatar }}" alt="{{ t.name }}" class="testimonial-avatar">
+          {% else %}
+          <div class="avatar-placeholder">{{ t.name[0] }}</div>
+          {% endif %}
+          <div>
+            <strong class="testimonial-name">{{ t.name }}</strong>
+            {% if t.role %}<span class="testimonial-role">{{ t.role }}</span>{% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ═══════ STREAM TOPPERS ═══════ -->
+{% set stream_meta = [
+  ('science_bio',  '🔬 Science (Bio)',    'sci-bio'),
+  ('science_math', '📐 Science (Math)',   'sci-math'),
+  ('management',   '📊 Management',       'mgmt'),
+  ('law',          '⚖️ Law',              'law'),
+  ('arts',         '🎨 Arts',             'arts'),
+] %}
+{% set has_toppers = toppers_by_stream.values() | selectattr('__len__') | list %}
+{% if has_toppers %}
+<section class="section toppers-section" id="toppers">
+  <div class="container">
+    <div class="section-header" data-animate="fadeInUp">
+      <span class="section-badge">🏆 Hall of Fame</span>
+      <h2>Stream Toppers</h2>
+      <p>Congratulating our brilliant students who have excelled in their respective programmes.</p>
+    </div>
+
+    <!-- Stream tab buttons -->
+    <div class="topper-tabs" data-animate="fadeInUp">
+      {% for key, label, cls in stream_meta %}
+      {% if toppers_by_stream[key] %}
+      <button class="topper-tab-btn {% if loop.first %}active{% endif %}"
+              data-stream="{{ key }}" type="button">
+        {{ label }}
+        <span class="topper-tab-count">{{ toppers_by_stream[key]|length }}</span>
+      </button>
+      {% endif %}
+      {% endfor %}
+    </div>
+
+    <!-- Stream panels -->
+    {% for key, label, cls in stream_meta %}
+    {% if toppers_by_stream[key] %}
+    <div class="topper-panel {% if loop.first %}active{% endif %}"
+         id="panel-{{ key }}" data-animate="fadeInUp">
+      <div class="topper-row" id="row-{{ key }}">
+        {% for t in toppers_by_stream[key] %}
+        <div class="topper-card">
+          <div class="topper-rank-badge">#{{ t.rank }}</div>
+          <div class="topper-photo-wrap stream-{{ cls }}">
+            {% if t.photo %}
+            <img src="{{ t.photo }}"
+                 alt="{{ t.name }}" class="topper-photo">
+            {% else %}
+            <div class="topper-initials stream-{{ cls }}">
+              {{ t.name.split()[0][0] }}{{ t.name.split()[-1][0] if t.name.split()|length > 1 else '' }}
+            </div>
+            {% endif %}
+          </div>
+          <div class="topper-info">
+            <span class="topper-name">{{ t.name }}</span>
+            {% if t.percentage %}
+            <span class="topper-pct">{{ t.percentage }}%</span>
+            {% endif %}
+            <span class="topper-year">{{ t.year }}</span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+  </div>
+</section>
+{% endif %}
+
+<!-- ═══════ CTA ═══════ -->
+<section class="cta-section">
+  <div class="container cta-inner" data-animate="fadeInUp">
+    <div class="cta-gold-line"></div>
+    <h2>Begin Your Journey With Us</h2>
+    <p>Download admission forms and take the first step towards a world-class education at {{ school_name }}.</p>
+    <div class="cta-actions">
+      <a href="{{ url_for('public.downloads') }}" class="btn btn-gold btn-lg">📥 Download Forms</a>
+      <a href="{{ url_for('public.contact') }}" class="btn btn-outline-white btn-lg">Contact Admissions</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ ANNOUNCEMENT POPUP ═══════ -->
+{% if popup_show %}
+<div class="pop-overlay" id="admissionPopup" role="dialog" aria-modal="true">
+  <div class="pop-card">
+
+    <!-- X close button -->
+    <button class="pop-close" id="closePopup" aria-label="Close">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+
+    <!-- Left — image panel -->
+    <div class="pop-image">
+      {% if popup and popup.image %}
+      <img src="{{ popup.image }}" alt="{{ popup.title or school_name }}">
+      {% elif about and about.image %}
+      <img src="{{ about.image }}" alt="{{ school_name }}">
+      {% else %}
+      <div class="pop-image-fallback">
+        <span class="pop-logo-icon">📢</span>
+        <strong>{{ school_name }}</strong>
+        <span>{{ school_tagline }}</span>
+      </div>
+      {% endif %}
+      {% if popup and popup.subtitle %}
+      <div class="pop-image-badge">
+        <i class="fa-solid fa-bullhorn"></i>
+        {{ popup.subtitle }}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Right — content -->
+    <div class="pop-body">
+      <p class="pop-eyebrow">📢 Official Announcement</p>
+      <h2 class="pop-heading">{{ popup.title if popup and popup.title else 'Notice' }}</h2>
+      <p class="pop-sub">{{ school_name }} &mdash; {{ school_tagline }}</p>
+      <p class="pop-text">{{ popup.content if popup and popup.content else '' }}</p>
+
+      <a href="{{ url_for('public.contact') }}" class="pop-btn-primary">
+        <i class="fa-solid fa-envelope"></i> Contact Us
+      </a>
+
+      <button class="pop-dismiss" id="dismissPopup">No, thanks</button>
+    </div>
+
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/animations.js') }}"></script>
+
+{% if popup_show %}
+<script>
+(function(){
+  var overlay  = document.getElementById('admissionPopup');
+  var closeBtn = document.getElementById('closePopup');
+  var dismiss2 = document.getElementById('dismissPopup');
+  if (!overlay) return;
+
+  // Show after 1.5s on every page load — no sessionStorage
+  setTimeout(function(){
+    overlay.style.display = 'flex';
+    // force reflow so transition fires
+    overlay.offsetHeight;
+    overlay.classList.add('visible');
+  }, 1500);
+
+  function dismiss(){
+    overlay.classList.remove('visible');
+    setTimeout(function(){ overlay.style.display = 'none'; }, 350);
+  }
+
+  closeBtn.addEventListener('click', dismiss);
+  dismiss2.addEventListener('click', dismiss);
+  overlay.addEventListener('click', function(e){ if (e.target === overlay) dismiss(); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') dismiss(); });
+})();
+</script>
+{% endif %}
+
+<!-- Toppers tab switching -->
+<script>
+(function(){
+  var btns   = document.querySelectorAll('.topper-tab-btn');
+  var panels = document.querySelectorAll('.topper-panel');
+  if (!btns.length) return;
+  btns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var key = btn.dataset.stream;
+      btns.forEach(function(b){ b.classList.remove('active'); });
+      panels.forEach(function(p){ p.classList.remove('active'); });
+      btn.classList.add('active');
+      var panel = document.getElementById('panel-' + key);
+      if (panel) panel.classList.add('active');
+    });
+  });
+})();
+</script>
+
+{% if slides %}
+<script>
+(function(){
+  var heroEl   = document.getElementById('heroSection');
+  var bgWrap   = document.getElementById('heroBgSlideshow');
+  if (!bgWrap) return;
+
+  var slides   = bgWrap.querySelectorAll('.hero-bg-slide');
+  var dots     = document.querySelectorAll('.hero-dots .dot');
+  var prevBtn  = document.getElementById('heroPrev');
+  var nextBtn  = document.getElementById('heroNext');
+  var current  = 0;
+  var timer    = null;
+  var DELAY    = 5500;
+
+  function goTo(n) {
+    slides[current].classList.remove('active');
+    if (dots[current]) dots[current].classList.remove('active');
+    current = (n + slides.length) % slides.length;
+    slides[current].classList.add('active');
+    if (dots[current]) dots[current].classList.add('active');
+  }
+
+  function startAuto() { timer = setInterval(function(){ goTo(current + 1); }, DELAY); }
+  function stopAuto()  { clearInterval(timer); }
+  function resetAuto() { stopAuto(); startAuto(); }
+
+  if (prevBtn) prevBtn.addEventListener('click', function(){ goTo(current - 1); resetAuto(); });
+  if (nextBtn) nextBtn.addEventListener('click', function(){ goTo(current + 1); resetAuto(); });
+  dots.forEach(function(d){
+    d.addEventListener('click', function(){ goTo(+d.dataset.index); resetAuto(); });
+  });
+
+  // Touch / swipe support on the hero section
+  var touchX = 0;
+  if (heroEl) {
+    heroEl.addEventListener('touchstart', function(e){ touchX = e.touches[0].clientX; }, {passive:true});
+    heroEl.addEventListener('touchend',   function(e){
+      var diff = touchX - e.changedTouches[0].clientX;
+      if (Math.abs(diff) > 50) { goTo(diff > 0 ? current+1 : current-1); resetAuto(); }
+    }, {passive:true});
+  }
+
+  // Keyboard arrow support
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowLeft')  { goTo(current - 1); resetAuto(); }
+    if (e.key === 'ArrowRight') { goTo(current + 1); resetAuto(); }
+  });
+
+  startAuto();
+})();
+</script>
+{% endif %}
+
+{% endblock %}
