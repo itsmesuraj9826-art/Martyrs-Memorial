@@ -65,6 +65,11 @@ def utc_now():
     return datetime.now(timezone.utc)
 
 
+def utc_now_naive():
+    """Return current UTC datetime WITHOUT timezone (for comparing with DB naive columns)."""
+    return datetime.utcnow()
+
+
 # ─────────────────────────────────────────────
 # 1. CONFIGURATION
 # ─────────────────────────────────────────────
@@ -342,7 +347,8 @@ class Event(db.Model):
     updated_at    = db.Column(db.DateTime,    default=utc_now, onupdate=utc_now)
 
     def is_upcoming(self):
-        return self.event_date >= utc_now()
+        # event_date is stored as naive datetime; compare with naive UTC now
+        return self.event_date >= datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class GalleryAlbum(db.Model):
@@ -811,7 +817,7 @@ def index():
                        .order_by(Notice.is_pinned.desc(), Notice.created_at.desc())
                        .limit(5).all())
     upcoming_events = (Event.query
-                       .filter(Event.is_published == True, Event.event_date >= utc_now())
+                       .filter(Event.is_published == True, Event.event_date >= utc_now_naive())
                        .order_by(Event.event_date.asc()).limit(4).all())
     featured_posts  = (BlogPost.query.filter_by(is_published=True, is_featured=True)
                        .order_by(BlogPost.created_at.desc()).limit(3).all())
@@ -881,13 +887,12 @@ def notices():
 def events():
     page = request.args.get('page', 1, type=int)
     tab  = request.args.get('tab', 'upcoming')
-    now  = utc_now()
     if tab == 'past':
         query = Event.query.filter(Event.is_published == True,
-                                   Event.event_date < now).order_by(Event.event_date.desc())
+                                   Event.event_date < utc_now_naive()).order_by(Event.event_date.desc())
     else:
         query = Event.query.filter(Event.is_published == True,
-                                   Event.event_date >= now).order_by(Event.event_date.asc())
+                                   Event.event_date >= utc_now_naive()).order_by(Event.event_date.asc())
     pagination = query.paginate(page=page, per_page=app.config['POSTS_PER_PAGE'], error_out=False)
     return render_template('public/events.html', pagination=pagination, tab=tab)
 
@@ -2019,7 +2024,7 @@ def seed_database():
             title='Annual Sports Day 2025',
             description='Join us for an exciting day of athletics, field events, and team sports.',
             location='School Sports Ground',
-            event_date=utc_now() + timedelta(days=30),
+            event_date=datetime.utcnow() + timedelta(days=30),
             is_published=True))
 
     if not Testimonial.query.first():
