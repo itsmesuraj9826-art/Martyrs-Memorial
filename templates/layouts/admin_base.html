@@ -143,15 +143,58 @@
       <div class="header-actions">
         <!-- Notification Bell -->
         {% set unread = unread_count() %}
-        <a href="{{ url_for('admin.messages') }}" class="notif-bell" title="Messages">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-          </svg>
-          {% if unread > 0 %}
-          <span class="notif-count">{{ unread if unread < 100 else '99+' }}</span>
-          {% endif %}
-        </a>
+        {% set recent_msgs = recent_messages(5) %}
+        <div class="notif-wrap" id="notifWrap">
+          <button class="notif-bell" id="notifBtn" type="button"
+                  aria-label="Notifications" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            {% if unread > 0 %}
+            <span class="notif-count">{{ unread if unread < 100 else '99+' }}</span>
+            {% endif %}
+          </button>
+
+          <!-- Dropdown -->
+          <div class="notif-dropdown" id="notifDropdown">
+            <div class="notif-hdr">
+              <span class="notif-hdr-title">Notifications</span>
+              {% if unread > 0 %}
+              <span class="notif-hdr-badge">{{ unread }} new</span>
+              {% endif %}
+            </div>
+
+            <div class="notif-list">
+              {% if recent_msgs %}
+                {% for msg in recent_msgs %}
+                <a href="{{ url_for('admin.message_view', msg_id=msg.id) }}"
+                   class="notif-item{% if not msg.is_read %} notif-unread{% endif %}">
+                  <div class="notif-av">{{ msg.name[0]|upper }}</div>
+                  <div class="notif-body">
+                    <div class="notif-sender">{{ msg.name }}</div>
+                    <div class="notif-subject">{{ msg.subject[:38] }}{% if msg.subject|length > 38 %}…{% endif %}</div>
+                    <div class="notif-time">{{ msg.created_at.strftime('%d %b · %I:%M %p') }}</div>
+                  </div>
+                  {% if not msg.is_read %}<span class="notif-dot"></span>{% endif %}
+                </a>
+                {% endfor %}
+              {% else %}
+                <div class="notif-empty">
+                  <span>🔔</span>
+                  <p>No messages yet</p>
+                </div>
+              {% endif %}
+            </div>
+
+            <a href="{{ url_for('admin.messages') }}" class="notif-footer">
+              View all messages →
+            </a>
+          </div>
+        </div>
+
         <!-- User -->
         <a href="{{ url_for('admin.profile') }}" class="header-user">
           <div class="header-avatar">{{ current_user.full_name[0] }}</div>
@@ -176,6 +219,70 @@
   </div>
 </div>
 <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+<script>
+(function () {
+  var btn  = document.getElementById('notifBtn');
+  var wrap = document.getElementById('notifWrap');
+  var drop = document.getElementById('notifDropdown');
+  if (!btn || !drop) return;
+
+  // Toggle on bell click
+  btn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    var open = drop.classList.toggle('notif-open');
+    btn.setAttribute('aria-expanded', String(open));
+  });
+
+  // Close when clicking anywhere outside
+  document.addEventListener('click', function (e) {
+    if (wrap && !wrap.contains(e.target)) {
+      drop.classList.remove('notif-open');
+      btn.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  // Close on Escape
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      drop.classList.remove('notif-open');
+      btn.setAttribute('aria-expanded', 'false');
+      btn.focus();
+    }
+  });
+})();
+</script>
+
 {% block extra_js %}{% endblock %}
+
+<script>
+(function(){
+  var btn      = document.getElementById('notifBtn');
+  var dropdown = document.getElementById('notifDropdown');
+  var wrap     = document.getElementById('notifWrap');
+  if (!btn || !dropdown) return;
+
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    var open = dropdown.classList.toggle('notif-dropdown--open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+
+  // Close when clicking outside
+  document.addEventListener('click', function(e){
+    if (wrap && !wrap.contains(e.target)) {
+      dropdown.classList.remove('notif-dropdown--open');
+      btn.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  // Close on Escape
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') {
+      dropdown.classList.remove('notif-dropdown--open');
+      btn.setAttribute('aria-expanded', 'false');
+    }
+  });
+})();
+</script>
 </body>
 </html>
