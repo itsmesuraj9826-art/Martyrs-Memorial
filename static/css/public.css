@@ -644,9 +644,10 @@ body.dark-mode .album-info h3{color:#dce8f8}
   .nav-links a{padding:.8rem 1rem}
   .dropdown{position:static;opacity:1;visibility:visible;transform:none;box-shadow:none;border:none;padding-left:1rem}
   .nav-toggle{display:flex}
-  .stats-grid{grid-template-columns:repeat(2,1fr)}
-  .stat-item{border-right:none;border-bottom:1px solid rgba(255,255,255,.1)}
-  .stat-item:last-child{border-bottom:none}
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:.25rem}
+  .stat-item{border-right:none;border-bottom:1px solid rgba(255,255,255,.08);padding:.85rem .5rem}
+  .stat-item:nth-child(odd){border-right:1px solid rgba(255,255,255,.08)}
+  .stat-item:last-child,.stat-item:nth-last-child(2):nth-child(odd){border-bottom:none}
   .image-placeholder.large{height:260px}
   .about-image-wrap{height:260px}
   .footer-grid{grid-template-columns:1fr;gap:2.5rem}
@@ -1561,5 +1562,37 @@ body.dark-mode .topper-name{color:#e2e8f0}
   }
   .hero h1{
     font-size:clamp(1.5rem,8vw,2rem) !important;
+  }
+}
+
+/* ── Stats bar — compact on mobile ── */
+@media(max-width:768px){
+  .stats-bar{padding:1rem 0 1.25rem}
+  /* Remove the big wave SVG on mobile — saves space */
+  .stats-bar::before{display:none}
+  .stat-number{font-size:1.8rem !important}
+  .stat-suffix{font-size:1.2rem !important}
+  .stat-label{font-size:.68rem !important;letter-spacing:.04em}
+}
+@media(max-width:480px){
+  .stats-bar{padding:.85rem 0 1rem}
+  /* All 4 in one row, tiny */
+  .stats-grid{
+    grid-template-columns:repeat(4,1fr) !important;
+    gap:0 !important;
+  }
+  .stat-item{
+    padding:.7rem .25rem !important;
+    border-right:1px solid rgba(255,255,255,.08) !important;
+    border-bottom:none !important;
+  }
+  .stat-item:last-child{border-right:none !important}
+  .stat-number{font-size:1.35rem !important}
+  .stat-suffix{font-size:.95rem !important}
+  .stat-label{
+    font-size:.58rem !important;
+    letter-spacing:.02em;
+    line-height:1.3;
+    white-space:nowrap;
   }
 }
