@@ -1,3 +1,56 @@
+/* ── Fix hamburger menu icon color in Dark Mode ── */
+.nav-toggle {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Light Mode - default state */
+.nav-toggle span {
+    background-color: var(--color-primary);
+    display: block;
+    width: 25px;
+    height: 3px;
+    margin: 5px 0;
+    transition: all 0.3s ease-in-out;
+    border-radius: 3px;
+}
+
+/* Light Mode - hover state */
+.nav-toggle:hover span {
+    background-color: var(--c-gold);
+}
+
+/* Dark Mode - default state */
+body.dark-mode .nav-toggle span {
+    background-color: var(--color-text) !important;
+}
+
+/* Dark Mode - hover state */
+body.dark-mode .nav-toggle:hover span {
+    background-color: var(--c-gold) !important;
+}
+
+/* Active/Open state - transforms to X */
+.nav-toggle.active span:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+}
+
+.nav-toggle.active span:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0);
+}
+
+.nav-toggle.active span:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
+}
+
 /* ============================================================
    main.css — Design tokens, resets, shared utilities
    School: Martyrs' Memorial +2 | Royal Blue + Gold Theme
@@ -67,6 +120,7 @@ body.dark-mode {
   --c-mist:  #080f1e;
 }
 
+/* Reset & Base */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;font-size:16px}
 body{font-family:var(--font-sans);color:var(--color-text);background:var(--color-bg);line-height:1.7;transition:background var(--transition),color var(--transition);-webkit-font-smoothing:antialiased}
@@ -76,6 +130,7 @@ a:hover{color:var(--c-gold)}
 ul{list-style:none}
 button{cursor:pointer;font-family:inherit}
 
+/* Layout */
 .container{width:100%;max-width:var(--max-w);margin:0 auto;padding:0 2rem}
 .section{padding:6rem 0}
 .bg-light{background:var(--c-cream) !important}
@@ -264,7 +319,206 @@ textarea.form-control{resize:vertical;min-height:120px}
 [data-delay="4"]{transition-delay:.4s}
 [data-delay="5"]{transition-delay:.5s}
 
-@media(max-width:768px){
+/* ============================================================
+   SLIDESHOW / HERO SECTION MOBILE FIXES
+   ============================================================ */
+
+/* Hero/Slideshow section container */
+.hero-section,
+.slideshow-container,
+.hero-slider,
+.home-slideshow {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+}
+
+/* Mobile fixes for slideshow */
+@media (max-width: 768px) {
+    /* Reduce section height on mobile */
+    .hero-section,
+    .slideshow-container,
+    .hero-slider,
+    .home-slideshow,
+    .swiper-container,
+    [class*="slideshow"],
+    [class*="hero"] {
+        min-height: auto !important;
+        height: auto !important;
+        max-height: 60vh !important;
+    }
+
+    /* Scale down slide images */
+    .hero-section img,
+    .slideshow-container img,
+    .hero-slider img,
+    .home-slideshow img,
+    .slide-image,
+    [class*="slide"] img {
+        width: 100%;
+        height: auto !important;
+        object-fit: cover;
+        max-height: 55vh;
+    }
+
+    /* Reduce padding/margin on mobile */
+    .hero-content,
+    .slide-content,
+    .hero-text,
+    .slide-text {
+        padding: 1.5rem !important;
+        margin-top: 0 !important;
+    }
+
+    /* Smaller heading text */
+    .hero-content h1,
+    .slide-content h1,
+    .hero-text h1,
+    .slide-text h1,
+    .hero-section h1 {
+        font-size: 1.8rem !important;
+        line-height: 1.3 !important;
+    }
+
+    /* Smaller subheading */
+    .hero-content p,
+    .slide-content p,
+    .hero-text p,
+    .slide-text p {
+        font-size: 0.9rem !important;
+    }
+
+    /* Adjust buttons */
+    .hero-content .btn,
+    .slide-content .btn {
+        padding: 0.5rem 1rem !important;
+        font-size: 0.8rem !important;
+    }
+
+    /* Reduce slide height */
+    .swiper-slide,
+    .slide-item,
+    .hero-item {
+        height: auto !important;
+        min-height: 300px;
+    }
+
+    /* Fix for any fixed height containers */
+    [class*="slider"],
+    [class*="carousel"] {
+        height: auto !important;
+        min-height: 280px;
+    }
+}
+
+/* For very small screens (phones under 480px) */
+@media (max-width: 480px) {
+    .hero-section,
+    .slideshow-container {
+        max-height: 50vh !important;
+    }
+
+    .hero-section img,
+    .slideshow-container img {
+        max-height: 45vh;
+    }
+
+    .hero-content h1,
+    .slide-content h1 {
+        font-size: 1.5rem !important;
+    }
+
+    .hero-content p,
+    .slide-content p {
+        font-size: 0.8rem !important;
+    }
+
+    .hero-content .btn,
+    .slide-content .btn {
+        padding: 0.4rem 0.8rem !important;
+        font-size: 0.75rem !important;
+    }
+
+    .swiper-slide,
+    .slide-item {
+        min-height: 250px;
+    }
+}
+
+/* For landscape orientation on mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    .hero-section,
+    .slideshow-container {
+        max-height: 85vh !important;
+    }
+
+    .hero-section img,
+    .slideshow-container img {
+        max-height: 80vh;
+        object-fit: cover;
+    }
+
+    .hero-content,
+    .slide-content {
+        padding: 1rem !important;
+    }
+}
+
+/* If you're using Swiper slider library */
+@media (max-width: 768px) {
+    .swiper {
+        height: auto !important;
+    }
+
+    .swiper-wrapper {
+        height: auto !important;
+    }
+
+    .swiper-slide {
+        height: auto !important;
+    }
+
+    .swiper-pagination {
+        bottom: 10px !important;
+    }
+
+    .swiper-button-next,
+    .swiper-button-prev {
+        width: 30px !important;
+        height: 30px !important;
+        transform: scale(0.7);
+    }
+}
+
+/* Target welcome section specifically */
+.welcome-section,
+.hero-banner,
+[class*="welcome"] {
+    min-height: auto;
+}
+
+@media (max-width: 768px) {
+    .welcome-section,
+    .hero-banner {
+        padding: 2rem 0 !important;
+    }
+
+    .welcome-section h1,
+    .hero-banner h1 {
+        font-size: 1.8rem !important;
+    }
+
+    .welcome-section p,
+    .hero-banner p {
+        font-size: 0.9rem !important;
+    }
+}
+
+/* ============================================================
+   RESPONSIVE (Original)
+   ============================================================ */
+
+@media (max-width: 768px){
   .section{padding:4rem 0}
   .form-row{grid-template-columns:1fr}
   .form-row .flex-2{grid-column:span 1}
