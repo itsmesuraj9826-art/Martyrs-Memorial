@@ -141,6 +141,19 @@
       <button class="sidebar-toggle" id="sidebarToggle">☰</button>
       <div class="header-title">{% block page_title %}Dashboard{% endblock %}</div>
       <div class="header-actions">
+
+        <!-- NOTIFICATION BELL -->
+        <a href="{{ url_for('admin.notifications') }}" class="nav-notification" title="Notifications">
+          🔔
+          {% set unread = unread_count() %}
+          {% if unread and unread > 0 %}
+          <span class="badge">{{ unread if unread < 100 else '99+' }}</span>
+          {% else %}
+          <span class="badge">0</span>
+          {% endif %}
+        </a>
+
+        <!-- User Profile -->
         <a href="{{ url_for('admin.profile') }}" class="header-user">
           <div class="header-avatar">{{ current_user.full_name[0] }}</div>
           <span>{{ current_user.full_name }}</span>
@@ -163,7 +176,37 @@
     </div>
   </div>
 </div>
+
 <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+<script>
+  // Sidebar toggle functionality
+  const sidebar = document.getElementById('sidebar');
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  const sidebarClose = document.getElementById('sidebarClose');
+
+  if (sidebarToggle) {
+    sidebarToggle.addEventListener('click', () => {
+      sidebar.classList.add('open');
+    });
+  }
+
+  if (sidebarClose) {
+    sidebarClose.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+    });
+  }
+
+  // Close sidebar when clicking outside on mobile
+  document.addEventListener('click', (e) => {
+    if (window.innerWidth <= 1024) {
+      if (sidebar && sidebar.classList.contains('open')) {
+        if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
+          sidebar.classList.remove('open');
+        }
+      }
+    }
+  });
+</script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>

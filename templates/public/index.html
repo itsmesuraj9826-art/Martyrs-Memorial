@@ -263,7 +263,7 @@
 </section>
 {% endif %}
 
-<!-- ═══════ TESTIMONIALS ═══════ -->
+<!-- ═══════ TESTIMONIALS - FIXED VERSION ═══════ -->
 {% if testimonials %}
 <section class="section testimonials-section">
   <div class="container">
@@ -272,18 +272,35 @@
       <h2>What Our Community Says</h2>
       <p>Hear from the parents, alumni, and students who call {{ school_name }} home.</p>
     </div>
-    <div class="testimonials-slider" data-animate="fadeInUp">
+
+    <!-- Testimonials Grid - Fixed layout -->
+    <div class="testimonials-grid" data-animate="fadeInUp">
       {% for t in testimonials %}
       <div class="testimonial-card" data-delay="{{ loop.index }}">
-        <div class="testimonial-stars">{{ '★' * (t.rating or 5) }}{{ '☆' * (5 - (t.rating or 5)) }}</div>
+        <!-- Quote icon -->
+        <div class="testimonial-quote">"</div>
+
+        <!-- Rating stars -->
+        <div class="testimonial-rating">
+          {% for i in range(t.rating or 5) %}
+          <span class="star">★</span>
+          {% endfor %}
+          {% for i in range(5 - (t.rating or 5)) %}
+          <span class="star-empty">☆</span>
+          {% endfor %}
+        </div>
+
+        <!-- Testimonial text -->
         <p class="testimonial-text">"{{ t.content }}"</p>
+
+        <!-- Author section - INSIDE THE CARD (FIXED) -->
         <div class="testimonial-author">
           {% if t.avatar %}
           <img src="{{ t.avatar }}" alt="{{ t.name }}" class="testimonial-avatar">
           {% else %}
-          <div class="avatar-placeholder">{{ t.name[0] }}</div>
+          <div class="testimonial-avatar-placeholder">{{ t.name[0] }}</div>
           {% endif %}
-          <div>
+          <div class="testimonial-author-info">
             <strong class="testimonial-name">{{ t.name }}</strong>
             {% if t.role %}<span class="testimonial-role">{{ t.role }}</span>{% endif %}
           </div>
