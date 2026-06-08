@@ -59,7 +59,7 @@ from wtforms.validators import (DataRequired, Length, Email, Optional,
                                 EqualTo, NumberRange)
 from PIL import Image
 
-# Helper function to get current UTC datetime (timezone-aware)
+
 def utc_now():
     """Return current UTC datetime with timezone awareness."""
     return datetime.now(timezone.utc)
@@ -70,38 +70,32 @@ def utc_now():
 # ─────────────────────────────────────────────
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-# ── Cloudinary configuration ─────────────────────────────────────────────────
+# ── Cloudinary configuration ──────────────────────────────────────────────────
 CLOUDINARY_CLOUD_NAME = os.environ.get('CLOUDINARY_CLOUD_NAME')
-CLOUDINARY_API_KEY = os.environ.get('CLOUDINARY_API_KEY')
+CLOUDINARY_API_KEY    = os.environ.get('CLOUDINARY_API_KEY')
 CLOUDINARY_API_SECRET = os.environ.get('CLOUDINARY_API_SECRET')
 
-# Initialize Cloudinary if credentials exist
 CLOUDINARY_ENABLED = all([CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET])
 
 if CLOUDINARY_ENABLED:
     cloudinary.config(
         cloud_name=CLOUDINARY_CLOUD_NAME,
         api_key=CLOUDINARY_API_KEY,
-        api_secret=CLOUDINARY_API_SECRET
+        api_secret=CLOUDINARY_API_SECRET,
     )
     print("✓ Cloudinary configured successfully")
 else:
     print("⚠ Cloudinary not configured — using local file storage")
     print("  Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET in .env")
 
-# ── MySQL connection ──────────────────────────────────────────────────────────
-# Edit these values to match your MySQL Workbench setup.
-# TIP: If your password has special characters (@ # % etc.) just set it
-#      here as-is — quote_plus() handles URL-encoding automatically.
+# ── Database ──────────────────────────────────────────────────────────────────
 DB_USER     = os.environ.get('DB_USER',     'root')
 DB_PASSWORD = os.environ.get('DB_PASSWORD', 'suraj@123')
 DB_HOST     = os.environ.get('DB_HOST',     'localhost')
 DB_NAME     = os.environ.get('DB_NAME',     'school_website')
 
-# quote_plus safely encodes special characters in credentials
 _raw_url = os.environ.get('DATABASE_URL')
 if _raw_url:
-    # Render gives postgres:// but SQLAlchemy needs postgresql+psycopg://
     if _raw_url.startswith('postgres://'):
         _raw_url = _raw_url.replace('postgres://', 'postgresql+psycopg://', 1)
     elif _raw_url.startswith('postgresql://') and 'psycopg' not in _raw_url:
@@ -112,101 +106,92 @@ else:
         quote_plus(DB_USER), quote_plus(DB_PASSWORD), DB_HOST, DB_NAME
     )
 
-UPLOAD_FOLDER        = os.path.join(basedir, 'static', 'uploads')
-ALLOWED_IMAGE_EXTS   = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
-ALLOWED_DOC_EXTS     = {'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip'}
+UPLOAD_FOLDER      = os.path.join(basedir, 'static', 'uploads')
+ALLOWED_IMAGE_EXTS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+ALLOWED_DOC_EXTS   = {'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip'}
 
 SCHOOL_NAME    = os.environ.get('SCHOOL_NAME',    "Martyrs' Memorial +2")
 SCHOOL_TAGLINE = os.environ.get('SCHOOL_TAGLINE', 'Biratnagar-10, College Road')
 
-
-# ── Email (SMTP) configuration ────────────────────────────────────────────────
-# Uses Gmail by default. Set your credentials below or via environment variables.
+# ── Email ─────────────────────────────────────────────────────────────────────
 MAIL_SERVER_HOST  = os.environ.get('MAIL_SERVER',   'smtp.gmail.com')
-MAIL_SERVER_PORT  = int(os.environ.get('MAIL_PORT',  '587'))
+MAIL_SERVER_PORT  = int(os.environ.get('MAIL_PORT', '587'))
 MAIL_USE_TLS_VAL  = True
-MAIL_USERNAME_VAL = os.environ.get('MAIL_USERNAME', 'surajmehta9826@gmail.com')   # ← your Gmail address
-MAIL_PASSWORD_VAL = os.environ.get('MAIL_PASSWORD', 'akzynlwaajmdvxkg')   # ← Gmail App Password
-MAIL_RECEIVER     = os.environ.get('MAIL_RECEIVER', 'surajmehta9826@gmail.com')   # ← where to receive contact msgs
+MAIL_USERNAME_VAL = os.environ.get('MAIL_USERNAME', 'surajmehta9826@gmail.com')
+MAIL_PASSWORD_VAL = os.environ.get('MAIL_PASSWORD', 'akzynlwaajmdvxkg')
+MAIL_RECEIVER     = os.environ.get('MAIL_RECEIVER', 'surajmehta9826@gmail.com')
+
 
 # ─────────────────────────────────────────────
 # 2. FLASK APP + EXTENSIONS
 # ─────────────────────────────────────────────
 app = Flask(__name__)
 app.config.update(
-    SECRET_KEY                    = os.environ.get('SECRET_KEY', 'dev-secret-change-in-production'),
-    SQLALCHEMY_DATABASE_URI       = DATABASE_URL,
-    SQLALCHEMY_TRACK_MODIFICATIONS= False,
-    WTF_CSRF_ENABLED              = True,
-    WTF_CSRF_TIME_LIMIT           = 3600,
-    UPLOAD_FOLDER                 = UPLOAD_FOLDER,
-    MAX_CONTENT_LENGTH            = 16 * 1024 * 1024,   # 16 MB
-    ALLOWED_IMAGE_EXTENSIONS      = ALLOWED_IMAGE_EXTS,
-    ALLOWED_DOC_EXTENSIONS        = ALLOWED_DOC_EXTS,
-    PERMANENT_SESSION_LIFETIME    = timedelta(hours=2),
-    SESSION_COOKIE_HTTPONLY       = True,
-    SESSION_COOKIE_SAMESITE       = 'Lax',
-    POSTS_PER_PAGE                = 10,
-    SCHOOL_NAME                   = SCHOOL_NAME,
-    SCHOOL_TAGLINE                = SCHOOL_TAGLINE,
-    DEBUG                         = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true',
-    MAIL_SERVER                   = MAIL_SERVER_HOST,
-    MAIL_PORT                     = MAIL_SERVER_PORT,
-    MAIL_USE_TLS                  = MAIL_USE_TLS_VAL,
-    MAIL_USERNAME                 = MAIL_USERNAME_VAL,
-    MAIL_PASSWORD                 = MAIL_PASSWORD_VAL,
-    MAIL_DEFAULT_SENDER           = MAIL_USERNAME_VAL,
-    CLOUDINARY_ENABLED            = CLOUDINARY_ENABLED,
+    SECRET_KEY                     = os.environ.get('SECRET_KEY', 'dev-secret-change-in-production'),
+    SQLALCHEMY_DATABASE_URI        = DATABASE_URL,
+    SQLALCHEMY_TRACK_MODIFICATIONS = False,
+    WTF_CSRF_ENABLED               = True,
+    WTF_CSRF_TIME_LIMIT            = 3600,
+    UPLOAD_FOLDER                  = UPLOAD_FOLDER,
+    MAX_CONTENT_LENGTH             = 16 * 1024 * 1024,
+    ALLOWED_IMAGE_EXTENSIONS       = ALLOWED_IMAGE_EXTS,
+    ALLOWED_DOC_EXTENSIONS         = ALLOWED_DOC_EXTS,
+    PERMANENT_SESSION_LIFETIME     = timedelta(hours=2),
+    SESSION_COOKIE_HTTPONLY        = True,
+    SESSION_COOKIE_SAMESITE        = 'Lax',
+    POSTS_PER_PAGE                 = 10,
+    SCHOOL_NAME                    = SCHOOL_NAME,
+    SCHOOL_TAGLINE                 = SCHOOL_TAGLINE,
+    DEBUG                          = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true',
+    MAIL_SERVER                    = MAIL_SERVER_HOST,
+    MAIL_PORT                      = MAIL_SERVER_PORT,
+    MAIL_USE_TLS                   = MAIL_USE_TLS_VAL,
+    MAIL_USERNAME                  = MAIL_USERNAME_VAL,
+    MAIL_PASSWORD                  = MAIL_PASSWORD_VAL,
+    MAIL_DEFAULT_SENDER            = MAIL_USERNAME_VAL,
+    CLOUDINARY_ENABLED             = CLOUDINARY_ENABLED,
 )
 
-db           = SQLAlchemy(app)
-csrf         = CSRFProtect(app)
-mail         = Mail(app)
+db            = SQLAlchemy(app)
+csrf          = CSRFProtect(app)
+mail          = Mail(app)
 login_manager = LoginManager(app)
-login_manager.login_view         = 'auth.login'
-login_manager.login_message      = 'Please log in to access this page.'
+login_manager.login_view             = 'auth.login'
+login_manager.login_message          = 'Please log in to access this page.'
 login_manager.login_message_category = 'warning'
 
-# Ensure upload sub-directories exist (for fallback local storage)
+# Ensure local upload sub-directories exist
 for _sub in ('notices', 'events', 'gallery', 'downloads', 'blog', 'misc', 'board', 'toppers'):
     os.makedirs(os.path.join(UPLOAD_FOLDER, _sub), exist_ok=True)
 
 
 # ─────────────────────────────────────────────
-# 3. UTILITY FUNCTIONS (Cloudinary-aware)
+# 3. UTILITY FUNCTIONS
 # ─────────────────────────────────────────────
 
 def save_file(file_obj, subfolder, resize=None):
-    """
-    Save file to Cloudinary if configured, otherwise save locally.
-    Returns the file URL/path.
-    """
+    """Save to Cloudinary if configured, otherwise save locally. Returns URL/path."""
     if not file_obj or not file_obj.filename:
         return None
 
     if CLOUDINARY_ENABLED:
         try:
-            # Determine resource type
-            ext = file_obj.filename.rsplit('.', 1)[-1].lower() if '.' in file_obj.filename else ''
+            ext      = file_obj.filename.rsplit('.', 1)[-1].lower() if '.' in file_obj.filename else ''
             is_image = ext in ALLOWED_IMAGE_EXTS
 
             upload_options = {
-                'folder': f'school_website/{subfolder}',
-                'use_filename': True,
+                'folder':          f'school_website/{subfolder}',
+                'use_filename':    True,
                 'unique_filename': True,
             }
-
-            # Add image-specific transformations
             if is_image and resize:
                 upload_options['transformation'] = [
                     {'width': resize[0], 'height': resize[1], 'crop': 'limit'}
                 ]
-
-            upload_result = cloudinary.uploader.upload(file_obj, **upload_options)
-            return upload_result.get('secure_url')
+            result = cloudinary.uploader.upload(file_obj, **upload_options)
+            return result.get('secure_url')
         except Exception as e:
             app.logger.error(f"Cloudinary upload error: {e}")
-            # Fallback to local storage
             return _save_file_local(file_obj, subfolder, resize)
     else:
         return _save_file_local(file_obj, subfolder, resize)
@@ -214,12 +199,12 @@ def save_file(file_obj, subfolder, resize=None):
 
 def _save_file_local(file_obj, subfolder, resize=None):
     """Local file storage fallback."""
-    original = secure_filename(file_obj.filename)
-    ext = original.rsplit('.', 1)[-1].lower() if '.' in original else 'bin'
-    unique_name = f"{uuid.uuid4().hex}.{ext}"
-    dest_dir = os.path.join(app.config['UPLOAD_FOLDER'], subfolder)
+    original  = secure_filename(file_obj.filename)
+    ext       = original.rsplit('.', 1)[-1].lower() if '.' in original else 'bin'
+    unique    = f"{uuid.uuid4().hex}.{ext}"
+    dest_dir  = os.path.join(app.config['UPLOAD_FOLDER'], subfolder)
     os.makedirs(dest_dir, exist_ok=True)
-    dest_path = os.path.join(dest_dir, unique_name)
+    dest_path = os.path.join(dest_dir, unique)
     file_obj.save(dest_path)
 
     if resize and ext in app.config['ALLOWED_IMAGE_EXTENSIONS']:
@@ -230,40 +215,31 @@ def _save_file_local(file_obj, subfolder, resize=None):
         except Exception:
             pass
 
-    # Return relative path for local storage
-    return f'/static/uploads/{subfolder}/{unique_name}'
+    return f'/static/uploads/{subfolder}/{unique}'
 
 
 def delete_file(file_path, subfolder):
-    """
-    Delete file from Cloudinary (if URL) or local storage.
-    """
+    """Delete from Cloudinary (if URL) or local storage."""
     if not file_path:
         return
 
-    # Handle Cloudinary URLs
     if CLOUDINARY_ENABLED and file_path.startswith('http'):
         try:
-            # Extract public_id from Cloudinary URL
-            # Format: https://res.cloudinary.com/cloud_name/image/upload/v1234567890/folder/filename.jpg
             parts = file_path.split('/')
-            # Find the upload version part
             for i, part in enumerate(parts):
                 if part in ['upload', 'image', 'video', 'raw'] and i + 1 < len(parts):
-                    # Skip version number if present (starts with v)
-                    start_idx = i + 1
-                    if parts[start_idx].startswith('v') and parts[start_idx][1:].isdigit():
-                        start_idx += 1
-                    public_id = '/'.join(parts[start_idx:]).split('.')[0]
+                    start = i + 1
+                    if parts[start].startswith('v') and parts[start][1:].isdigit():
+                        start += 1
+                    public_id = '/'.join(parts[start:]).split('.')[0]
                     cloudinary.uploader.destroy(public_id)
                     return
         except Exception as e:
             app.logger.error(f"Cloudinary delete error: {e}")
 
-    # Handle local files
     if file_path and not file_path.startswith('http'):
         filename = os.path.basename(file_path)
-        path = os.path.join(app.config['UPLOAD_FOLDER'], subfolder, filename)
+        path     = os.path.join(app.config['UPLOAD_FOLDER'], subfolder, filename)
         if os.path.exists(path):
             os.remove(path)
 
@@ -288,11 +264,11 @@ _ALLOWED_TAGS = [
     'thead', 'tr', 'u', 'ul',
 ]
 _ALLOWED_ATTRS = {
-    '*': ['class', 'style'],
-    'a': ['href', 'title', 'target', 'rel'],
+    '*':   ['class', 'style'],
+    'a':   ['href', 'title', 'target', 'rel'],
     'img': ['src', 'alt', 'title', 'width', 'height'],
-    'td': ['colspan', 'rowspan'],
-    'th': ['colspan', 'rowspan'],
+    'td':  ['colspan', 'rowspan'],
+    'th':  ['colspan', 'rowspan'],
 }
 
 
@@ -307,17 +283,17 @@ def sanitize_html(content):
 # ─────────────────────────────────────────────
 
 class Admin(UserMixin, db.Model):
-    __tablename__ = 'admins'
-    id            = db.Column(db.Integer, primary_key=True)
-    username      = db.Column(db.String(80),  unique=True, nullable=False, index=True)
-    email         = db.Column(db.String(120), unique=True, nullable=False, index=True)
-    password_hash = db.Column(db.String(255), nullable=False)
-    full_name     = db.Column(db.String(150), nullable=False)
-    is_active          = db.Column(db.Boolean, default=True, nullable=False)
-    created_at         = db.Column(db.DateTime, default=utc_now)
-    last_login         = db.Column(db.DateTime, nullable=True)
+    __tablename__      = 'admins'
+    id                 = db.Column(db.Integer,     primary_key=True)
+    username           = db.Column(db.String(80),  unique=True, nullable=False, index=True)
+    email              = db.Column(db.String(120), unique=True, nullable=False, index=True)
+    password_hash      = db.Column(db.String(255), nullable=False)
+    full_name          = db.Column(db.String(150), nullable=False)
+    is_active          = db.Column(db.Boolean,     default=True, nullable=False)
+    created_at         = db.Column(db.DateTime,    default=utc_now)
+    last_login         = db.Column(db.DateTime,    nullable=True)
     reset_token        = db.Column(db.String(100), nullable=True)
-    reset_token_expiry = db.Column(db.DateTime, nullable=True)
+    reset_token_expiry = db.Column(db.DateTime,    nullable=True)
 
     def set_password(self, password):
         from werkzeug.security import generate_password_hash
@@ -335,16 +311,16 @@ def load_user(user_id):
 
 class Notice(db.Model):
     __tablename__ = 'notices'
-    id           = db.Column(db.Integer, primary_key=True)
-    title        = db.Column(db.String(255), nullable=False)
-    content      = db.Column(db.Text,        nullable=False)
-    category     = db.Column(db.String(50),  default='general')
-    is_pinned    = db.Column(db.Boolean,     default=False)
-    is_published = db.Column(db.Boolean,     default=True)
-    attachment   = db.Column(db.String(500), nullable=True)
-    expiry_date  = db.Column(db.Date,        nullable=True)
-    created_at   = db.Column(db.DateTime,    default=utc_now, index=True)
-    updated_at   = db.Column(db.DateTime,    default=utc_now, onupdate=utc_now)
+    id            = db.Column(db.Integer,     primary_key=True)
+    title         = db.Column(db.String(255), nullable=False)
+    content       = db.Column(db.Text,        nullable=False)
+    category      = db.Column(db.String(50),  default='general')
+    is_pinned     = db.Column(db.Boolean,     default=False)
+    is_published  = db.Column(db.Boolean,     default=True)
+    attachment    = db.Column(db.String(500), nullable=True)
+    expiry_date   = db.Column(db.Date,        nullable=True)
+    created_at    = db.Column(db.DateTime,    default=utc_now, index=True)
+    updated_at    = db.Column(db.DateTime,    default=utc_now, onupdate=utc_now)
 
     def is_expired(self):
         if self.expiry_date is None:
@@ -354,16 +330,16 @@ class Notice(db.Model):
 
 class Event(db.Model):
     __tablename__ = 'events'
-    id           = db.Column(db.Integer,  primary_key=True)
-    title        = db.Column(db.String(255), nullable=False)
-    description  = db.Column(db.Text,        nullable=False)
-    location     = db.Column(db.String(255), nullable=True)
-    event_date   = db.Column(db.DateTime,    nullable=False, index=True)
-    end_date     = db.Column(db.DateTime,    nullable=True)
-    banner_image = db.Column(db.String(500), nullable=True)
-    is_published = db.Column(db.Boolean,     default=True)
-    created_at   = db.Column(db.DateTime,    default=utc_now)
-    updated_at   = db.Column(db.DateTime,    default=utc_now, onupdate=utc_now)
+    id            = db.Column(db.Integer,     primary_key=True)
+    title         = db.Column(db.String(255), nullable=False)
+    description   = db.Column(db.Text,        nullable=False)
+    location      = db.Column(db.String(255), nullable=True)
+    event_date    = db.Column(db.DateTime,    nullable=False, index=True)
+    end_date      = db.Column(db.DateTime,    nullable=True)
+    banner_image  = db.Column(db.String(500), nullable=True)
+    is_published  = db.Column(db.Boolean,     default=True)
+    created_at    = db.Column(db.DateTime,    default=utc_now)
+    updated_at    = db.Column(db.DateTime,    default=utc_now, onupdate=utc_now)
 
     def is_upcoming(self):
         return self.event_date >= utc_now()
@@ -371,14 +347,14 @@ class Event(db.Model):
 
 class GalleryAlbum(db.Model):
     __tablename__ = 'gallery_albums'
-    id           = db.Column(db.Integer, primary_key=True)
-    name         = db.Column(db.String(150), nullable=False)
-    description  = db.Column(db.Text,        nullable=True)
-    cover_image  = db.Column(db.String(500), nullable=True)
-    is_published = db.Column(db.Boolean,     default=True)
-    created_at   = db.Column(db.DateTime,    default=utc_now)
-    images       = db.relationship('GalleryImage', backref='album', lazy='dynamic',
-                                   cascade='all, delete-orphan')
+    id            = db.Column(db.Integer,     primary_key=True)
+    name          = db.Column(db.String(150), nullable=False)
+    description   = db.Column(db.Text,        nullable=True)
+    cover_image   = db.Column(db.String(500), nullable=True)
+    is_published  = db.Column(db.Boolean,     default=True)
+    created_at    = db.Column(db.DateTime,    default=utc_now)
+    images        = db.relationship('GalleryImage', backref='album', lazy='dynamic',
+                                    cascade='all, delete-orphan')
 
     def image_count(self):
         return self.images.count()
@@ -386,18 +362,18 @@ class GalleryAlbum(db.Model):
 
 class GalleryImage(db.Model):
     __tablename__ = 'gallery_images'
-    id         = db.Column(db.Integer, primary_key=True)
-    album_id   = db.Column(db.Integer, db.ForeignKey('gallery_albums.id', ondelete='CASCADE'),
-                           nullable=False, index=True)
-    filename   = db.Column(db.String(500), nullable=False)
-    caption    = db.Column(db.String(255), nullable=True)
-    sort_order = db.Column(db.Integer,     default=0)
-    created_at = db.Column(db.DateTime,    default=utc_now)
+    id            = db.Column(db.Integer,     primary_key=True)
+    album_id      = db.Column(db.Integer,     db.ForeignKey('gallery_albums.id', ondelete='CASCADE'),
+                              nullable=False,  index=True)
+    filename      = db.Column(db.String(500), nullable=False)
+    caption       = db.Column(db.String(255), nullable=True)
+    sort_order    = db.Column(db.Integer,     default=0)
+    created_at    = db.Column(db.DateTime,    default=utc_now)
 
 
 class BlogPost(db.Model):
-    __tablename__ = 'blog_posts'
-    id             = db.Column(db.Integer,  primary_key=True)
+    __tablename__  = 'blog_posts'
+    id             = db.Column(db.Integer,     primary_key=True)
     title          = db.Column(db.String(255), nullable=False)
     slug           = db.Column(db.String(255), unique=True, nullable=False, index=True)
     content        = db.Column(db.Text,        nullable=False)
@@ -413,19 +389,19 @@ class BlogPost(db.Model):
 
 class ContactMessage(db.Model):
     __tablename__ = 'contact_messages'
-    id         = db.Column(db.Integer, primary_key=True)
-    name       = db.Column(db.String(150), nullable=False)
-    email      = db.Column(db.String(150), nullable=False)
-    phone      = db.Column(db.String(20),  nullable=True)
-    subject    = db.Column(db.String(255), nullable=False)
-    message    = db.Column(db.Text,        nullable=False)
-    is_read    = db.Column(db.Boolean,     default=False)
-    created_at = db.Column(db.DateTime,    default=utc_now, index=True)
+    id            = db.Column(db.Integer,     primary_key=True)
+    name          = db.Column(db.String(150), nullable=False)
+    email         = db.Column(db.String(150), nullable=False)
+    phone         = db.Column(db.String(20),  nullable=True)
+    subject       = db.Column(db.String(255), nullable=False)
+    message       = db.Column(db.Text,        nullable=False)
+    is_read       = db.Column(db.Boolean,     default=False)
+    created_at    = db.Column(db.DateTime,    default=utc_now, index=True)
 
 
 class Download(db.Model):
-    __tablename__ = 'downloads'
-    id             = db.Column(db.Integer, primary_key=True)
+    __tablename__  = 'downloads'
+    id             = db.Column(db.Integer,     primary_key=True)
     title          = db.Column(db.String(255), nullable=False)
     description    = db.Column(db.Text,        nullable=True)
     filename       = db.Column(db.String(500), nullable=False)
@@ -448,74 +424,74 @@ class Download(db.Model):
 
 class HomepageContent(db.Model):
     __tablename__ = 'homepage_content'
-    id         = db.Column(db.Integer, primary_key=True)
-    section    = db.Column(db.String(80), unique=True, nullable=False)
-    title      = db.Column(db.String(255), nullable=True)
-    subtitle   = db.Column(db.String(255), nullable=True)
-    content    = db.Column(db.Text,        nullable=True)
-    image      = db.Column(db.String(500), nullable=True)
-    extra_data = db.Column(db.JSON,        nullable=True)
-    updated_at = db.Column(db.DateTime,    default=utc_now, onupdate=utc_now)
+    id            = db.Column(db.Integer,     primary_key=True)
+    section       = db.Column(db.String(80),  unique=True, nullable=False)
+    title         = db.Column(db.String(255), nullable=True)
+    subtitle      = db.Column(db.String(255), nullable=True)
+    content       = db.Column(db.Text,        nullable=True)
+    image         = db.Column(db.String(500), nullable=True)
+    extra_data    = db.Column(db.JSON,        nullable=True)
+    updated_at    = db.Column(db.DateTime,    default=utc_now, onupdate=utc_now)
 
 
 class Slide(db.Model):
     __tablename__ = 'slides'
-    id          = db.Column(db.Integer, primary_key=True)
-    title       = db.Column(db.String(255), nullable=True)
-    subtitle    = db.Column(db.String(255), nullable=True)
-    image       = db.Column(db.String(500), nullable=False)
-    btn_text    = db.Column(db.String(80),  nullable=True, default='Learn More')
-    btn_url     = db.Column(db.String(255), nullable=True)
-    sort_order  = db.Column(db.Integer, default=0)
-    is_active   = db.Column(db.Boolean, default=True)
-    created_at  = db.Column(db.DateTime, default=utc_now)
+    id            = db.Column(db.Integer,     primary_key=True)
+    title         = db.Column(db.String(255), nullable=True)
+    subtitle      = db.Column(db.String(255), nullable=True)
+    image         = db.Column(db.String(500), nullable=False)
+    btn_text      = db.Column(db.String(80),  nullable=True, default='Learn More')
+    btn_url       = db.Column(db.String(255), nullable=True)
+    sort_order    = db.Column(db.Integer,     default=0)
+    is_active     = db.Column(db.Boolean,     default=True)
+    created_at    = db.Column(db.DateTime,    default=utc_now)
 
 
 class BoardMember(db.Model):
     __tablename__ = 'board_members'
-    id           = db.Column(db.Integer,     primary_key=True)
-    name         = db.Column(db.String(150), nullable=False)
-    position     = db.Column(db.String(150), nullable=False)
-    category     = db.Column(db.String(80),  default='board')
-    bio          = db.Column(db.Text,        nullable=True)
-    photo        = db.Column(db.String(500), nullable=True)
-    email        = db.Column(db.String(120), nullable=True)
-    phone        = db.Column(db.String(30),  nullable=True)
-    is_published = db.Column(db.Boolean,     default=True)
-    sort_order   = db.Column(db.Integer,     default=0)
-    created_at   = db.Column(db.DateTime,    default=utc_now)
-    updated_at   = db.Column(db.DateTime,    default=utc_now, onupdate=utc_now)
+    id            = db.Column(db.Integer,     primary_key=True)
+    name          = db.Column(db.String(150), nullable=False)
+    position      = db.Column(db.String(150), nullable=False)
+    category      = db.Column(db.String(80),  default='board')
+    bio           = db.Column(db.Text,        nullable=True)
+    photo         = db.Column(db.String(500), nullable=True)
+    email         = db.Column(db.String(120), nullable=True)
+    phone         = db.Column(db.String(30),  nullable=True)
+    is_published  = db.Column(db.Boolean,     default=True)
+    sort_order    = db.Column(db.Integer,     default=0)
+    created_at    = db.Column(db.DateTime,    default=utc_now)
+    updated_at    = db.Column(db.DateTime,    default=utc_now, onupdate=utc_now)
 
 
 class Testimonial(db.Model):
     __tablename__ = 'testimonials'
-    id           = db.Column(db.Integer, primary_key=True)
-    name         = db.Column(db.String(150), nullable=False)
-    role         = db.Column(db.String(150), nullable=True)
-    content      = db.Column(db.Text,        nullable=False)
-    avatar       = db.Column(db.String(500), nullable=True)
-    rating       = db.Column(db.Integer,     default=5)
-    is_published = db.Column(db.Boolean,     default=True)
-    sort_order   = db.Column(db.Integer,     default=0)
-    created_at   = db.Column(db.DateTime,    default=utc_now)
+    id            = db.Column(db.Integer,     primary_key=True)
+    name          = db.Column(db.String(150), nullable=False)
+    role          = db.Column(db.String(150), nullable=True)
+    content       = db.Column(db.Text,        nullable=False)
+    avatar        = db.Column(db.String(500), nullable=True)
+    rating        = db.Column(db.Integer,     default=5)
+    is_published  = db.Column(db.Boolean,     default=True)
+    sort_order    = db.Column(db.Integer,     default=0)
+    created_at    = db.Column(db.DateTime,    default=utc_now)
 
 
 class Topper(db.Model):
     __tablename__ = 'toppers'
-    id           = db.Column(db.Integer,     primary_key=True)
-    name         = db.Column(db.String(150), nullable=False)
-    stream       = db.Column(db.String(50),  nullable=False)
-    percentage   = db.Column(db.Numeric(5,2),nullable=True)
-    year         = db.Column(db.String(10),  nullable=False,   default='2024')
-    photo        = db.Column(db.String(500), nullable=True)
-    rank         = db.Column(db.Integer,     default=1)
-    is_published = db.Column(db.Boolean,     default=True)
-    sort_order   = db.Column(db.Integer,     default=0)
-    created_at   = db.Column(db.DateTime,    default=utc_now)
+    id            = db.Column(db.Integer,        primary_key=True)
+    name          = db.Column(db.String(150),    nullable=False)
+    stream        = db.Column(db.String(50),     nullable=False)
+    percentage    = db.Column(db.Numeric(5, 2),  nullable=True)
+    year          = db.Column(db.String(10),     nullable=False, default='2024')
+    photo         = db.Column(db.String(500),    nullable=True)
+    rank          = db.Column(db.Integer,        default=1)
+    is_published  = db.Column(db.Boolean,        default=True)
+    sort_order    = db.Column(db.Integer,        default=0)
+    created_at    = db.Column(db.DateTime,       default=utc_now)
 
 
 # ─────────────────────────────────────────────
-# 5. FORMS (Same as original)
+# 5. FORMS
 # ─────────────────────────────────────────────
 
 class LoginForm(FlaskForm):
@@ -536,48 +512,49 @@ class ChangePasswordForm(FlaskForm):
 
 
 class ContactForm(FlaskForm):
-    name      = StringField('Your Name',         validators=[DataRequired(), Length(1, 150)])
-    email     = StringField('Email Address',     validators=[DataRequired(), Email()])
-    phone     = StringField('Phone Number',      validators=[Optional(), Length(0, 20)])
-    stream    = SelectField('Programme / Stream', validators=[Optional()], choices=[
+    name    = StringField('Your Name',         validators=[DataRequired(), Length(1, 150)])
+    email   = StringField('Email Address',     validators=[DataRequired(), Email()])
+    phone   = StringField('Phone Number',      validators=[Optional(), Length(0, 20)])
+    stream  = SelectField('Programme / Stream', validators=[Optional()], choices=[
         ('', '— Select Programme (optional) —'),
-        ('science_bio',   'Science (With Biology)'),
-        ('science_math',  'Science (Without Biology / Math)'),
-        ('management',    'Management'),
-        ('law',           'Law'),
-        ('arts',          'Arts / Humanities'),
-        ('other',         'Other / General Enquiry'),
+        ('science_bio',  'Science (With Biology)'),
+        ('science_math', 'Science (Without Biology / Math)'),
+        ('management',   'Management'),
+        ('law',          'Law'),
+        ('arts',         'Arts / Humanities'),
+        ('other',        'Other / General Enquiry'),
     ])
-    subject   = StringField('Subject',           validators=[DataRequired(), Length(1, 255)])
-    message   = TextAreaField('Message',         validators=[DataRequired(), Length(min=10)])
-    submit    = SubmitField('Send Message')
+    subject = StringField('Subject',   validators=[DataRequired(), Length(1, 255)])
+    message = TextAreaField('Message', validators=[DataRequired(), Length(min=10)])
+    submit  = SubmitField('Send Message')
 
 
 class NoticeForm(FlaskForm):
-    title       = StringField('Title',    validators=[DataRequired(), Length(1, 255)])
-    content     = TextAreaField('Content', validators=[DataRequired()])
-    category    = SelectField('Category', choices=[
-        ('general','General'), ('academic','Academic'), ('exam','Examination'),
-        ('event','Event'), ('urgent','Urgent')])
-    is_pinned   = BooleanField('Pin this notice')
-    is_published= BooleanField('Publish', default=True)
-    expiry_date = DateField('Expiry Date', validators=[Optional()], format='%Y-%m-%d')
-    attachment  = FileField('Attachment', validators=[
+    title        = StringField('Title',   validators=[DataRequired(), Length(1, 255)])
+    content      = TextAreaField('Content', validators=[DataRequired()])
+    category     = SelectField('Category', choices=[
+        ('general', 'General'), ('academic', 'Academic'), ('exam', 'Examination'),
+        ('event', 'Event'), ('urgent', 'Urgent')])
+    is_pinned    = BooleanField('Pin this notice')
+    is_published = BooleanField('Publish', default=True)
+    expiry_date  = DateField('Expiry Date', validators=[Optional()], format='%Y-%m-%d')
+    attachment   = FileField('Attachment', validators=[
         Optional(),
-        FileAllowed(['pdf','doc','docx','xls','xlsx','png','jpg','jpeg'], 'Allowed: PDF, Word, Excel, Images')])
+        FileAllowed(['pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg', 'jpeg'],
+                    'Allowed: PDF, Word, Excel, Images')])
     submit = SubmitField('Save Notice')
 
 
 class EventForm(FlaskForm):
-    title        = StringField('Title',      validators=[DataRequired(), Length(1, 255)])
+    title        = StringField('Title',       validators=[DataRequired(), Length(1, 255)])
     description  = TextAreaField('Description', validators=[DataRequired()])
-    location     = StringField('Location',   validators=[Optional(), Length(0, 255)])
+    location     = StringField('Location',    validators=[Optional(), Length(0, 255)])
     event_date   = DateTimeLocalField('Event Date & Time', format='%Y-%m-%dT%H:%M',
                                       validators=[DataRequired()])
     end_date     = DateTimeLocalField('End Date & Time (optional)', format='%Y-%m-%dT%H:%M',
                                       validators=[Optional()])
     banner_image = FileField('Banner Image', validators=[
-        Optional(), FileAllowed(['png','jpg','jpeg','gif','webp'], 'Images only.')])
+        Optional(), FileAllowed(['png', 'jpg', 'jpeg', 'gif', 'webp'], 'Images only.')])
     is_published = BooleanField('Publish', default=True)
     submit       = SubmitField('Save Event')
 
@@ -599,10 +576,10 @@ class BlogPostForm(FlaskForm):
     content        = TextAreaField('Content', validators=[DataRequired()])
     excerpt        = TextAreaField('Excerpt (Short Summary)', validators=[Optional(), Length(0, 500)])
     category       = SelectField('Category', choices=[
-        ('news','School News'), ('announcement','Announcement'), ('achievement','Achievement'),
-        ('sports','Sports'), ('cultural','Cultural')])
+        ('news', 'School News'), ('announcement', 'Announcement'),
+        ('achievement', 'Achievement'), ('sports', 'Sports'), ('cultural', 'Cultural')])
     featured_image = FileField('Featured Image', validators=[
-        Optional(), FileAllowed(['png','jpg','jpeg','gif','webp'], 'Images only.')])
+        Optional(), FileAllowed(['png', 'jpg', 'jpeg', 'gif', 'webp'], 'Images only.')])
     is_published   = BooleanField('Publish', default=True)
     is_featured    = BooleanField('Feature on Homepage')
     submit         = SubmitField('Save Post')
@@ -612,32 +589,32 @@ class DownloadForm(FlaskForm):
     title        = StringField('Title',       validators=[DataRequired(), Length(1, 255)])
     description  = TextAreaField('Description', validators=[Optional()])
     category     = SelectField('Category', choices=[
-        ('admission','Admission Forms'), ('syllabus','Syllabus'),
-        ('calendar','Academic Calendar'), ('brochure','Brochure'),
-        ('notice','Notice'), ('general','General')])
+        ('admission', 'Admission Forms'), ('syllabus', 'Syllabus'),
+        ('calendar', 'Academic Calendar'), ('brochure', 'Brochure'),
+        ('notice', 'Notice'), ('general', 'General')])
     file         = FileField('File', validators=[
         DataRequired(),
-        FileAllowed(['pdf','doc','docx','xls','xlsx','ppt','pptx','zip'],
+        FileAllowed(['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip'],
                     'Allowed: PDF, Word, Excel, PowerPoint, ZIP')])
     is_published = BooleanField('Publish', default=True)
     submit       = SubmitField('Upload File')
 
 
 class HomepageHeroForm(FlaskForm):
-    title    = StringField('Hero Title',       validators=[DataRequired()])
-    subtitle = StringField('Hero Subtitle',    validators=[Optional()])
-    content  = TextAreaField('Hero Description', validators=[Optional()])
+    title    = StringField('Hero Title',         validators=[DataRequired()])
+    subtitle = StringField('Hero Subtitle',       validators=[Optional()])
+    content  = TextAreaField('Hero Description',  validators=[Optional()])
     image    = FileField('Hero Background Image', validators=[
-        Optional(), FileAllowed(['png','jpg','jpeg','webp'], 'Images only.')])
+        Optional(), FileAllowed(['png', 'jpg', 'jpeg', 'webp'], 'Images only.')])
     submit   = SubmitField('Save')
 
 
 class AnnouncementPopupForm(FlaskForm):
-    title    = StringField('Title',          validators=[Optional(), Length(0, 255)])
-    subtitle = StringField('Subtitle/Badge', validators=[Optional(), Length(0, 255)])
-    content  = TextAreaField('Body Text',    validators=[Optional()])
-    image    = FileField('Popup Image',      validators=[
-        Optional(), FileAllowed(['png','jpg','jpeg','webp'], 'Images only.')])
+    title    = StringField('Title',           validators=[Optional(), Length(0, 255)])
+    subtitle = StringField('Subtitle/Badge',  validators=[Optional(), Length(0, 255)])
+    content  = TextAreaField('Body Text',     validators=[Optional()])
+    image    = FileField('Popup Image',       validators=[
+        Optional(), FileAllowed(['png', 'jpg', 'jpeg', 'webp'], 'Images only.')])
     submit   = SubmitField('Save Popup')
 
 
@@ -662,62 +639,62 @@ class ResetPasswordForm(FlaskForm):
 
 
 class SlideForm(FlaskForm):
-    title      = StringField('Slide Title',    validators=[Optional(), Length(0, 255)])
-    subtitle   = StringField('Subtitle',       validators=[Optional(), Length(0, 255)])
-    btn_text   = StringField('Button Label',   validators=[Optional(), Length(0, 80)], default='Learn More')
-    btn_url    = StringField('Button Link',    validators=[Optional(), Length(0, 255)])
-    sort_order = IntegerField('Sort Order',    validators=[Optional()], default=0)
-    is_active  = BooleanField('Active',        default=True)
+    title      = StringField('Slide Title',   validators=[Optional(), Length(0, 255)])
+    subtitle   = StringField('Subtitle',      validators=[Optional(), Length(0, 255)])
+    btn_text   = StringField('Button Label',  validators=[Optional(), Length(0, 80)], default='Learn More')
+    btn_url    = StringField('Button Link',   validators=[Optional(), Length(0, 255)])
+    sort_order = IntegerField('Sort Order',   validators=[Optional()], default=0)
+    is_active  = BooleanField('Active',       default=True)
     image      = FileField('Slide Image (landscape, 1920×700px recommended)', validators=[
-                    Optional(), FileAllowed(['png','jpg','jpeg','webp'], 'Images only.')])
+        Optional(), FileAllowed(['png', 'jpg', 'jpeg', 'webp'], 'Images only.')])
     submit     = SubmitField('Save Slide')
 
 
 class BoardMemberForm(FlaskForm):
-    name       = StringField('Full Name',      validators=[DataRequired(), Length(1, 150)])
-    position   = StringField('Position / Title', validators=[DataRequired(), Length(1, 150)])
-    category   = SelectField('Category', choices=[
-                    ('board',      'Board of Directors'),
-                    ('management', 'Management Committee'),
-                    ('faculty',    'Faculty / Staff'),
-                 ], default='board')
-    bio        = TextAreaField('Short Bio',    validators=[Optional()])
-    email      = StringField('Email',          validators=[Optional(), Email()])
-    phone      = StringField('Phone',          validators=[Optional(), Length(0, 30)])
-    sort_order = IntegerField('Sort Order',    validators=[Optional()], default=0)
-    is_published = BooleanField('Published',   default=True)
-    photo      = FileField('Photo', validators=[
-                    Optional(), FileAllowed(['png','jpg','jpeg','webp'], 'Images only.')])
-    submit     = SubmitField('Save Member')
+    name         = StringField('Full Name',         validators=[DataRequired(), Length(1, 150)])
+    position     = StringField('Position / Title',  validators=[DataRequired(), Length(1, 150)])
+    category     = SelectField('Category', choices=[
+        ('board',      'Board of Directors'),
+        ('management', 'Management Committee'),
+        ('faculty',    'Faculty / Staff'),
+    ], default='board')
+    bio          = TextAreaField('Short Bio',        validators=[Optional()])
+    email        = StringField('Email',              validators=[Optional(), Email()])
+    phone        = StringField('Phone',              validators=[Optional(), Length(0, 30)])
+    sort_order   = IntegerField('Sort Order',        validators=[Optional()], default=0)
+    is_published = BooleanField('Published',         default=True)
+    photo        = FileField('Photo', validators=[
+        Optional(), FileAllowed(['png', 'jpg', 'jpeg', 'webp'], 'Images only.')])
+    submit       = SubmitField('Save Member')
 
 
 class TestimonialForm(FlaskForm):
-    name    = StringField('Name',                  validators=[DataRequired()])
+    name    = StringField('Name',                       validators=[DataRequired()])
     role    = StringField('Role (e.g. Parent, Alumni)', validators=[Optional()])
-    content = TextAreaField('Testimonial',          validators=[DataRequired()])
+    content = TextAreaField('Testimonial',              validators=[DataRequired()])
     rating  = IntegerField('Rating (1-5)', validators=[Optional(), NumberRange(1, 5)], default=5)
     avatar  = FileField('Avatar Image', validators=[
-        Optional(), FileAllowed(['png','jpg','jpeg','webp'], 'Images only.')])
+        Optional(), FileAllowed(['png', 'jpg', 'jpeg', 'webp'], 'Images only.')])
     submit  = SubmitField('Save Testimonial')
 
 
 class TopperForm(FlaskForm):
-    name       = StringField('Student Name',  validators=[DataRequired(), Length(1, 150)])
-    stream     = SelectField('Stream', choices=[
-                    ('science_bio',  'Science (With Biology)'),
-                    ('science_math', 'Science (Without Biology / Math)'),
-                    ('management',   'Management'),
-                    ('law',          'Law'),
-                    ('arts',         'Arts'),
-                 ])
-    percentage = StringField('Percentage / GPA', validators=[Optional(), Length(0, 10)])
-    year       = StringField('Year (e.g. 2024)', validators=[DataRequired(), Length(1, 10)], default='2024')
-    rank       = IntegerField('Rank',            validators=[Optional(), NumberRange(1, 20)], default=1)
-    sort_order = IntegerField('Sort Order',      validators=[Optional()], default=0)
-    is_published = BooleanField('Published',     default=True)
-    photo      = FileField('Student Photo', validators=[
-                    Optional(), FileAllowed(['png','jpg','jpeg','webp'], 'Images only.')])
-    submit     = SubmitField('Save Topper')
+    name         = StringField('Student Name',   validators=[DataRequired(), Length(1, 150)])
+    stream       = SelectField('Stream', choices=[
+        ('science_bio',  'Science (With Biology)'),
+        ('science_math', 'Science (Without Biology / Math)'),
+        ('management',   'Management'),
+        ('law',          'Law'),
+        ('arts',         'Arts'),
+    ])
+    percentage   = StringField('Percentage / GPA', validators=[Optional(), Length(0, 10)])
+    year         = StringField('Year (e.g. 2024)',  validators=[DataRequired(), Length(1, 10)], default='2024')
+    rank         = IntegerField('Rank',             validators=[Optional(), NumberRange(1, 20)], default=1)
+    sort_order   = IntegerField('Sort Order',       validators=[Optional()], default=0)
+    is_published = BooleanField('Published',        default=True)
+    photo        = FileField('Student Photo', validators=[
+        Optional(), FileAllowed(['png', 'jpg', 'jpeg', 'webp'], 'Images only.')])
+    submit       = SubmitField('Save Topper')
 
 
 # ─────────────────────────────────────────────
@@ -734,20 +711,47 @@ def inject_globals():
     except Exception:
         ticker_notices = []
     return {
-        'now':            utc_now(),
-        'school_name':    app.config['SCHOOL_NAME'],
-        'school_tagline': app.config['SCHOOL_TAGLINE'],
-        'latest_notices': ticker_notices,
+        'now':                utc_now(),
+        'school_name':        app.config['SCHOOL_NAME'],
+        'school_tagline':     app.config['SCHOOL_TAGLINE'],
+        'latest_notices':     ticker_notices,
         'cloudinary_enabled': CLOUDINARY_ENABLED,
     }
 
 
 @app.template_global()
 def unread_count():
+    """Returns number of unread contact messages. Used in nav bell and sidebar badge."""
     try:
         return ContactMessage.query.filter_by(is_read=False).count()
     except Exception:
         return 0
+
+
+@app.template_global()
+def img_src(path_or_url, subfolder='misc'):
+    """
+    Resolve an image stored path or URL to a usable <img src> / CSS url().
+
+    Handles all three storage cases:
+      - Cloudinary URL  (https://res.cloudinary.com/...)  → returned as-is
+      - Local abs path  (/static/uploads/misc/file.jpg)   → returned as-is
+      - Bare filename   (abc123.jpg)  ← legacy            → prefixed with /static/uploads/{subfolder}/
+      - None / empty                                       → navy placeholder SVG
+    """
+    if not path_or_url:
+        # Transparent navy placeholder — prevents broken-image icons
+        return (
+            "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' "
+            "width='400' height='300'%3E"
+            "%3Crect width='400' height='300' fill='%231a3570'/%3E"
+            "%3C/svg%3E"
+        )
+    # Full URL (Cloudinary) or absolute local path
+    if path_or_url.startswith('http') or path_or_url.startswith('/'):
+        return path_or_url
+    # Bare filename — legacy local storage
+    return f'/static/uploads/{subfolder}/{path_or_url}'
 
 
 @app.template_global()
@@ -765,7 +769,6 @@ auth_bp   = Blueprint('auth',   __name__)
 admin_bp  = Blueprint('admin',  __name__)
 
 
-# ── Admin decorator ────────────────────────────────────────────────────────────
 def _require_admin(f):
     @wraps(f)
     @login_required
@@ -869,9 +872,11 @@ def events():
     tab  = request.args.get('tab', 'upcoming')
     now  = utc_now()
     if tab == 'past':
-        query = Event.query.filter(Event.is_published == True, Event.event_date < now).order_by(Event.event_date.desc())
+        query = Event.query.filter(Event.is_published == True,
+                                   Event.event_date < now).order_by(Event.event_date.desc())
     else:
-        query = Event.query.filter(Event.is_published == True, Event.event_date >= now).order_by(Event.event_date.asc())
+        query = Event.query.filter(Event.is_published == True,
+                                   Event.event_date >= now).order_by(Event.event_date.asc())
     pagination = query.paginate(page=page, per_page=app.config['POSTS_PER_PAGE'], error_out=False)
     return render_template('public/events.html', pagination=pagination, tab=tab)
 
@@ -913,7 +918,7 @@ def news():
 
 @public_bp.route('/news/<slug>')
 def news_detail(slug):
-    post       = BlogPost.query.filter_by(slug=slug, is_published=True).first_or_404()
+    post        = BlogPost.query.filter_by(slug=slug, is_published=True).first_or_404()
     post.views += 1
     db.session.commit()
     return render_template('public/news_detail.html', post=post)
@@ -928,22 +933,18 @@ def contact():
             subject=form.subject.data, message=form.message.data)
         db.session.add(msg)
         db.session.commit()
-
         _send_contact_email(form)
         _send_autoreply_email(form)
-
         flash('Your message has been sent. We will get back to you soon!', 'success')
         return redirect(url_for('public.contact'))
     return render_template('public/contact.html', form=form)
 
 
 def _send_contact_email(form):
-    """Send contact form submission to the school admin email."""
     receiver = app.config.get('MAIL_RECEIVER') or app.config.get('MAIL_USERNAME')
     if not receiver or not app.config.get('MAIL_USERNAME'):
         return
     try:
-        subject = f"[Contact Form] {form.subject.data} — from {form.name.data}"
         stream_labels = {
             'science_bio':  'Science (With Biology)',
             'science_math': 'Science (Without Biology / Math)',
@@ -953,46 +954,45 @@ def _send_contact_email(form):
             'other':        'Other / General Enquiry',
         }
         stream_str = stream_labels.get(form.stream.data, 'Not specified') if form.stream.data else 'Not specified'
-        body = f"""New contact form submission from your school website.
-
-Name      : {form.name.data}
-Email     : {form.email.data}
-Phone     : {form.phone.data or 'Not provided'}
-Programme : {stream_str}
-Subject   : {form.subject.data}
-
-Message:
-{form.message.data}
-
----
-Received at {utc_now().strftime('%Y-%m-%d %H:%M UTC')}
-"""
-        email_msg = MailMessage(subject=subject, recipients=[receiver],
-                                body=body, reply_to=form.email.data)
+        body = (
+            f"New contact form submission from your school website.\n\n"
+            f"Name      : {form.name.data}\n"
+            f"Email     : {form.email.data}\n"
+            f"Phone     : {form.phone.data or 'Not provided'}\n"
+            f"Programme : {stream_str}\n"
+            f"Subject   : {form.subject.data}\n\n"
+            f"Message:\n{form.message.data}\n\n"
+            f"---\nReceived at {utc_now().strftime('%Y-%m-%d %H:%M UTC')}\n"
+        )
+        email_msg = MailMessage(
+            subject=f"[Contact Form] {form.subject.data} — from {form.name.data}",
+            recipients=[receiver],
+            body=body,
+            reply_to=form.email.data,
+        )
         mail.send(email_msg)
     except Exception as e:
         app.logger.warning(f"Admin email failed: {e}")
 
 
 def _send_autoreply_email(form):
-    """Send an auto-reply acknowledgement to the person who submitted the form."""
     if not app.config.get('MAIL_USERNAME'):
         return
     try:
         school = app.config['SCHOOL_NAME']
-        subject = f"Thank you for contacting {school}"
-        body = f"""Dear {form.name.data},
-
-Thank you for reaching out to {school}. We have received your message and will get back to you within 1–2 business days.
-
-Your message details:
-Subject : {form.subject.data}
-
----
-This is an automated reply. Please do not reply to this email.
-{school} | info@{school.lower().replace(' ','')}.edu
-"""
-        email_msg = MailMessage(subject=subject, recipients=[form.email.data], body=body)
+        body   = (
+            f"Dear {form.name.data},\n\n"
+            f"Thank you for reaching out to {school}. We have received your message "
+            f"and will get back to you within 1–2 business days.\n\n"
+            f"Your message details:\nSubject : {form.subject.data}\n\n"
+            f"---\nThis is an automated reply. Please do not reply to this email.\n"
+            f"{school} | info@martyrsmemorial.edu.np\n"
+        )
+        email_msg = MailMessage(
+            subject=f"Thank you for contacting {school}",
+            recipients=[form.email.data],
+            body=body,
+        )
         mail.send(email_msg)
     except Exception as e:
         app.logger.warning(f"Auto-reply email failed: {e}")
@@ -1005,7 +1005,8 @@ def downloads():
     if category:
         query  = query.filter_by(category=category)
     files      = query.order_by(Download.created_at.desc()).all()
-    categories = [c[0] for c in db.session.query(Download.category).filter_by(is_published=True).distinct().all()]
+    categories = [c[0] for c in db.session.query(Download.category)
+                  .filter_by(is_published=True).distinct().all()]
     return render_template('public/downloads.html', files=files,
                            categories=categories, active_category=category)
 
@@ -1015,15 +1016,11 @@ def download_file(file_id):
     dl = Download.query.filter_by(id=file_id, is_published=True).first_or_404()
     dl.download_count += 1
     db.session.commit()
-
-    # Check if it's a Cloudinary URL
     if dl.filename and dl.filename.startswith('http'):
         return redirect(dl.filename)
-
-    # Local file
     folder = os.path.join(app.config['UPLOAD_FOLDER'], 'downloads')
-    return send_from_directory(folder, os.path.basename(dl.filename), as_attachment=True,
-                               download_name=dl.original_name)
+    return send_from_directory(folder, os.path.basename(dl.filename),
+                               as_attachment=True, download_name=dl.original_name)
 
 
 @public_bp.route('/notices/<int:notice_id>/attachment')
@@ -1031,12 +1028,8 @@ def notice_attachment(notice_id):
     notice = Notice.query.filter_by(id=notice_id, is_published=True).first_or_404()
     if not notice.attachment:
         abort(404)
-
-    # Check if it's a Cloudinary URL
-    if notice.attachment and notice.attachment.startswith('http'):
+    if notice.attachment.startswith('http'):
         return redirect(notice.attachment)
-
-    # Local file
     folder = os.path.join(app.config['UPLOAD_FOLDER'], 'notices')
     return send_from_directory(folder, os.path.basename(notice.attachment), as_attachment=True)
 
@@ -1100,27 +1093,25 @@ def forgot_password():
     if form.validate_on_submit():
         admin = Admin.query.filter_by(email=form.email.data).first()
         if admin:
-            token = secrets.token_urlsafe(32)
-            admin.reset_token = token
+            token                  = secrets.token_urlsafe(32)
+            admin.reset_token      = token
             admin.reset_token_expiry = utc_now() + timedelta(hours=1)
             db.session.commit()
             reset_url = url_for('auth.reset_password', token=token, _external=True)
             try:
                 if app.config.get('MAIL_USERNAME'):
                     msg = MailMessage(
-                        subject=f'Password Reset — {app.config["SCHOOL_NAME"]} Admin',
+                        subject=f"Password Reset — {app.config['SCHOOL_NAME']} Admin",
                         recipients=[admin.email],
-                        body=f'''Hello {admin.full_name},
-
-A password reset was requested for your admin account.
-
-Click the link below to reset your password (valid for 1 hour):
-{reset_url}
-
-If you did not request this, ignore this email.
-
-— {app.config["SCHOOL_NAME"]} System
-''')
+                        body=(
+                            f"Hello {admin.full_name},\n\n"
+                            f"A password reset was requested for your admin account.\n\n"
+                            f"Click the link below to reset your password (valid for 1 hour):\n"
+                            f"{reset_url}\n\n"
+                            f"If you did not request this, ignore this email.\n\n"
+                            f"— {app.config['SCHOOL_NAME']} System\n"
+                        ),
+                    )
                     mail.send(msg)
                     flash('Password reset link sent to your email.', 'success')
                 else:
@@ -1145,7 +1136,7 @@ def reset_password(token):
     form = ResetPasswordForm()
     if form.validate_on_submit():
         admin.set_password(form.new_password.data)
-        admin.reset_token = None
+        admin.reset_token        = None
         admin.reset_token_expiry = None
         db.session.commit()
         flash('Password reset successfully! You can now log in.', 'success')
@@ -1154,7 +1145,7 @@ def reset_password(token):
 
 
 # ─────────────────────────────────────────────
-# 10. ADMIN ROUTES (UPDATED FOR CLOUDINARY)
+# 10. ADMIN ROUTES
 # ─────────────────────────────────────────────
 
 @admin_bp.route('/')
@@ -1176,11 +1167,12 @@ def dashboard():
 
 
 # ── Notices ───────────────────────────────────────────────────────────────────
+
 @admin_bp.route('/notices')
 @_require_admin
 def notices():
-    page = request.args.get('page', 1, type=int)
-    q    = request.args.get('q', '')
+    page  = request.args.get('page', 1, type=int)
+    q     = request.args.get('q', '')
     query = Notice.query
     if q:
         query = query.filter(Notice.title.ilike(f'%{q}%'))
@@ -1196,10 +1188,11 @@ def notice_new():
         attachment = None
         if form.attachment.data and form.attachment.data.filename:
             attachment = save_file(form.attachment.data, 'notices')
-        notice = Notice(title=form.title.data, content=sanitize_html(form.content.data),
-                        category=form.category.data, is_pinned=form.is_pinned.data,
-                        is_published=form.is_published.data, expiry_date=form.expiry_date.data,
-                        attachment=attachment)
+        notice = Notice(
+            title=form.title.data, content=sanitize_html(form.content.data),
+            category=form.category.data, is_pinned=form.is_pinned.data,
+            is_published=form.is_published.data, expiry_date=form.expiry_date.data,
+            attachment=attachment)
         db.session.add(notice)
         db.session.commit()
         flash('Notice created successfully.', 'success')
@@ -1216,12 +1209,12 @@ def notice_edit(notice_id):
         if form.attachment.data and form.attachment.data.filename:
             delete_file(notice.attachment, 'notices')
             notice.attachment = save_file(form.attachment.data, 'notices')
-        notice.title       = form.title.data
-        notice.content     = sanitize_html(form.content.data)
-        notice.category    = form.category.data
-        notice.is_pinned   = form.is_pinned.data
-        notice.is_published= form.is_published.data
-        notice.expiry_date = form.expiry_date.data
+        notice.title        = form.title.data
+        notice.content      = sanitize_html(form.content.data)
+        notice.category     = form.category.data
+        notice.is_pinned    = form.is_pinned.data
+        notice.is_published = form.is_published.data
+        notice.expiry_date  = form.expiry_date.data
         db.session.commit()
         flash('Notice updated.', 'success')
         return redirect(url_for('admin.notices'))
@@ -1240,10 +1233,11 @@ def notice_delete(notice_id):
 
 
 # ── Events ────────────────────────────────────────────────────────────────────
+
 @admin_bp.route('/events')
 @_require_admin
 def events():
-    page = request.args.get('page', 1, type=int)
+    page       = request.args.get('page', 1, type=int)
     pagination = Event.query.order_by(Event.event_date.desc()).paginate(page=page, per_page=20, error_out=False)
     return render_template('admin/events.html', pagination=pagination)
 
@@ -1256,10 +1250,11 @@ def event_new():
         banner = None
         if form.banner_image.data and form.banner_image.data.filename:
             banner = save_file(form.banner_image.data, 'events', resize=(1200, 600))
-        event = Event(title=form.title.data, description=sanitize_html(form.description.data),
-                      location=form.location.data, event_date=form.event_date.data,
-                      end_date=form.end_date.data, banner_image=banner,
-                      is_published=form.is_published.data)
+        event = Event(
+            title=form.title.data, description=sanitize_html(form.description.data),
+            location=form.location.data, event_date=form.event_date.data,
+            end_date=form.end_date.data, banner_image=banner,
+            is_published=form.is_published.data)
         db.session.add(event)
         db.session.commit()
         flash('Event created.', 'success')
@@ -1276,12 +1271,12 @@ def event_edit(event_id):
         if form.banner_image.data and form.banner_image.data.filename:
             delete_file(event.banner_image, 'events')
             event.banner_image = save_file(form.banner_image.data, 'events', resize=(1200, 600))
-        event.title       = form.title.data
-        event.description = sanitize_html(form.description.data)
-        event.location    = form.location.data
-        event.event_date  = form.event_date.data
-        event.end_date    = form.end_date.data
-        event.is_published= form.is_published.data
+        event.title        = form.title.data
+        event.description  = sanitize_html(form.description.data)
+        event.location     = form.location.data
+        event.event_date   = form.event_date.data
+        event.end_date     = form.end_date.data
+        event.is_published = form.is_published.data
         db.session.commit()
         flash('Event updated.', 'success')
         return redirect(url_for('admin.events'))
@@ -1300,6 +1295,7 @@ def event_delete(event_id):
 
 
 # ── Gallery ───────────────────────────────────────────────────────────────────
+
 @admin_bp.route('/gallery')
 @_require_admin
 def gallery():
@@ -1327,9 +1323,9 @@ def album_edit(album_id):
     album = GalleryAlbum.query.get_or_404(album_id)
     form  = AlbumForm(obj=album)
     if form.validate_on_submit():
-        album.name        = form.name.data
-        album.description = form.description.data
-        album.is_published= form.is_published.data
+        album.name         = form.name.data
+        album.description  = form.description.data
+        album.is_published = form.is_published.data
         db.session.commit()
         flash('Album updated.', 'success')
         return redirect(url_for('admin.gallery'))
@@ -1387,6 +1383,7 @@ def image_delete(image_id):
 
 
 # ── Blog ──────────────────────────────────────────────────────────────────────
+
 @admin_bp.route('/blog')
 @_require_admin
 def blog():
@@ -1411,10 +1408,11 @@ def blog_new():
         image = None
         if form.featured_image.data and form.featured_image.data.filename:
             image = save_file(form.featured_image.data, 'blog', resize=(1200, 630))
-        post = BlogPost(title=form.title.data, slug=slug, content=sanitize_html(form.content.data),
-                        excerpt=form.excerpt.data, category=form.category.data,
-                        featured_image=image, is_published=form.is_published.data,
-                        is_featured=form.is_featured.data)
+        post = BlogPost(
+            title=form.title.data, slug=slug, content=sanitize_html(form.content.data),
+            excerpt=form.excerpt.data, category=form.category.data,
+            featured_image=image, is_published=form.is_published.data,
+            is_featured=form.is_featured.data)
         db.session.add(post)
         db.session.commit()
         flash('Post published.', 'success')
@@ -1431,12 +1429,12 @@ def blog_edit(post_id):
         if form.featured_image.data and form.featured_image.data.filename:
             delete_file(post.featured_image, 'blog')
             post.featured_image = save_file(form.featured_image.data, 'blog', resize=(1200, 630))
-        post.title       = form.title.data
-        post.content     = sanitize_html(form.content.data)
-        post.excerpt     = form.excerpt.data
-        post.category    = form.category.data
-        post.is_published= form.is_published.data
-        post.is_featured = form.is_featured.data
+        post.title        = form.title.data
+        post.content      = sanitize_html(form.content.data)
+        post.excerpt      = form.excerpt.data
+        post.category     = form.category.data
+        post.is_published = form.is_published.data
+        post.is_featured  = form.is_featured.data
         db.session.commit()
         flash('Post updated.', 'success')
         return redirect(url_for('admin.blog'))
@@ -1455,6 +1453,7 @@ def blog_delete(post_id):
 
 
 # ── Messages ──────────────────────────────────────────────────────────────────
+
 @admin_bp.route('/messages')
 @_require_admin
 def messages():
@@ -1489,10 +1488,11 @@ def message_delete(msg_id):
 
 
 # ── Downloads ─────────────────────────────────────────────────────────────────
+
 @admin_bp.route('/downloads')
 @_require_admin
 def downloads():
-    page = request.args.get('page', 1, type=int)
+    page       = request.args.get('page', 1, type=int)
     pagination = Download.query.order_by(Download.created_at.desc()).paginate(page=page, per_page=20, error_out=False)
     return render_template('admin/downloads.html', pagination=pagination)
 
@@ -1504,17 +1504,16 @@ def download_new():
     if form.validate_on_submit():
         file_obj  = form.file.data
         filename  = save_file(file_obj, 'downloads')
-
-        # For local files, get size; for Cloudinary, size is handled differently
         file_size = None
         if filename and not filename.startswith('http'):
-            full_path = os.path.join(app.config['UPLOAD_FOLDER'], 'downloads', filename)
+            full_path = os.path.join(app.config['UPLOAD_FOLDER'], 'downloads',
+                                     os.path.basename(filename))
             file_size = os.path.getsize(full_path) if os.path.exists(full_path) else None
-
-        dl = Download(title=form.title.data, description=form.description.data,
-                      filename=filename, original_name=file_obj.filename,
-                      category=form.category.data, file_size=file_size,
-                      is_published=form.is_published.data)
+        dl = Download(
+            title=form.title.data, description=form.description.data,
+            filename=filename, original_name=file_obj.filename,
+            category=form.category.data, file_size=file_size,
+            is_published=form.is_published.data)
         db.session.add(dl)
         db.session.commit()
         flash('File uploaded.', 'success')
@@ -1534,6 +1533,7 @@ def download_delete(dl_id):
 
 
 # ── Homepage Content ──────────────────────────────────────────────────────────
+
 @admin_bp.route('/homepage')
 @_require_admin
 def homepage():
@@ -1555,10 +1555,10 @@ def homepage_hero():
         if not content:
             content = HomepageContent(section='hero')
             db.session.add(content)
-        content.title    = form.title.data
-        content.subtitle = form.subtitle.data
-        content.content  = form.content.data
-        content.image    = image
+        content.title   = form.title.data
+        content.subtitle= form.subtitle.data
+        content.content = form.content.data
+        content.image   = image
         db.session.commit()
         flash('Hero section updated.', 'success')
         return redirect(url_for('admin.homepage'))
@@ -1599,7 +1599,8 @@ def homepage_section(section_name):
                            title=titles[section_name], content=content)
 
 
-# ── Admin Profile & Settings ─────────────────────────────────────────────────
+# ── Admin Profile & Settings ──────────────────────────────────────────────────
+
 @admin_bp.route('/profile', methods=['GET', 'POST'])
 @_require_admin
 def profile():
@@ -1627,6 +1628,7 @@ def settings():
 
 
 # ── Testimonials ──────────────────────────────────────────────────────────────
+
 @admin_bp.route('/testimonials')
 @_require_admin
 def testimonials():
@@ -1642,8 +1644,9 @@ def testimonial_new():
         avatar = None
         if form.avatar.data and form.avatar.data.filename:
             avatar = save_file(form.avatar.data, 'misc', resize=(200, 200))
-        t = Testimonial(name=form.name.data, role=form.role.data,
-                        content=form.content.data, rating=form.rating.data or 5, avatar=avatar)
+        t = Testimonial(
+            name=form.name.data, role=form.role.data,
+            content=form.content.data, rating=form.rating.data or 5, avatar=avatar)
         db.session.add(t)
         db.session.commit()
         flash('Testimonial added.', 'success')
@@ -1663,6 +1666,7 @@ def testimonial_delete(t_id):
 
 
 # ── Board of Directors ────────────────────────────────────────────────────────
+
 @admin_bp.route('/board-members')
 @_require_admin
 def board_members():
@@ -1677,16 +1681,12 @@ def board_member_new():
     if form.validate_on_submit():
         photo = save_file(form.photo.data, 'board', resize=(600, 600))
         m = BoardMember(
-            name=form.name.data,
-            position=form.position.data,
+            name=form.name.data, position=form.position.data,
             category=form.category.data,
             bio=bleach.clean(form.bio.data or '', tags=['p','b','i','br','em','strong'], strip=True),
-            email=form.email.data,
-            phone=form.phone.data,
+            email=form.email.data, phone=form.phone.data,
             sort_order=form.sort_order.data or 0,
-            is_published=form.is_published.data,
-            photo=photo,
-        )
+            is_published=form.is_published.data, photo=photo)
         db.session.add(m)
         db.session.commit()
         flash(f'{m.name} added to Board of Directors.', 'success')
@@ -1704,13 +1704,13 @@ def board_member_edit(m_id):
         if new_photo:
             delete_file(m.photo, 'board')
             m.photo = new_photo
-        m.name        = form.name.data
-        m.position    = form.position.data
-        m.category    = form.category.data
-        m.bio         = bleach.clean(form.bio.data or '', tags=['p','b','i','br','em','strong'], strip=True)
-        m.email       = form.email.data
-        m.phone       = form.phone.data
-        m.sort_order  = form.sort_order.data or 0
+        m.name         = form.name.data
+        m.position     = form.position.data
+        m.category     = form.category.data
+        m.bio          = bleach.clean(form.bio.data or '', tags=['p','b','i','br','em','strong'], strip=True)
+        m.email        = form.email.data
+        m.phone        = form.phone.data
+        m.sort_order   = form.sort_order.data or 0
         m.is_published = form.is_published.data
         db.session.commit()
         flash(f'{m.name} updated.', 'success')
@@ -1729,7 +1729,8 @@ def board_member_delete(m_id):
     return redirect(url_for('admin.board_members'))
 
 
-# ── Slides (homepage slideshow) ──────────────────────────────────────────────
+# ── Slides ────────────────────────────────────────────────────────────────────
+
 @admin_bp.route('/slides')
 @_require_admin
 def slides():
@@ -1746,10 +1747,11 @@ def slide_new():
             flash('A slide image is required.', 'danger')
             return render_template('admin/slide_form.html', form=form, title='Add Slide')
         img = save_file(form.image.data, 'misc', resize=(1920, 700))
-        s = Slide(title=form.title.data, subtitle=form.subtitle.data,
-                  image=img, btn_text=form.btn_text.data or 'Learn More',
-                  btn_url=form.btn_url.data, sort_order=form.sort_order.data or 0,
-                  is_active=form.is_active.data)
+        s   = Slide(
+            title=form.title.data, subtitle=form.subtitle.data,
+            image=img, btn_text=form.btn_text.data or 'Learn More',
+            btn_url=form.btn_url.data, sort_order=form.sort_order.data or 0,
+            is_active=form.is_active.data)
         db.session.add(s)
         db.session.commit()
         flash('Slide added.', 'success')
@@ -1791,7 +1793,8 @@ def slide_delete(slide_id):
     return redirect(url_for('admin.slides'))
 
 
-# ── Toppers admin ─────────────────────────────────────────────────────────────
+# ── Toppers ───────────────────────────────────────────────────────────────────
+
 STREAM_LABELS = {
     'science_bio':  'Science (With Biology)',
     'science_math': 'Science (Without Bio / Math)',
@@ -1800,12 +1803,12 @@ STREAM_LABELS = {
     'arts':         'Arts',
 }
 
+
 @admin_bp.route('/toppers')
 @_require_admin
 def toppers():
-    all_toppers = (Topper.query.order_by(Topper.stream, Topper.sort_order, Topper.rank).all())
-    return render_template('admin/toppers.html', toppers=all_toppers,
-                           stream_labels=STREAM_LABELS)
+    all_toppers = Topper.query.order_by(Topper.stream, Topper.sort_order, Topper.rank).all()
+    return render_template('admin/toppers.html', toppers=all_toppers, stream_labels=STREAM_LABELS)
 
 
 @admin_bp.route('/toppers/new', methods=['GET', 'POST'])
@@ -1813,17 +1816,13 @@ def toppers():
 def topper_new():
     form = TopperForm()
     if form.validate_on_submit():
-        photo = save_file(form.photo.data, 'toppers', resize=(400, 400)) if form.photo.data and form.photo.data.filename else None
+        photo = (save_file(form.photo.data, 'toppers', resize=(400, 400))
+                 if form.photo.data and form.photo.data.filename else None)
         t = Topper(
-            name       = form.name.data,
-            stream     = form.stream.data,
-            percentage = form.percentage.data or None,
-            year       = form.year.data,
-            rank       = form.rank.data or 1,
-            sort_order = form.sort_order.data or 0,
-            is_published = form.is_published.data,
-            photo      = photo,
-        )
+            name=form.name.data, stream=form.stream.data,
+            percentage=form.percentage.data or None, year=form.year.data,
+            rank=form.rank.data or 1, sort_order=form.sort_order.data or 0,
+            is_published=form.is_published.data, photo=photo)
         db.session.add(t)
         db.session.commit()
         flash('Topper added.', 'success')
@@ -1835,18 +1834,18 @@ def topper_new():
 @admin_bp.route('/toppers/<int:tid>/edit', methods=['GET', 'POST'])
 @_require_admin
 def topper_edit(tid):
-    t = Topper.query.get_or_404(tid)
+    t    = Topper.query.get_or_404(tid)
     form = TopperForm(obj=t)
     if form.validate_on_submit():
         if form.photo.data and form.photo.data.filename:
             delete_file(t.photo, 'toppers')
             t.photo = save_file(form.photo.data, 'toppers', resize=(400, 400))
-        t.name        = form.name.data
-        t.stream      = form.stream.data
-        t.percentage  = form.percentage.data or None
-        t.year        = form.year.data
-        t.rank        = form.rank.data or 1
-        t.sort_order  = form.sort_order.data or 0
+        t.name         = form.name.data
+        t.stream       = form.stream.data
+        t.percentage   = form.percentage.data or None
+        t.year         = form.year.data
+        t.rank         = form.rank.data or 1
+        t.sort_order   = form.sort_order.data or 0
         t.is_published = form.is_published.data
         db.session.commit()
         flash('Topper updated.', 'success')
@@ -1866,7 +1865,8 @@ def topper_delete(tid):
     return redirect(url_for('admin.toppers'))
 
 
-# ── Announcement Popup admin (via HomepageContent section='popup') ────────────
+# ── Announcement Popup ────────────────────────────────────────────────────────
+
 @admin_bp.route('/homepage/popup', methods=['GET', 'POST'])
 @_require_admin
 def homepage_popup():
@@ -1889,17 +1889,16 @@ def homepage_popup():
             content.extra_data = {'enabled': enabled}
             db.session.commit()
             flash('Announcement popup updated.', 'success')
-            app.logger.info('Popup saved: enabled=%s', enabled)
             return redirect(url_for('admin.homepage'))
         else:
             for field, errs in form.errors.items():
                 for e in errs:
                     flash(f'{field}: {e}', 'danger')
-            app.logger.warning('Popup form failed: %s', form.errors)
     return render_template('admin/homepage_popup.html', form=form, content=content)
 
 
-# ── Privacy Policy admin ─────────────────────────────────────────────────────
+# ── Privacy Policy ────────────────────────────────────────────────────────────
+
 @admin_bp.route('/privacy-policy', methods=['GET', 'POST'])
 @_require_admin
 def privacy_policy_admin():
@@ -1909,26 +1908,30 @@ def privacy_policy_admin():
             request.form.get('content', ''),
             tags=['p','h2','h3','h4','ul','ol','li','strong','em','b','i','br','a','blockquote'],
             attributes={'a': ['href', 'target', 'rel']},
-            strip=True
+            strip=True,
         )
         last_updated = utc_now().strftime('%d %B %Y')
         if content:
-            content.content = body
-            if content.extra_data is None:
-                content.extra_data = {}
-            content.extra_data = {**content.extra_data, 'last_updated': last_updated}
+            content.content    = body
+            content.extra_data = {**(content.extra_data or {}), 'last_updated': last_updated}
         else:
             content = HomepageContent(
-                section='privacy_policy',
-                title='Privacy Policy',
-                content=body,
-                extra_data={'last_updated': last_updated}
-            )
+                section='privacy_policy', title='Privacy Policy', content=body,
+                extra_data={'last_updated': last_updated})
             db.session.add(content)
         db.session.commit()
         flash('Privacy Policy updated successfully.', 'success')
         return redirect(url_for('admin.privacy_policy_admin'))
     return render_template('admin/privacy_policy.html', content=content)
+
+
+# ── Notifications (unread messages list) ──────────────────────────────────────
+
+@admin_bp.route('/notifications')
+@_require_admin
+def notifications():
+    """Redirect to messages filtered to unread — bell icon target."""
+    return redirect(url_for('admin.messages', read='unread'))
 
 
 # ─────────────────────────────────────────────
@@ -1962,7 +1965,6 @@ app.register_blueprint(admin_bp, url_prefix='/admin')
 # 13. FIRST-RUN DB SEED
 # ─────────────────────────────────────────────
 def seed_database():
-    """Create tables and insert default data if the DB is empty."""
     db.create_all()
     print("✓ Database tables ready.")
 
@@ -1977,22 +1979,19 @@ def seed_database():
 
     if not HomepageContent.query.filter_by(section='hero').first():
         db.session.add(HomepageContent(
-            section='hero',
-            title='Welcome to Martyrs Memorial +2',
+            section='hero', title='Welcome to Martyrs Memorial +2',
             subtitle='Excellence in Education Since 1990',
             content='A premier institution committed to holistic education and lifelong learning.'))
 
     if not HomepageContent.query.filter_by(section='about').first():
         db.session.add(HomepageContent(
-            section='about',
-            title='A Legacy of Learning',
+            section='about', title='A Legacy of Learning',
             content=('Founded in 1990, Martyrs Memorial +2 has grown into a centre of academic '
                      'and co-curricular excellence, shaping thousands of young minds.')))
 
     if not HomepageContent.query.filter_by(section='principal').first():
         db.session.add(HomepageContent(
-            section='principal',
-            title="Principal's Message",
+            section='principal', title="Principal's Message",
             subtitle='Mr. John Doe, Principal',
             content=('Education is not merely the acquisition of knowledge; it is the cultivation '
                      'of character, curiosity, and compassion. At Martyrs Memorial +2, every child '
@@ -2018,79 +2017,76 @@ def seed_database():
             content='Martyrs Memorial +2 has been incredible for my daughter. The teachers are dedicated and the emphasis on values makes it truly special.',
             rating=5, is_published=True))
 
-    # ── Seed dummy toppers ─────────────────────────────────────────────────────
     if not Topper.query.first():
-        _dummy_toppers = [
-            # Science with Biology
-            ('Aarav Sharma',       'science_bio',  '96.75', 1),
-            ('Sita Rai',           'science_bio',  '95.50', 2),
-            ('Bishnu Thapa',       'science_bio',  '94.25', 3),
-            ('Priya Shrestha',     'science_bio',  '93.80', 4),
-            ('Rohan Karki',        'science_bio',  '93.10', 5),
-            ('Anisha Paudel',      'science_bio',  '92.60', 6),
-            ('Dipesh Adhikari',    'science_bio',  '91.90', 7),
-            ('Manisha Koirala',    'science_bio',  '91.25', 8),
-            ('Sujan Bista',        'science_bio',  '90.75', 9),
-            ('Kabita Gurung',      'science_bio',  '90.10', 10),
-            # Science without Biology / Math
-            ('Nischal Acharya',    'science_math', '97.20', 1),
-            ('Asmita Tamang',      'science_math', '96.40', 2),
-            ('Pratik Lama',        'science_math', '95.80', 3),
-            ('Sunita Maharjan',    'science_math', '94.60', 4),
-            ('Bibek Pandey',       'science_math', '93.75', 5),
-            ('Kritika Subedi',     'science_math', '93.00', 6),
-            ('Milan Dahal',        'science_math', '92.30', 7),
-            ('Rekha Neupane',      'science_math', '91.80', 8),
-            ('Sandesh Bhattarai',  'science_math', '91.10', 9),
-            ('Puja Sapkota',       'science_math', '90.50', 10),
+        _dummy = [
+            # Science Bio
+            ('Aarav Sharma',        'science_bio',  '96.75',  1),
+            ('Sita Rai',            'science_bio',  '95.50',  2),
+            ('Bishnu Thapa',        'science_bio',  '94.25',  3),
+            ('Priya Shrestha',      'science_bio',  '93.80',  4),
+            ('Rohan Karki',         'science_bio',  '93.10',  5),
+            ('Anisha Paudel',       'science_bio',  '92.60',  6),
+            ('Dipesh Adhikari',     'science_bio',  '91.90',  7),
+            ('Manisha Koirala',     'science_bio',  '91.25',  8),
+            ('Sujan Bista',         'science_bio',  '90.75',  9),
+            ('Kabita Gurung',       'science_bio',  '90.10', 10),
+            # Science Math
+            ('Nischal Acharya',     'science_math', '97.20',  1),
+            ('Asmita Tamang',       'science_math', '96.40',  2),
+            ('Pratik Lama',         'science_math', '95.80',  3),
+            ('Sunita Maharjan',     'science_math', '94.60',  4),
+            ('Bibek Pandey',        'science_math', '93.75',  5),
+            ('Kritika Subedi',      'science_math', '93.00',  6),
+            ('Milan Dahal',         'science_math', '92.30',  7),
+            ('Rekha Neupane',       'science_math', '91.80',  8),
+            ('Sandesh Bhattarai',   'science_math', '91.10',  9),
+            ('Puja Sapkota',        'science_math', '90.50', 10),
             # Management
-            ('Rajan Pokhrel',      'management',   '95.40', 1),
-            ('Samiksha Joshi',     'management',   '94.20', 2),
-            ('Nabin Khadka',       'management',   '93.60', 3),
-            ('Anjali Magar',       'management',   '92.90', 4),
-            ('Sailesh Giri',       'management',   '92.10', 5),
-            ('Binita Chaudhary',   'management',   '91.50', 6),
-            ('Rohit Yadav',        'management',   '91.00', 7),
-            ('Elina Limbu',        'management',   '90.40', 8),
-            ('Aakash Basnet',      'management',   '89.80', 9),
-            ('Nirmala Rajbhandari','management',   '89.20', 10),
+            ('Rajan Pokhrel',       'management',   '95.40',  1),
+            ('Samiksha Joshi',      'management',   '94.20',  2),
+            ('Nabin Khadka',        'management',   '93.60',  3),
+            ('Anjali Magar',        'management',   '92.90',  4),
+            ('Sailesh Giri',        'management',   '92.10',  5),
+            ('Binita Chaudhary',    'management',   '91.50',  6),
+            ('Rohit Yadav',         'management',   '91.00',  7),
+            ('Elina Limbu',         'management',   '90.40',  8),
+            ('Aakash Basnet',       'management',   '89.80',  9),
+            ('Nirmala Rajbhandari', 'management',   '89.20', 10),
             # Law
-            ('Bibhuti Prasad',     'law',          '94.80', 1),
-            ('Sapana Dhakal',      'law',          '93.50', 2),
-            ('Suresh Oli',         'law',          '92.70', 3),
-            ('Kopila Tiwari',      'law',          '92.00', 4),
-            ('Ujjwal Budhathoki',  'law',          '91.30', 5),
-            ('Shreya Baral',       'law',          '90.80', 6),
-            ('Dinesh Humagain',    'law',          '90.10', 7),
-            ('Rojina Ghimire',     'law',          '89.60', 8),
-            ('Shyam Hamal',        'law',          '89.00', 9),
-            ('Mina Chand',         'law',          '88.50', 10),
+            ('Bibhuti Prasad',      'law',          '94.80',  1),
+            ('Sapana Dhakal',       'law',          '93.50',  2),
+            ('Suresh Oli',          'law',          '92.70',  3),
+            ('Kopila Tiwari',       'law',          '92.00',  4),
+            ('Ujjwal Budhathoki',   'law',          '91.30',  5),
+            ('Shreya Baral',        'law',          '90.80',  6),
+            ('Dinesh Humagain',     'law',          '90.10',  7),
+            ('Rojina Ghimire',      'law',          '89.60',  8),
+            ('Shyam Hamal',         'law',          '89.00',  9),
+            ('Mina Chand',          'law',          '88.50', 10),
             # Arts
-            ('Prabhat Regmi',      'arts',         '93.90', 1),
-            ('Srijana Bhandari',   'arts',         '92.60', 2),
-            ('Tulasi Pantha',      'arts',         '91.80', 3),
-            ('Ramesh Tharu',       'arts',         '91.00', 4),
-            ('Laxmi Chhetri',      'arts',         '90.40', 5),
-            ('Govind Pariyar',     'arts',         '89.70', 6),
-            ('Saraswati Sah',      'arts',         '89.10', 7),
-            ('Deepak Rai',         'arts',         '88.60', 8),
-            ('Rupa Tamrakar',      'arts',         '88.00', 9),
-            ('Janak Upreti',       'arts',         '87.50', 10),
+            ('Prabhat Regmi',       'arts',         '93.90',  1),
+            ('Srijana Bhandari',    'arts',         '92.60',  2),
+            ('Tulasi Pantha',       'arts',         '91.80',  3),
+            ('Ramesh Tharu',        'arts',         '91.00',  4),
+            ('Laxmi Chhetri',       'arts',         '90.40',  5),
+            ('Govind Pariyar',      'arts',         '89.70',  6),
+            ('Saraswati Sah',       'arts',         '89.10',  7),
+            ('Deepak Rai',          'arts',         '88.60',  8),
+            ('Rupa Tamrakar',       'arts',         '88.00',  9),
+            ('Janak Upreti',        'arts',         '87.50', 10),
         ]
-        for name, stream, pct, rank in _dummy_toppers:
+        for name, stream, pct, rank in _dummy:
             db.session.add(Topper(
-                name=name, stream=stream,
-                percentage=pct, year='2082',
-                rank=rank, is_published=True, sort_order=rank
-            ))
-        print(f"  Seeded {len(_dummy_toppers)} dummy toppers.")
+                name=name, stream=stream, percentage=pct,
+                year='2082', rank=rank, is_published=True, sort_order=rank))
+        print(f"  Seeded {len(_dummy)} dummy toppers.")
 
     db.session.commit()
     print("✓ Database seed complete.")
 
 
 # ─────────────────────────────────────────────
-# 14. AUTO-INIT ON STARTUP (works with gunicorn)
+# 14. AUTO-INIT ON STARTUP
 # ─────────────────────────────────────────────
 with app.app_context():
     try:
@@ -2103,7 +2099,7 @@ with app.app_context():
 
 
 # ─────────────────────────────────────────────
-# 15. DEV SERVER ENTRY POINT
+# 15. DEV SERVER
 # ─────────────────────────────────────────────
 if __name__ == '__main__':
     app.run(debug=app.config['DEBUG'], host='0.0.0.0', port=5000)
