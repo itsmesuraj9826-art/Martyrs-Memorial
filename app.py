@@ -15,7 +15,7 @@ Then run this file:
 On first run it will create all tables and seed the default admin:
     URL  : http://localhost:5000
     Admin: http://localhost:5000/auth/login
-    User : admin  |  Password: Admin@1234
+    User : msuraj24  |  Password: suraj@123
 
 Change the password immediately after first login!
 """
@@ -31,7 +31,7 @@ from dotenv import load_dotenv
 load_dotenv()
 import uuid
 import unicodedata
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from functools import wraps
 from urllib.parse import quote_plus
 
@@ -58,6 +58,11 @@ from wtforms import (StringField, PasswordField, TextAreaField, BooleanField,
 from wtforms.validators import (DataRequired, Length, Email, Optional,
                                 EqualTo, NumberRange)
 from PIL import Image
+
+# Helper function to get current UTC datetime (timezone-aware)
+def utc_now():
+    """Return current UTC datetime with timezone awareness."""
+    return datetime.now(timezone.utc)
 
 
 # ─────────────────────────────────────────────
@@ -309,7 +314,7 @@ class Admin(UserMixin, db.Model):
     password_hash = db.Column(db.String(255), nullable=False)
     full_name     = db.Column(db.String(150), nullable=False)
     is_active          = db.Column(db.Boolean, default=True, nullable=False)
-    created_at         = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at         = db.Column(db.DateTime, default=utc_now)
     last_login         = db.Column(db.DateTime, nullable=True)
     reset_token        = db.Column(db.String(100), nullable=True)
     reset_token_expiry = db.Column(db.DateTime, nullable=True)
@@ -336,15 +341,15 @@ class Notice(db.Model):
     category     = db.Column(db.String(50),  default='general')
     is_pinned    = db.Column(db.Boolean,     default=False)
     is_published = db.Column(db.Boolean,     default=True)
-    attachment   = db.Column(db.String(500), nullable=True)  # Increased length for Cloudinary URLs
+    attachment   = db.Column(db.String(500), nullable=True)
     expiry_date  = db.Column(db.Date,        nullable=True)
-    created_at   = db.Column(db.DateTime,    default=datetime.utcnow, index=True)
-    updated_at   = db.Column(db.DateTime,    default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at   = db.Column(db.DateTime,    default=utc_now, index=True)
+    updated_at   = db.Column(db.DateTime,    default=utc_now, onupdate=utc_now)
 
     def is_expired(self):
         if self.expiry_date is None:
             return False
-        return self.expiry_date < datetime.utcnow().date()
+        return self.expiry_date < utc_now().date()
 
 
 class Event(db.Model):
@@ -357,11 +362,11 @@ class Event(db.Model):
     end_date     = db.Column(db.DateTime,    nullable=True)
     banner_image = db.Column(db.String(500), nullable=True)
     is_published = db.Column(db.Boolean,     default=True)
-    created_at   = db.Column(db.DateTime,    default=datetime.utcnow)
-    updated_at   = db.Column(db.DateTime,    default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at   = db.Column(db.DateTime,    default=utc_now)
+    updated_at   = db.Column(db.DateTime,    default=utc_now, onupdate=utc_now)
 
     def is_upcoming(self):
-        return self.event_date >= datetime.utcnow()
+        return self.event_date >= utc_now()
 
 
 class GalleryAlbum(db.Model):
@@ -371,7 +376,7 @@ class GalleryAlbum(db.Model):
     description  = db.Column(db.Text,        nullable=True)
     cover_image  = db.Column(db.String(500), nullable=True)
     is_published = db.Column(db.Boolean,     default=True)
-    created_at   = db.Column(db.DateTime,    default=datetime.utcnow)
+    created_at   = db.Column(db.DateTime,    default=utc_now)
     images       = db.relationship('GalleryImage', backref='album', lazy='dynamic',
                                    cascade='all, delete-orphan')
 
@@ -387,7 +392,7 @@ class GalleryImage(db.Model):
     filename   = db.Column(db.String(500), nullable=False)
     caption    = db.Column(db.String(255), nullable=True)
     sort_order = db.Column(db.Integer,     default=0)
-    created_at = db.Column(db.DateTime,    default=datetime.utcnow)
+    created_at = db.Column(db.DateTime,    default=utc_now)
 
 
 class BlogPost(db.Model):
@@ -402,8 +407,8 @@ class BlogPost(db.Model):
     is_published   = db.Column(db.Boolean,     default=True)
     is_featured    = db.Column(db.Boolean,     default=False)
     views          = db.Column(db.Integer,     default=0)
-    created_at     = db.Column(db.DateTime,    default=datetime.utcnow, index=True)
-    updated_at     = db.Column(db.DateTime,    default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at     = db.Column(db.DateTime,    default=utc_now, index=True)
+    updated_at     = db.Column(db.DateTime,    default=utc_now, onupdate=utc_now)
 
 
 class ContactMessage(db.Model):
@@ -415,7 +420,7 @@ class ContactMessage(db.Model):
     subject    = db.Column(db.String(255), nullable=False)
     message    = db.Column(db.Text,        nullable=False)
     is_read    = db.Column(db.Boolean,     default=False)
-    created_at = db.Column(db.DateTime,    default=datetime.utcnow, index=True)
+    created_at = db.Column(db.DateTime,    default=utc_now, index=True)
 
 
 class Download(db.Model):
@@ -429,7 +434,7 @@ class Download(db.Model):
     file_size      = db.Column(db.Integer,     nullable=True)
     download_count = db.Column(db.Integer,     default=0)
     is_published   = db.Column(db.Boolean,     default=True)
-    created_at     = db.Column(db.DateTime,    default=datetime.utcnow, index=True)
+    created_at     = db.Column(db.DateTime,    default=utc_now, index=True)
 
     def formatted_size(self):
         if not self.file_size:
@@ -450,7 +455,7 @@ class HomepageContent(db.Model):
     content    = db.Column(db.Text,        nullable=True)
     image      = db.Column(db.String(500), nullable=True)
     extra_data = db.Column(db.JSON,        nullable=True)
-    updated_at = db.Column(db.DateTime,    default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = db.Column(db.DateTime,    default=utc_now, onupdate=utc_now)
 
 
 class Slide(db.Model):
@@ -463,7 +468,7 @@ class Slide(db.Model):
     btn_url     = db.Column(db.String(255), nullable=True)
     sort_order  = db.Column(db.Integer, default=0)
     is_active   = db.Column(db.Boolean, default=True)
-    created_at  = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at  = db.Column(db.DateTime, default=utc_now)
 
 
 class BoardMember(db.Model):
@@ -478,8 +483,8 @@ class BoardMember(db.Model):
     phone        = db.Column(db.String(30),  nullable=True)
     is_published = db.Column(db.Boolean,     default=True)
     sort_order   = db.Column(db.Integer,     default=0)
-    created_at   = db.Column(db.DateTime,    default=datetime.utcnow)
-    updated_at   = db.Column(db.DateTime,    default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at   = db.Column(db.DateTime,    default=utc_now)
+    updated_at   = db.Column(db.DateTime,    default=utc_now, onupdate=utc_now)
 
 
 class Testimonial(db.Model):
@@ -492,7 +497,7 @@ class Testimonial(db.Model):
     rating       = db.Column(db.Integer,     default=5)
     is_published = db.Column(db.Boolean,     default=True)
     sort_order   = db.Column(db.Integer,     default=0)
-    created_at   = db.Column(db.DateTime,    default=datetime.utcnow)
+    created_at   = db.Column(db.DateTime,    default=utc_now)
 
 
 class Topper(db.Model):
@@ -506,7 +511,7 @@ class Topper(db.Model):
     rank         = db.Column(db.Integer,     default=1)
     is_published = db.Column(db.Boolean,     default=True)
     sort_order   = db.Column(db.Integer,     default=0)
-    created_at   = db.Column(db.DateTime,    default=datetime.utcnow)
+    created_at   = db.Column(db.DateTime,    default=utc_now)
 
 
 # ─────────────────────────────────────────────
@@ -729,7 +734,7 @@ def inject_globals():
     except Exception:
         ticker_notices = []
     return {
-        'now':            datetime.utcnow(),
+        'now':            utc_now(),
         'school_name':    app.config['SCHOOL_NAME'],
         'school_tagline': app.config['SCHOOL_TAGLINE'],
         'latest_notices': ticker_notices,
@@ -792,7 +797,7 @@ def index():
                        .order_by(Notice.is_pinned.desc(), Notice.created_at.desc())
                        .limit(5).all())
     upcoming_events = (Event.query
-                       .filter(Event.is_published == True, Event.event_date >= datetime.utcnow())
+                       .filter(Event.is_published == True, Event.event_date >= utc_now())
                        .order_by(Event.event_date.asc()).limit(4).all())
     featured_posts  = (BlogPost.query.filter_by(is_published=True, is_featured=True)
                        .order_by(BlogPost.created_at.desc()).limit(3).all())
@@ -862,7 +867,7 @@ def notices():
 def events():
     page = request.args.get('page', 1, type=int)
     tab  = request.args.get('tab', 'upcoming')
-    now  = datetime.utcnow()
+    now  = utc_now()
     if tab == 'past':
         query = Event.query.filter(Event.is_published == True, Event.event_date < now).order_by(Event.event_date.desc())
     else:
@@ -960,7 +965,7 @@ Message:
 {form.message.data}
 
 ---
-Received at {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}
+Received at {utc_now().strftime('%Y-%m-%d %H:%M UTC')}
 """
         email_msg = MailMessage(subject=subject, recipients=[receiver],
                                 body=body, reply_to=form.email.data)
@@ -985,7 +990,7 @@ Subject : {form.subject.data}
 
 ---
 This is an automated reply. Please do not reply to this email.
-{school} | info@{school.lower().replace(' ','')} .edu
+{school} | info@{school.lower().replace(' ','')}.edu
 """
         email_msg = MailMessage(subject=subject, recipients=[form.email.data], body=body)
         mail.send(email_msg)
@@ -1043,7 +1048,7 @@ def privacy_policy():
 
 
 # ─────────────────────────────────────────────
-# 9. AUTH ROUTES (SAME AS ORIGINAL)
+# 9. AUTH ROUTES
 # ─────────────────────────────────────────────
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
@@ -1055,7 +1060,7 @@ def login():
         admin = Admin.query.filter_by(username=form.username.data).first()
         if admin and admin.is_active and admin.check_password(form.password.data):
             login_user(admin, remember=form.remember_me.data)
-            admin.last_login = datetime.utcnow()
+            admin.last_login = utc_now()
             db.session.commit()
             next_page = request.args.get('next')
             flash('Welcome back!', 'success')
@@ -1097,7 +1102,7 @@ def forgot_password():
         if admin:
             token = secrets.token_urlsafe(32)
             admin.reset_token = token
-            admin.reset_token_expiry = datetime.utcnow() + timedelta(hours=1)
+            admin.reset_token_expiry = utc_now() + timedelta(hours=1)
             db.session.commit()
             reset_url = url_for('auth.reset_password', token=token, _external=True)
             try:
@@ -1134,7 +1139,7 @@ def reset_password(token):
     if current_user.is_authenticated:
         return redirect(url_for('admin.dashboard'))
     admin = Admin.query.filter_by(reset_token=token).first()
-    if not admin or not admin.reset_token_expiry or admin.reset_token_expiry < datetime.utcnow():
+    if not admin or not admin.reset_token_expiry or admin.reset_token_expiry < utc_now():
         flash('This reset link is invalid or has expired. Please request a new one.', 'danger')
         return redirect(url_for('auth.forgot_password'))
     form = ResetPasswordForm()
@@ -1906,7 +1911,7 @@ def privacy_policy_admin():
             attributes={'a': ['href', 'target', 'rel']},
             strip=True
         )
-        last_updated = datetime.utcnow().strftime('%d %B %Y')
+        last_updated = utc_now().strftime('%d %B %Y')
         if content:
             content.content = body
             if content.extra_data is None:
@@ -2004,7 +2009,7 @@ def seed_database():
             title='Annual Sports Day 2025',
             description='Join us for an exciting day of athletics, field events, and team sports.',
             location='School Sports Ground',
-            event_date=datetime.utcnow() + timedelta(days=30),
+            event_date=utc_now() + timedelta(days=30),
             is_published=True))
 
     if not Testimonial.query.first():
