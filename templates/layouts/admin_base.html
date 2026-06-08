@@ -143,7 +143,7 @@
       <div class="header-actions">
         <!-- Notification Bell -->
         {% set unread = unread_count() %}
-        {% set recent_msgs = recent_messages(5) %}
+        {% set recent_msgs = get_recent_messages(5) %}
         <div class="notif-wrap" id="notifWrap">
           <button class="notif-bell" id="notifBtn" type="button"
                   aria-label="Notifications" aria-expanded="false">

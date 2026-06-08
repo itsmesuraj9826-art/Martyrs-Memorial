@@ -729,19 +729,8 @@ def unread_count():
 
 
 @app.template_global()
-def recent_messages(limit=5):
-    """Returns the most recent contact messages for the notification dropdown."""
-    try:
-        return (ContactMessage.query
-                .order_by(ContactMessage.created_at.desc())
-                .limit(limit).all())
-    except Exception:
-        return []
-
-
-@app.template_global()
 def get_recent_messages(limit=5):
-    """Returns recent contact messages for the notification dropdown."""
+    """Returns the most recent contact messages for the notification dropdown."""
     try:
         return (ContactMessage.query
                 .order_by(ContactMessage.created_at.desc())

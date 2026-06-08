@@ -1512,18 +1512,54 @@ body.dark-mode .topper-tab-btn{background:#122040;border-color:#1e3a6e;color:#94
 body.dark-mode .topper-tab-btn.active{background:var(--c-navy);color:#fff;border-color:var(--c-navy)}
 body.dark-mode .topper-name{color:#e2e8f0}
 
-/* ── Hero height on mobile — prevent full-screen overflow ── */
+/* ── Hero mobile — compact, no overflow ── */
 @media(max-width:768px){
   .hero{
-    min-height:72vh !important;
-    padding-top:calc(36px + 60px + 1.25rem);
-    padding-bottom:3rem;
+    min-height:auto !important;
+    height:auto !important;
+    padding:calc(36px + 60px + .75rem) 1.25rem 2rem !important;
   }
+  /* Hide the large eyebrow pill on mobile — saves ~100px */
+  .hero-eyebrow{ display:none }
+  /* Tighter headline */
+  .hero h1{
+    font-size:clamp(1.7rem,7vw,2.4rem) !important;
+    margin-bottom:.75rem !important;
+    line-height:1.15 !important;
+  }
+  .hero p{
+    font-size:.88rem !important;
+    margin-bottom:1.25rem !important;
+    line-height:1.6 !important;
+  }
+  /* Stack buttons but keep them slim */
+  .hero-actions{
+    flex-direction:column !important;
+    gap:.6rem !important;
+  }
+  .hero-actions .btn{
+    width:100% !important;
+    justify-content:center !important;
+    padding:.65rem 1.2rem !important;
+    font-size:.85rem !important;
+  }
+  /* Smaller arrows */
+  .slide-arrow{
+    width:34px !important;height:34px !important;
+    font-size:1.1rem !important;
+  }
+  .slide-prev{left:.5rem !important}
+  .slide-next{right:.5rem !important}
+  /* Dots closer to bottom */
+  .hero-dots{bottom:.75rem !important}
+  .hero-scroll-hint{display:none !important}
 }
+
 @media(max-width:480px){
   .hero{
-    min-height:65vh !important;
-    padding-top:calc(36px + 56px + 1rem);
-    padding-bottom:2.5rem;
+    padding:calc(36px + 56px + .5rem) 1rem 1.75rem !important;
+  }
+  .hero h1{
+    font-size:clamp(1.5rem,8vw,2rem) !important;
   }
 }
