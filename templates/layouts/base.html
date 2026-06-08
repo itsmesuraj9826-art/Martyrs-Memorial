@@ -246,27 +246,40 @@
   </a>
 </div>
 
+<!-- Add this hidden element somewhere before the script -->
+<span id="schoolNameData" style="display:none;" data-name="{{ school_name }}"></span>
+
 <script>
-(function(){
+(function() {
   // ── Change this number if needed ──────────────────────
   var WHATSAPP_NUMBER = "9779819745795"; // +977 9805308807
-  var PREFILL_MSG     = "Hello! I would like to inquire about admissions at {{ school_name }}.";
+
+  // Get school name from HTML data attribute (no Jinja in JavaScript)
+  var schoolNameEl = document.getElementById("schoolNameData");
+  var schoolName = schoolNameEl ? schoolNameEl.getAttribute("data-name") : "our college";
+  var PREFILL_MSG = "Hello! I would like to inquire about admissions at " + schoolName;
   // ──────────────────────────────────────────────────────
 
-  var encoded  = encodeURIComponent(PREFILL_MSG);
-  var isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
-  var link     = document.getElementById("waLink");
+  var encoded = encodeURIComponent(PREFILL_MSG);
+  var isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  var link = document.getElementById("waLink");
 
-  link.href = isMobile
-    ? "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encoded
-    : "https://web.whatsapp.com/send?phone=" + WHATSAPP_NUMBER + "&text=" + encoded;
+  if (link) {
+    link.href = isMobile
+      ? "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encoded
+      : "https://web.whatsapp.com/send?phone=" + WHATSAPP_NUMBER + "&text=" + encoded;
+  }
 
   // Auto-show tooltip once after 3 seconds
   var tip = document.getElementById("waTooltip");
-  setTimeout(function(){
-    tip.classList.add("wa-show");
-    setTimeout(function(){ tip.classList.remove("wa-show"); }, 4000);
-  }, 3000);
+  if (tip) {
+    setTimeout(function() {
+      tip.classList.add("wa-show");
+      setTimeout(function() {
+        tip.classList.remove("wa-show");
+      }, 4000);
+    }, 3000);
+  }
 })();
 </script>
 <!-- ── END WHATSAPP BUTTON ── -->
