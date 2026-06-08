@@ -67,6 +67,8 @@
       <li><a href="{{ url_for('public.downloads') }}" class="{% if request.endpoint == 'public.downloads' %}active{% endif %}">Downloads</a></li>
       <li><a href="{{ url_for('public.contact') }}" class="{% if request.endpoint == 'public.contact' %}active{% endif %}">Contact</a></li>
     </ul>
+    <!-- Mobile tap-outside overlay -->
+    <div class="nav-menu-overlay" id="navMenuOverlay"></div>
     <div class="nav-actions">
       <!-- Live clock -->
       <div class="nav-clock" id="navClock" title="Local time — auto dark mode switches at 6 PM">
@@ -126,7 +128,7 @@
         </div>
       </div>
 
-      <!-- Quick Links with Admin button at the bottom -->
+      <!-- Quick Links -->
       <div class="footer-col">
         <h4>Quick Links</h4>
         <ul>
@@ -136,12 +138,7 @@
           <li><a href="{{ url_for('public.events') }}">Events</a></li>
           <li><a href="{{ url_for('public.gallery') }}">Gallery</a></li>
           <li><a href="{{ url_for('public.privacy_policy') }}">Privacy Policy</a></li>
-          <!-- Admin button moved here - inside Quick Links -->
-          <li class="admin-link-item">
-            <a href="{{ url_for('auth.login') }}" class="admin-link">
-              <i class="fa-solid fa-lock"></i> Admin Login
-            </a>
-          </li>
+          <li><a href="{{ url_for('auth.login') }}" class="footer-admin-link"><i class="fa-solid fa-lock"></i> Admin Login</a></li>
         </ul>
       </div>
 
@@ -172,125 +169,50 @@
 
     </div>
   </div>
-
-  <!-- Copyright Bar (without Admin button) -->
   <div style="border-top:1px solid #1a2d45">
     <div class="container footer-bottom">
       <span>© <span data-year></span> {{ school_name }}, Biratnagar-10. All rights reserved.</span>
-      <a href="{{ url_for('public.privacy_policy') }}" style="font-size:.78rem;color:#4a6fa5;text-decoration:none;transition:color .2s;white-space:nowrap" onmouseover="this.style.color='#d4920a'" onmouseout="this.style.color='#4a6fa5'">
-        <i class="fa-solid fa-shield-halved" style="margin-right:.3rem;font-size:.7rem"></i>Privacy Policy
+      <a href="{{ url_for('public.privacy_policy') }}" style="font-size:.78rem;color:#4a6fa5;text-decoration:none;transition:color .2s;white-space:nowrap" onmouseover="this.style.color='#d4920a'" onmouseout="this.style.color='#4a6fa5'"><i class="fa-solid fa-shield-halved" style="margin-right:.3rem;font-size:.7rem"></i>Privacy Policy</a>
+      <span>Developed by <a href="https://www.instagram.com/surajmehtahere_/" target="_blank" rel="noopener" style="color:#4a6fa5;font-weight:700;text-decoration:none;transition:color .2s" onmouseover="this.style.color='#e1306c'" onmouseout="this.style.color='#4a6fa5'"><i class="fa-brands fa-instagram" style="margin-right:.3rem"></i>Suraj Mehta</a> &amp; Team</span>
+      <a href="{{ url_for('auth.login') }}" style="font-size:.75rem;color:#4a6fa5;opacity:.55;text-decoration:none;transition:opacity .2s" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.55'">
+        <i class="fa-solid fa-lock" style="font-size:.68rem;margin-right:.3rem"></i>Admin
       </a>
-      <span>Developed by <a href="https://www.instagram.com/surajmehtahere_/" target="_blank" rel="noopener" style="color:#4a6fa5;font-weight:700;text-decoration:none;transition:color .2s" onmouseover="this.style.color='#e1306c'" onmouseout="this.style.color='#4a6fa5'">
-        <i class="fa-brands fa-instagram" style="margin-right:.3rem"></i>Suraj Mehta</a> &amp; Team
-      </span>
     </div>
   </div>
 </footer>
-<!-- ═══════════════════════════════════════════
-     WHATSAPP FLOATING BUTTON
-     Number: 9805308807  (Nepal +977)
-     To change: update WHATSAPP_NUMBER below
-════════════════════════════════════════════ -->
-<style>
-.wa-float{
-  position:fixed;bottom:28px;right:28px;z-index:9999;
-  display:flex;flex-direction:column;align-items:flex-end;gap:10px;
-  font-family:'DM Sans',system-ui,sans-serif;
-}
-.wa-tooltip{
-  background:#fff;color:#1a1a1a;
-  font-size:13px;font-weight:500;line-height:1.4;
-  padding:9px 14px;
-  border-radius:20px 20px 4px 20px;
-  box-shadow:0 4px 20px rgba(0,0,0,.18);
-  white-space:nowrap;
-  opacity:0;transform:translateX(12px);
-  transition:opacity .25s ease,transform .25s ease;
-  pointer-events:none;
-}
-.wa-float:hover .wa-tooltip,
-.wa-tooltip.wa-show{opacity:1;transform:translateX(0)}
-.wa-btn{
-  width:60px;height:60px;border-radius:50%;
-  background:#25D366;
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 6px 24px rgba(37,211,102,.45);
-  cursor:pointer;text-decoration:none;
-  position:relative;
-  transition:transform .2s ease,box-shadow .2s ease;
-  animation:wa-pop-in .5s cubic-bezier(.34,1.56,.64,1) both;
-}
-.wa-btn:hover{transform:scale(1.1);box-shadow:0 8px 28px rgba(37,211,102,.6)}
-.wa-btn svg{width:32px;height:32px;fill:#fff;flex-shrink:0}
-.wa-btn::before{
-  content:'';position:absolute;inset:-6px;border-radius:50%;
-  border:3px solid rgba(37,211,102,.5);
-  animation:wa-pulse 2.2s ease-out infinite;
-}
-@keyframes wa-pulse{
-  0%  {opacity:.8;transform:scale(1)}
-  70% {opacity:0;transform:scale(1.5)}
-  100%{opacity:0;transform:scale(1.5)}
-}
-@keyframes wa-pop-in{
-  from{opacity:0;transform:scale(.4)}
-  to  {opacity:1;transform:scale(1)}
-}
-@media(max-width:480px){
-  .wa-float{bottom:18px;right:16px}
-  .wa-btn{width:52px;height:52px}
-  .wa-btn svg{width:27px;height:27px}
-  .wa-tooltip{font-size:12px}
-}
-</style>
 
+
+<!-- ══ WHATSAPP FLOAT BUTTON ══ -->
+<span id="schoolNameData" style="display:none" data-name="{{ school_name }}"></span>
 <div class="wa-float" id="waFloat">
   <div class="wa-tooltip" id="waTooltip">💬 Chat with us on WhatsApp</div>
-  <a class="wa-btn" id="waLink" href="#" target="_blank" rel="noopener noreferrer"
-     aria-label="Contact us on WhatsApp" title="WhatsApp">
+  <a class="wa-btn" id="waLink" href="#" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
     <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
       <path d="M16.002 2C8.271 2 2 8.271 2 16.002c0 2.475.652 4.8 1.788 6.82L2 30l7.355-1.762A13.94 13.94 0 0 0 16.002 30C23.73 30 30 23.73 30 16.002 30 8.271 23.73 2 16.002 2zm0 25.455a11.39 11.39 0 0 1-5.81-1.589l-.416-.247-4.362 1.045 1.077-4.25-.271-.435A11.394 11.394 0 0 1 4.547 16c0-6.315 5.14-11.455 11.455-11.455S27.455 9.685 27.455 16 22.315 27.455 16.002 27.455zm6.29-8.57c-.345-.173-2.042-1.007-2.358-1.122-.316-.115-.547-.173-.777.173-.23.345-.893 1.122-1.094 1.353-.201.23-.402.259-.748.086-.345-.173-1.457-.537-2.776-1.714-1.026-.915-1.718-2.045-1.92-2.39-.201-.346-.021-.533.151-.705.155-.155.345-.403.518-.604.173-.202.23-.346.345-.577.115-.23.058-.432-.029-.605-.086-.173-.777-1.874-1.065-2.565-.28-.672-.565-.581-.777-.592-.201-.01-.431-.012-.662-.012s-.604.086-.92.432c-.316.345-1.208 1.18-1.208 2.878s1.237 3.338 1.41 3.568c.173.23 2.434 3.716 5.898 5.21.824.356 1.467.568 1.97.728.827.264 1.58.226 2.175.137.663-.099 2.042-.834 2.329-1.638.288-.805.288-1.496.201-1.638-.086-.143-.316-.23-.661-.403z"/>
     </svg>
   </a>
 </div>
-
-<!-- Add this hidden element somewhere before the script -->
-<span id="schoolNameData" style="display:none;" data-name="{{ school_name }}"></span>
-
 <script>
-(function() {
-  // ── Change this number if needed ──────────────────────
-  var WHATSAPP_NUMBER = "9779819745795"; // +977 9805308807
-
-  // Get school name from HTML data attribute (no Jinja in JavaScript)
-  var schoolNameEl = document.getElementById("schoolNameData");
-  var schoolName = schoolNameEl ? schoolNameEl.getAttribute("data-name") : "our college";
-  var PREFILL_MSG = "Hello! I would like to inquire about admissions at " + schoolName;
-  // ──────────────────────────────────────────────────────
-
-  var encoded = encodeURIComponent(PREFILL_MSG);
-  var isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+(function(){
+  var WHATSAPP_NUMBER = "9779819745795";
+  var el = document.getElementById("schoolNameData");
+  var name = el ? el.getAttribute("data-name") : "our college";
+  var msg = encodeURIComponent("Hello! I would like to inquire about admissions at " + name);
+  var mobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   var link = document.getElementById("waLink");
-
-  if (link) {
-    link.href = isMobile
-      ? "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encoded
-      : "https://web.whatsapp.com/send?phone=" + WHATSAPP_NUMBER + "&text=" + encoded;
-  }
-
-  // Auto-show tooltip once after 3 seconds
+  if(link) link.href = mobile
+    ? "https://wa.me/"+WHATSAPP_NUMBER+"?text="+msg
+    : "https://web.whatsapp.com/send?phone="+WHATSAPP_NUMBER+"&text="+msg;
   var tip = document.getElementById("waTooltip");
-  if (tip) {
-    setTimeout(function() {
+  if(tip){
+    setTimeout(function(){
       tip.classList.add("wa-show");
-      setTimeout(function() {
-        tip.classList.remove("wa-show");
-      }, 4000);
-    }, 3000);
+      setTimeout(function(){tip.classList.remove("wa-show")},4000);
+    },3000);
   }
 })();
 </script>
-<!-- ── END WHATSAPP BUTTON ── -->
+<!-- ══ END WHATSAPP ══ -->
 
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 {% block extra_js %}{% endblock %}

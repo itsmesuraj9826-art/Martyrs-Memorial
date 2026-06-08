@@ -33,7 +33,7 @@
   background: #0a1120;
 }
 .sidebar-title { color: #fff; font-weight: 700; font-size: 1rem; flex: 1; }
-.sidebar-close { display: none; background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; }
+.sidebar-close { display: none; background: none; border: none; color: #94a3b8; font-size: 1.5rem; }
 
 .sidebar-nav ul { padding: 1rem 0; }
 .sidebar-nav li a {
@@ -68,44 +68,6 @@
   border-radius: 9999px;
 }
 
-/* Sidebar admin info block */
-.sidebar-admin-info {
-  display: flex;
-  align-items: center;
-  gap: .85rem;
-  padding: 1rem 1.25rem;
-  background: rgba(255,255,255,.07);
-  border-bottom: 1px solid rgba(255,255,255,.1);
-  margin-bottom: .5rem;
-}
-.sidebar-admin-info .admin-avatar {
-  width: 40px; height: 40px; border-radius: 50%;
-  background: var(--admin-amber, #f4a826);
-  color: #1a2e1a;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 1.1rem; flex-shrink: 0;
-}
-.sidebar-admin-info strong { display: block; font-size: .88rem; color: #fff; }
-.sidebar-admin-info small  { font-size: .75rem; color: rgba(255,255,255,.55); display: block; }
-
-/* Sidebar footer */
-.sidebar-footer {
-  padding: 1rem 1.25rem;
-  border-top: 1px solid rgba(255,255,255,.1);
-  margin-top: auto;
-}
-.sidebar-footer a {
-  color: rgba(255,255,255,.6);
-  font-size: .85rem;
-  text-decoration: none;
-  transition: color .2s;
-}
-.sidebar-footer a:hover { color: var(--admin-amber, #f4a826); }
-
-/* Sidebar logout */
-.sidebar-logout a { color: rgba(255,100,100,.8) !important; }
-.sidebar-logout a:hover { color: #ef4444 !important; background: rgba(239,68,68,.1) !important; }
-
 /* ── Admin Main ── */
 .admin-main {
   flex: 1;
@@ -135,101 +97,10 @@
   color: #64748b;
   display: none;
   padding: .4rem;
-  cursor: pointer;
 }
 .header-title { font-weight: 600; font-size: 1.05rem; color: #1e293b; flex: 1; }
+.header-user { font-size: .9rem; color: #64748b; }
 
-/* Header Actions - Updated for notification bell */
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-/* Header User Profile */
-.header-user {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  text-decoration: none;
-  color: #1e293b;
-  font-size: 0.88rem;
-  font-weight: 500;
-  padding: 0.25rem 0.5rem;
-  border-radius: 8px;
-  transition: background 0.2s;
-}
-.header-user:hover {
-  background: rgba(0, 0, 0, 0.05);
-}
-.header-avatar {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #2d5a27, #3a7032);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: .9rem;
-}
-
-/* ============================================================
-   NOTIFICATION BELL STYLES
-   ============================================================ */
-
-/* Notification Bell Container */
-.nav-notification {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  font-size: 1.25rem;
-  color: #64748b;
-  transition: all 0.2s ease;
-  padding: 0.35rem;
-  border-radius: 8px;
-}
-
-.nav-notification:hover {
-  color: var(--admin-amber, #f4a826);
-  background: rgba(0, 0, 0, 0.05);
-  transform: scale(1.05);
-}
-
-/* Notification Badge */
-.nav-notification .badge {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  background: #ef4444;
-  color: white;
-  font-size: 0.6rem;
-  font-weight: 700;
-  padding: 2px 5px;
-  border-radius: 20px;
-  min-width: 17px;
-  height: 17px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-/* Dark Mode Support for Notification */
-body.dark-mode .nav-notification {
-  color: #94a3b8;
-}
-
-body.dark-mode .nav-notification:hover {
-  color: var(--admin-amber, #f4a826);
-  background: rgba(255, 255, 255, 0.05);
-}
-
-/* ── Admin Content ── */
 .admin-content { padding: 1.75rem; flex: 1; }
 
 /* ── Cards ── */
@@ -480,7 +351,6 @@ body.dark-mode .nav-notification:hover {
   border: none;
   font-size: 1rem;
   color: #64748b;
-  cursor: pointer;
 }
 .back-link {
   display: block;
@@ -491,8 +361,21 @@ body.dark-mode .nav-notification:hover {
 }
 .back-link:hover { color: #3b82f6; }
 
-/* ── Change Password page fix ── */
-.change-password-wrap { max-width: 480px; }
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-close { display: block; }
+  .admin-main { margin-left: 0; }
+  .sidebar-toggle { display: block; }
+  .dashboard-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .stats-cards { grid-template-columns: repeat(2, 1fr); }
+  .admin-content { padding: 1rem; }
+  .message-detail-meta { grid-template-columns: 1fr; }
+}
 
 /* ── Green theme overrides for admin ── */
 :root {
@@ -507,63 +390,122 @@ body.dark-mode .nav-notification:hover {
   --text-muted:      #5a7a52;
 }
 
-/* ── Responsive ── */
-@media (max-width: 1024px) {
-  .sidebar { transform: translateX(-100%); }
-  .sidebar.open { transform: translateX(0); }
-  .sidebar-close { display: block; }
-  .admin-main { margin-left: 0; }
-  .sidebar-toggle { display: block; }
-  .dashboard-grid { grid-template-columns: 1fr; }
+/* Sidebar admin info block */
+.sidebar-admin-info {
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+  padding: 1rem 1.25rem;
+  background: rgba(255,255,255,.07);
+  border-bottom: 1px solid rgba(255,255,255,.1);
+  margin-bottom: .5rem;
+}
+.sidebar-admin-info .admin-avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--admin-amber);
+  color: #1a2e1a;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 1.1rem; flex-shrink: 0;
+}
+.sidebar-admin-info strong { display: block; font-size: .88rem; color: #fff; }
+.sidebar-admin-info small  { font-size: .75rem; color: rgba(255,255,255,.55); display: block; }
+
+/* Sidebar footer */
+.sidebar-footer {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid rgba(255,255,255,.1);
+  margin-top: auto;
+}
+.sidebar-footer a {
+  color: rgba(255,255,255,.6);
+  font-size: .85rem;
+  text-decoration: none;
+  transition: color .2s;
+}
+.sidebar-footer a:hover { color: var(--admin-amber); }
+
+/* Sidebar logout */
+.sidebar-logout a { color: rgba(255,100,100,.8) !important; }
+.sidebar-logout a:hover { color: #ef4444 !important; background: rgba(239,68,68,.1) !important; }
+
+/* Header avatar */
+.header-actions { display: flex; align-items: center; }
+.header-user {
+  display: flex; align-items: center; gap: .6rem;
+  text-decoration: none; color: var(--text);
+  font-size: .88rem; font-weight: 500;
+}
+.header-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, #2d5a27, #3a7032);
+  color: #fff; display: flex; align-items: center;
+  justify-content: center; font-weight: 700; font-size: .9rem;
 }
 
-@media (max-width: 768px) {
-  /* Notification bell mobile */
-  .nav-notification {
-    font-size: 1.1rem;
-    padding: 0.25rem;
-  }
+/* Change Password page fix */
+.change-password-wrap { max-width: 480px; }
 
-  .nav-notification .badge {
-    font-size: 0.5rem;
-    padding: 1px 4px;
-    min-width: 14px;
-    height: 14px;
-    top: -4px;
-    right: -4px;
-  }
-
-  .header-user span {
-    display: none;
-  }
-
-  .header-user {
-    padding: 0.25rem;
-  }
-
-  .header-actions {
-    gap: 0.5rem;
-  }
+/* ── Notification Bell ── */
+.notif-bell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  color: #475569;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s, transform 0.2s;
+  flex-shrink: 0;
 }
 
-@media (max-width: 640px) {
-  .stats-cards { grid-template-columns: repeat(2, 1fr); }
-  .admin-content { padding: 1rem; }
-  .message-detail-meta { grid-template-columns: 1fr; }
+.notif-bell:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+  transform: scale(1.06);
 }
 
-@media (max-width: 480px) {
-  /* Notification bell very small */
-  .nav-notification {
-    font-size: 1rem;
-  }
+/* Red count badge */
+.notif-count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #ef4444;
+  color: #fff;
+  font-size: .62rem;
+  font-weight: 800;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  line-height: 1;
+  border: 2px solid #fff;
+  pointer-events: none;
+}
 
-  .nav-notification .badge {
-    font-size: 0.45rem;
-    padding: 1px 3px;
-    min-width: 12px;
-    height: 12px;
-    top: -3px;
-    right: -3px;
-  }
+/* Gentle ring animation when there are unread messages */
+.notif-bell:has(.notif-count) svg {
+  animation: bellRing 3s ease-in-out infinite;
+  transform-origin: top center;
+}
+
+@keyframes bellRing {
+  0%, 100% { transform: rotate(0deg); }
+  5%        { transform: rotate(14deg); }
+  10%       { transform: rotate(-10deg); }
+  15%       { transform: rotate(8deg); }
+  20%       { transform: rotate(-5deg); }
+  25%       { transform: rotate(0deg); }
+}
+
+/* header-actions gap */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
 }

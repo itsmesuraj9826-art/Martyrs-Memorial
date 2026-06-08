@@ -144,9 +144,11 @@
   const navToggle = document.getElementById('navToggle');
   const navLinks  = document.getElementById('navLinks');
   if (navToggle && navLinks) {
+    const navOverlay = document.getElementById('navMenuOverlay');
     navToggle.addEventListener('click', () => {
       const open = navLinks.classList.toggle('open');
       navToggle.setAttribute('aria-expanded', String(open));
+      if (navOverlay) navOverlay.classList.toggle('open', open);
       const spans = navToggle.querySelectorAll('span');
       if (open) {
         spans[0].style.cssText = 'transform:translateY(7px) rotate(45deg)';
@@ -159,9 +161,18 @@
     document.addEventListener('click', (e) => {
       if (navbar && !navbar.contains(e.target)) {
         navLinks.classList.remove('open');
+        if (navOverlay) navOverlay.classList.remove('open');
         navToggle.querySelectorAll('span').forEach(s => s.style.cssText = '');
       }
     });
+    if (navOverlay) {
+      navOverlay.addEventListener('click', () => {
+        navLinks.classList.remove('open');
+        navOverlay.classList.remove('open');
+        navToggle.setAttribute('aria-expanded', 'false');
+        navToggle.querySelectorAll('span').forEach(s => s.style.cssText = '');
+      });
+    }
   }
 
   /* ── Scroll reveal animations ── */

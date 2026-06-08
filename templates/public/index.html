@@ -13,12 +13,12 @@
   <div class="hero-bg-slideshow" id="heroBgSlideshow">
     {% for slide in slides %}
     <div class="hero-bg-slide {% if loop.first %}active{% endif %}"
-         style="background-image:url('{{ slide.image }}')"></div>
+         style="background-image:url('{{ img_src(slide.image, 'misc') }}')"></div>
     {% endfor %}
   </div>
   {% elif hero and hero.image %}
   <div class="hero-bg-slide active"
-       style="position:absolute;inset:0;background-image:url('{{ hero.image }}');background-size:cover;background-position:center"></div>
+       style="position:absolute;inset:0;background-image:url('{{ img_src(hero.image, 'misc') }}');background-size:cover;background-position:center"></div>
   {% endif %}
 
   <!-- Dark gradient overlay — keeps text readable over any photo -->
@@ -84,7 +84,7 @@
   <div class="container about-grid">
     <div class="about-image-wrap" data-animate="slideInLeft">
       {% if about and about.image %}
-      <img src="{{ about.image }}"
+      <img src="{{ img_src(about.image, 'misc') }}"
            alt="About {{ school_name }}">
       {% else %}
       <div class="image-placeholder large">🏫</div>
@@ -105,7 +105,7 @@
   <div class="container principal-grid">
     <div class="principal-photo-wrap" data-animate="fadeIn">
       {% if principal.image %}
-      <img src="{{ principal.image }}" alt="Principal" class="principal-photo">
+      <img src="{{ img_src(principal.image, 'misc') }}" alt="Principal" class="principal-photo">
       {% else %}
       <div class="image-placeholder principal-ph">👨‍💼</div>
       {% endif %}
@@ -169,7 +169,7 @@
       <article class="event-card" data-delay="{{ loop.index }}">
         {% if event.banner_image %}
         <div class="event-image">
-          <img src="{{ event.banner_image }}" alt="{{ event.title }}">
+          <img src="{{ img_src(event.banner_image, 'events') }}" alt="{{ event.title }}">
         </div>
         {% else %}
         <div class="event-image placeholder">📅</div>
@@ -208,7 +208,7 @@
       <a href="{{ url_for('public.gallery_album',album_id=album.id) }}" class="album-card">
         <div class="album-cover">
           {% if album.cover_image %}
-          <img src="{{ album.cover_image }}" alt="{{ album.name }}">
+          <img src="{{ img_src(album.cover_image, 'gallery') }}" alt="{{ album.name }}">
           {% else %}
           <div class="album-cover-placeholder">🖼️</div>
           {% endif %}
@@ -241,7 +241,7 @@
       <article class="news-card" data-delay="{{ loop.index }}">
         {% if post.featured_image %}
         <div class="news-image">
-          <img src="{{ post.featured_image }}" alt="{{ post.title }}">
+          <img src="{{ img_src(post.featured_image, 'blog') }}" alt="{{ post.title }}">
         </div>
         {% endif %}
         <div class="news-body">
@@ -263,7 +263,7 @@
 </section>
 {% endif %}
 
-<!-- ═══════ TESTIMONIALS - FIXED VERSION ═══════ -->
+<!-- ═══════ TESTIMONIALS ═══════ -->
 {% if testimonials %}
 <section class="section testimonials-section">
   <div class="container">
@@ -272,35 +272,18 @@
       <h2>What Our Community Says</h2>
       <p>Hear from the parents, alumni, and students who call {{ school_name }} home.</p>
     </div>
-
-    <!-- Testimonials Grid - Fixed layout -->
-    <div class="testimonials-grid" data-animate="fadeInUp">
+    <div class="testimonials-slider" data-animate="fadeInUp">
       {% for t in testimonials %}
       <div class="testimonial-card" data-delay="{{ loop.index }}">
-        <!-- Quote icon -->
-        <div class="testimonial-quote">"</div>
-
-        <!-- Rating stars -->
-        <div class="testimonial-rating">
-          {% for i in range(t.rating or 5) %}
-          <span class="star">★</span>
-          {% endfor %}
-          {% for i in range(5 - (t.rating or 5)) %}
-          <span class="star-empty">☆</span>
-          {% endfor %}
-        </div>
-
-        <!-- Testimonial text -->
+        <div class="testimonial-stars">{{ '★' * (t.rating or 5) }}{{ '☆' * (5 - (t.rating or 5)) }}</div>
         <p class="testimonial-text">"{{ t.content }}"</p>
-
-        <!-- Author section - INSIDE THE CARD (FIXED) -->
         <div class="testimonial-author">
           {% if t.avatar %}
-          <img src="{{ t.avatar }}" alt="{{ t.name }}" class="testimonial-avatar">
+          <img src="{{ img_src(t.avatar, 'misc') }}" alt="{{ t.name }}" class="testimonial-avatar">
           {% else %}
-          <div class="testimonial-avatar-placeholder">{{ t.name[0] }}</div>
+          <div class="avatar-placeholder">{{ t.name[0] }}</div>
           {% endif %}
-          <div class="testimonial-author-info">
+          <div>
             <strong class="testimonial-name">{{ t.name }}</strong>
             {% if t.role %}<span class="testimonial-role">{{ t.role }}</span>{% endif %}
           </div>
@@ -349,12 +332,12 @@
     <div class="topper-panel {% if loop.first %}active{% endif %}"
          id="panel-{{ key }}" data-animate="fadeInUp">
       <div class="topper-row" id="row-{{ key }}">
-        {% for t in toppers_by_stream[key] %}
+        {% for t in toppers_by_stream[key][:10] %}
         <div class="topper-card">
           <div class="topper-rank-badge">#{{ t.rank }}</div>
           <div class="topper-photo-wrap stream-{{ cls }}">
             {% if t.photo %}
-            <img src="{{ t.photo }}"
+            <img src="{{ img_src(t.photo, 'toppers') }}"
                  alt="{{ t.name }}" class="topper-photo">
             {% else %}
             <div class="topper-initials stream-{{ cls }}">
@@ -406,9 +389,9 @@
     <!-- Left — image panel -->
     <div class="pop-image">
       {% if popup and popup.image %}
-      <img src="{{ popup.image }}" alt="{{ popup.title or school_name }}">
+      <img src="{{ img_src(popup.image, 'misc') }}" alt="{{ popup.title or school_name }}">
       {% elif about and about.image %}
-      <img src="{{ about.image }}" alt="{{ school_name }}">
+      <img src="{{ img_src(about.image, 'misc') }}" alt="{{ school_name }}">
       {% else %}
       <div class="pop-image-fallback">
         <span class="pop-logo-icon">📢</span>
@@ -533,7 +516,7 @@
   if (heroEl) {
     heroEl.addEventListener('touchstart', function(e){ touchX = e.touches[0].clientX; }, {passive:true});
     heroEl.addEventListener('touchend',   function(e){
-      var diff = touchX - e.changedTouches[0].clientX;
+      var diff =      var diff = touchX - e.changedTouches[0].clientX;
       if (Math.abs(diff) > 50) { goTo(diff > 0 ? current+1 : current-1); resetAuto(); }
     }, {passive:true});
   }
