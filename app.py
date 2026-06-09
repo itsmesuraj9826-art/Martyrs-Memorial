@@ -31,8 +31,7 @@ from dotenv import load_dotenv
 load_dotenv()
 import uuid
 import unicodedata
-from datetime import datetime, timezone
-timestamp = datetime.now(timezone.utc)
+from datetime import datetime, timedelta, timezone
 from functools import wraps
 from urllib.parse import quote_plus
 
@@ -497,6 +496,19 @@ class Topper(db.Model):
     created_at    = db.Column(db.DateTime,       default=utc_now)
 
 
+class FooterTheme(db.Model):
+    """Controls the footer event banner — set by admin."""
+    __tablename__ = 'footer_theme'
+    id         = db.Column(db.Integer,     primary_key=True)
+    theme      = db.Column(db.String(30),  default='default')   # default | admission | sports | annual | exam
+    label      = db.Column(db.String(100), nullable=True)        # e.g. "Admissions Open 2083"
+    subtext    = db.Column(db.String(200), nullable=True)        # e.g. "Apply before Shrawan 15"
+    cta_text   = db.Column(db.String(60),  nullable=True)        # e.g. "Apply Now"
+    cta_url    = db.Column(db.String(255), nullable=True)        # e.g. "/contact"
+    is_active  = db.Column(db.Boolean,     default=False)
+    updated_at = db.Column(db.DateTime,    default=utc_now, onupdate=utc_now)
+
+
 # ─────────────────────────────────────────────
 # 5. FORMS
 # ─────────────────────────────────────────────
@@ -704,6 +716,23 @@ class TopperForm(FlaskForm):
     submit       = SubmitField('Save Topper')
 
 
+class FooterThemeForm(FlaskForm):
+    theme    = SelectField('Event Theme', choices=[
+        ('default',   '— Default (no event) —'),
+        ('admission', '🎓 Admissions Open'),
+        ('sports',    '🏆 Sports Day'),
+        ('annual',    '🎉 Annual Day'),
+        ('exam',      '📝 Exam Season'),
+        ('result',    '🌟 Results Declared'),
+    ])
+    label    = StringField('Banner Headline',    validators=[Optional(), Length(0, 100)])
+    subtext  = StringField('Banner Subtext',     validators=[Optional(), Length(0, 200)])
+    cta_text = StringField('Button Text',        validators=[Optional(), Length(0, 60)])
+    cta_url  = StringField('Button Link (URL)',  validators=[Optional(), Length(0, 255)])
+    is_active= BooleanField('Show banner on website', default=True)
+    submit   = SubmitField('Save Theme')
+
+
 # ─────────────────────────────────────────────
 # 6. CONTEXT PROCESSORS & TEMPLATE GLOBALS
 # ─────────────────────────────────────────────
@@ -717,12 +746,17 @@ def inject_globals():
                           .limit(8).all())
     except Exception:
         ticker_notices = []
+    try:
+        footer_theme = FooterTheme.query.filter_by(is_active=True).first()
+    except Exception:
+        footer_theme = None
     return {
         'now':                utc_now(),
         'school_name':        app.config['SCHOOL_NAME'],
         'school_tagline':     app.config['SCHOOL_TAGLINE'],
         'latest_notices':     ticker_notices,
         'cloudinary_enabled': CLOUDINARY_ENABLED,
+        'footer_theme':       footer_theme,
     }
 
 
@@ -1951,6 +1985,29 @@ def notifications():
     return redirect(url_for('admin.messages', read='unread'))
 
 
+# ── Footer Theme ──────────────────────────────────────────────────────────────
+
+@admin_bp.route('/footer-theme', methods=['GET', 'POST'])
+@_require_admin
+def footer_theme():
+    current = FooterTheme.query.first()
+    form    = FooterThemeForm(obj=current)
+    if form.validate_on_submit():
+        if not current:
+            current = FooterTheme()
+            db.session.add(current)
+        current.theme     = form.theme.data
+        current.label     = form.label.data or ''
+        current.subtext   = form.subtext.data or ''
+        current.cta_text  = form.cta_text.data or ''
+        current.cta_url   = form.cta_url.data or ''
+        current.is_active = form.is_active.data
+        db.session.commit()
+        flash('Footer theme updated.', 'success')
+        return redirect(url_for('admin.footer_theme'))
+    return render_template('admin/footer_theme.html', form=form, current=current)
+
+
 # ─────────────────────────────────────────────
 # 11. ERROR HANDLERS
 # ─────────────────────────────────────────────
@@ -2097,6 +2154,12 @@ def seed_database():
                 name=name, stream=stream, percentage=pct,
                 year='2082', rank=rank, is_published=True, sort_order=rank))
         print(f"  Seeded {len(_dummy)} dummy toppers.")
+
+    # Seed default footer theme row
+    if not FooterTheme.query.first():
+        db.session.add(FooterTheme(
+            theme='default', label='', subtext='', cta_text='', cta_url='', is_active=False))
+        print("  Seeded default footer theme.")
 
     db.session.commit()
     print("✓ Database seed complete.")

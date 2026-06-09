@@ -161,6 +161,27 @@
 
 {% block content %}{% endblock %}
 
+<!-- ── Event Banner (controlled by admin Footer Theme) ── -->
+{% if footer_theme and footer_theme.is_active and footer_theme.theme != 'default' %}
+<div class="footer-event-banner footer-event-{{ footer_theme.theme }}">
+  <div class="container feb-inner">
+    <div class="feb-text">
+      {% if footer_theme.label %}
+      <span class="feb-label">{{ footer_theme.label }}</span>
+      {% endif %}
+      {% if footer_theme.subtext %}
+      <span class="feb-sub">{{ footer_theme.subtext }}</span>
+      {% endif %}
+    </div>
+    {% if footer_theme.cta_text %}
+    <a href="{{ footer_theme.cta_url or '/contact' }}" class="feb-cta">
+      {{ footer_theme.cta_text }} →
+    </a>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
 <!-- Footer -->
 <footer class="footer">
   <div class="container">

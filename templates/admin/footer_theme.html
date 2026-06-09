@@ -1,0 +1,211 @@
+{% extends 'layouts/admin_base.html' %}
+{% block title %}Footer Theme{% endblock %}
+{% block page_title %}Footer Theme{% endblock %}
+
+{% block content %}
+<div class="page-actions">
+  <div>
+    <h2 style="font-size:1.1rem;font-weight:700;color:#1e293b;margin-bottom:.25rem">Event Footer Banner</h2>
+    <p style="font-size:.85rem;color:#64748b">Switch the footer colour theme and banner for events like Admissions, Sports Day, Annual Day etc.</p>
+  </div>
+</div>
+
+<!-- Live Preview -->
+<div class="card" style="margin-bottom:1.5rem">
+  <div class="card-header">
+    <h3>Live Preview</h3>
+    <span style="font-size:.78rem;color:#64748b">Updates as you change the theme below</span>
+  </div>
+  <div class="card-body p-0">
+    <div id="previewBanner" style="padding:1.25rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;transition:all .3s ease">
+      <div>
+        <div id="previewLabel" style="font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:.2rem">— No active event —</div>
+        <div id="previewSub" style="font-size:.85rem;opacity:.8;color:#fff"></div>
+      </div>
+      <a id="previewCta" href="#" style="display:none;padding:.55rem 1.4rem;border-radius:999px;font-size:.85rem;font-weight:700;text-decoration:none;white-space:nowrap">Apply Now</a>
+    </div>
+  </div>
+</div>
+
+<!-- Form -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+
+  <div class="card">
+    <div class="card-header"><h3>Theme & Event</h3></div>
+    <div class="card-body">
+      <form method="POST">
+        {{ csrf_token_field() }}
+
+        <!-- Theme selector cards -->
+        <div style="margin-bottom:1.25rem">
+          <label style="font-weight:600;font-size:.88rem;display:block;margin-bottom:.75rem">Choose Event Theme</label>
+          <div id="themeCards" style="display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem">
+            {% set themes = [
+              ('default',  '—',  'Default',   '#0f172a', '#1e293b'),
+              ('admission','🎓', 'Admission', '#1a3570', '#1e52a0'),
+              ('sports',   '🏆', 'Sports',    '#14532d', '#166534'),
+              ('annual',   '🎉', 'Annual Day','#7c2d12', '#9a3412'),
+              ('exam',     '📝', 'Exams',     '#1e3a8a', '#1d4ed8'),
+              ('result',   '🌟', 'Results',   '#713f12', '#92400e'),
+            ] %}
+            {% for val, icon, name, bg, hover in themes %}
+            <label class="theme-card" style="cursor:pointer">
+              <input type="radio" name="theme" value="{{ val }}"
+                     {% if (current and current.theme == val) or (not current and val == 'default') %}checked{% endif %}
+                     style="display:none">
+              <div class="theme-card-inner" data-bg="{{ bg }}"
+                   style="background:{{ bg }};border-radius:10px;padding:.75rem .5rem;text-align:center;border:2px solid transparent;transition:all .2s">
+                <div style="font-size:1.4rem;margin-bottom:.25rem">{{ icon }}</div>
+                <div style="font-size:.72rem;font-weight:700;color:#fff">{{ name }}</div>
+              </div>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Banner Headline</label>
+          <input type="text" name="label" id="inputLabel" class="form-control"
+                 value="{{ current.label if current else '' }}"
+                 placeholder="e.g. Admissions Open for 2083">
+        </div>
+
+        <div class="form-group">
+          <label>Subtext</label>
+          <input type="text" name="subtext" id="inputSubtext" class="form-control"
+                 value="{{ current.subtext if current else '' }}"
+                 placeholder="e.g. Apply before Shrawan 15, 2083">
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+          <div class="form-group">
+            <label>Button Text</label>
+            <input type="text" name="cta_text" id="inputCtaText" class="form-control"
+                   value="{{ current.cta_text if current else '' }}"
+                   placeholder="e.g. Apply Now">
+          </div>
+          <div class="form-group">
+            <label>Button Link</label>
+            <input type="text" name="cta_url" class="form-control"
+                   value="{{ current.cta_url if current else '' }}"
+                   placeholder="/contact">
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem;padding:.85rem 1rem;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0">
+          <input type="checkbox" name="is_active" id="isActive" value="1"
+                 {% if current and current.is_active %}checked{% endif %}
+                 style="width:18px;height:18px;cursor:pointer;accent-color:#2d5a27">
+          <label for="isActive" style="cursor:pointer;font-weight:600;font-size:.88rem;margin:0">
+            Show event banner on the website footer
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full">💾 Save Footer Theme</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Theme guide -->
+  <div class="card">
+    <div class="card-header"><h3>Theme Guide</h3></div>
+    <div class="card-body">
+      <div style="display:flex;flex-direction:column;gap:.85rem">
+        {% for val, icon, name, bg, _ in [
+          ('default',  '—',  'Default — no banner, clean footer',         '#0f172a',''),
+          ('admission','🎓', 'Admission — royal blue, gold CTA',           '#1a3570',''),
+          ('sports',   '🏆', 'Sports Day — forest green, energetic',       '#14532d',''),
+          ('annual',   '🎉', 'Annual Day — warm burgundy/orange',          '#7c2d12',''),
+          ('exam',     '📝', 'Exam Season — deep navy, calm',              '#1e3a8a',''),
+          ('result',   '🌟', 'Results — amber/gold, celebratory',          '#713f12',''),
+        ] %}
+        <div style="display:flex;align-items:center;gap:.85rem;padding:.75rem;border-radius:10px;background:#f8fafc;border:1px solid #e2e8f0">
+          <div style="width:40px;height:40px;border-radius:8px;background:{{ bg }};display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0">{{ icon }}</div>
+          <div>
+            <div style="font-size:.85rem;font-weight:700;color:#1e293b">{{ name.split(' — ')[0] }}</div>
+            <div style="font-size:.75rem;color:#64748b">{{ name.split(' — ')[1] if ' — ' in name else '' }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div style="margin-top:1.5rem;padding:1rem;background:#fef9c3;border-radius:10px;border:1px solid #fde047">
+        <p style="font-size:.82rem;color:#713f12;font-weight:600;margin-bottom:.3rem">💡 Tip</p>
+        <p style="font-size:.8rem;color:#854d0e;line-height:1.6">Set theme back to <strong>Default</strong> and uncheck <strong>Show banner</strong> when the event is over. The footer returns to its normal appearance instantly.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var themeColors = {
+    'default':   { bg: '#0b1d3a', accent: '#d4920a', cta: '#d4920a', ctaTxt: '#0b1d3a' },
+    'admission': { bg: '#0f3460', accent: '#f0b429', cta: '#f0b429', ctaTxt: '#0f3460' },
+    'sports':    { bg: '#14532d', accent: '#4ade80', cta: '#4ade80', ctaTxt: '#14532d' },
+    'annual':    { bg: '#7c2d12', accent: '#fb923c', cta: '#fb923c', ctaTxt: '#fff' },
+    'exam':      { bg: '#1e3a8a', accent: '#93c5fd', cta: '#93c5fd', ctaTxt: '#1e3a8a' },
+    'result':    { bg: '#78350f', accent: '#fcd34d', cta: '#fcd34d', ctaTxt: '#78350f' },
+  };
+
+  var banner    = document.getElementById('previewBanner');
+  var preLabel  = document.getElementById('previewLabel');
+  var preSub    = document.getElementById('previewSub');
+  var preCta    = document.getElementById('previewCta');
+  var inpLabel  = document.getElementById('inputLabel');
+  var inpSub    = document.getElementById('inputSubtext');
+  var inpCta    = document.getElementById('inputCtaText');
+  var radios    = document.querySelectorAll('input[name="theme"]');
+  var cards     = document.querySelectorAll('.theme-card-inner');
+
+  function getSelected(){
+    for(var r of radios){ if(r.checked) return r.value; }
+    return 'default';
+  }
+
+  function updatePreview(){
+    var t  = getSelected();
+    var c  = themeColors[t] || themeColors['default'];
+    var lbl = inpLabel.value || (t === 'default' ? '— No active event —' : '');
+    var sub = inpSub.value || '';
+    var cta = inpCta.value || '';
+
+    banner.style.background = c.bg;
+    preLabel.textContent = lbl;
+    preLabel.style.color = '#fff';
+    preSub.textContent   = sub;
+    preSub.style.color   = c.accent;
+
+    if(cta){
+      preCta.style.display    = 'inline-block';
+      preCta.textContent      = cta;
+      preCta.style.background = c.cta;
+      preCta.style.color      = c.ctaTxt;
+    } else {
+      preCta.style.display = 'none';
+    }
+
+    // Highlight selected card
+    cards.forEach(function(card){
+      var radio = card.closest('.theme-card').querySelector('input');
+      card.style.borderColor = (radio && radio.value === t) ? c.accent : 'transparent';
+      card.style.transform   = (radio && radio.value === t) ? 'scale(1.06)' : 'scale(1)';
+    });
+  }
+
+  radios.forEach(function(r){ r.addEventListener('change', updatePreview); });
+  [inpLabel, inpSub, inpCta].forEach(function(el){ el.addEventListener('input', updatePreview); });
+
+  // Card click selects radio
+  document.querySelectorAll('.theme-card').forEach(function(card){
+    card.addEventListener('click', function(){
+      var r = card.querySelector('input');
+      if(r){ r.checked = true; updatePreview(); }
+    });
+  });
+
+  updatePreview();
+})();
+</script>
+{% endblock %}
