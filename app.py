@@ -742,17 +742,21 @@ class FooterThemeForm(FlaskForm):
 
 @app.context_processor
 def inject_globals():
+    ticker_notices = []
+    footer_theme   = None
     try:
         ticker_notices = (Notice.query
                           .filter_by(is_published=True)
                           .order_by(Notice.is_pinned.desc(), Notice.created_at.desc())
                           .limit(8).all())
     except Exception:
-        ticker_notices = []
+        db.session.rollback()
+
     try:
         footer_theme = FooterTheme.query.filter_by(is_active=True).first()
     except Exception:
-        footer_theme = None
+        db.session.rollback()   # table may not exist yet — rollback so other queries still work
+
     return {
         'now':                utc_now(),
         'school_name':        app.config['SCHOOL_NAME'],
@@ -769,6 +773,7 @@ def unread_count():
     try:
         return ContactMessage.query.filter_by(is_read=False).count()
     except Exception:
+        db.session.rollback()
         return 0
 
 
@@ -780,6 +785,7 @@ def get_recent_messages(limit=5):
                 .order_by(ContactMessage.created_at.desc())
                 .limit(limit).all())
     except Exception:
+        db.session.rollback()
         return []
 
 
