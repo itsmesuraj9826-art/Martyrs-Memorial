@@ -33,7 +33,7 @@
   <div class="card">
     <div class="card-header"><h3>Theme & Event</h3></div>
     <div class="card-body">
-      <form method="POST">
+      <form method="POST" enctype="multipart/form-data">
         {{ csrf_token_field() }}
 
         <!-- Theme selector cards -->
@@ -90,6 +90,21 @@
                    value="{{ current.cta_url if current else '' }}"
                    placeholder="/contact">
           </div>
+        </div>
+
+        <div class="form-group">
+          <label>Event Photo / Poster</label>
+          <input type="file" name="image" class="form-control" accept="image/*"
+                 style="padding:.5rem">
+          {% if current and current.image %}
+          <div style="margin-top:.6rem;display:flex;align-items:center;gap:.75rem">
+            <img src="{{ img_src(current.image, 'misc') }}" alt="Current event image"
+                 style="width:80px;height:60px;object-fit:cover;border-radius:8px;border:2px solid #e2e8f0">
+            <span style="font-size:.78rem;color:#64748b">Current image — upload a new one to replace</span>
+          </div>
+          {% else %}
+          <p style="font-size:.75rem;color:#94a3b8;margin-top:.3rem">Upload a photo or poster to display in the event footer (admission poster, sports photo etc.)</p>
+          {% endif %}
         </div>
 
         <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem;padding:.85rem 1rem;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0">

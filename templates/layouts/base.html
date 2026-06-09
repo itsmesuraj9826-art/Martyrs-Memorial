@@ -161,28 +161,125 @@
 
 {% block content %}{% endblock %}
 
-<!-- ── Event Banner (controlled by admin Footer Theme) ── -->
+<!-- ════════════════════════════════════════════════════
+     FOOTER — Default OR Event-themed
+     Controlled by Admin → Footer Theme
+════════════════════════════════════════════════════ -->
 {% if footer_theme and footer_theme.is_active and footer_theme.theme != 'default' %}
-<div class="footer-event-banner footer-event-{{ footer_theme.theme }}">
-  <div class="container feb-inner">
-    <div class="feb-text">
-      {% if footer_theme.label %}
-      <span class="feb-label">{{ footer_theme.label }}</span>
-      {% endif %}
-      {% if footer_theme.subtext %}
-      <span class="feb-sub">{{ footer_theme.subtext }}</span>
-      {% endif %}
-    </div>
-    {% if footer_theme.cta_text %}
-    <a href="{{ footer_theme.cta_url or '/contact' }}" class="feb-cta">
-      {{ footer_theme.cta_text }} →
-    </a>
-    {% endif %}
-  </div>
-</div>
-{% endif %}
+{# ── EVENT FOOTER ── #}
+<footer class="footer footer-event footer-event-{{ footer_theme.theme }}">
 
-<!-- Footer -->
+  {# Decorative diagonal stripe pattern #}
+  <div class="fe-pattern"></div>
+
+  <div class="container">
+
+    {# ── Top hero strip: image + headline + CTA ── #}
+    <div class="fe-hero">
+      {% if footer_theme.image %}
+      <div class="fe-img-wrap">
+        <img src="{{ img_src(footer_theme.image, 'misc') }}" alt="{{ footer_theme.label }}" class="fe-img">
+      </div>
+      {% else %}
+      <div class="fe-img-wrap fe-img-placeholder">
+        <span class="fe-placeholder-icon">
+          {% if footer_theme.theme == 'admission' %}🎓
+          {% elif footer_theme.theme == 'sports' %}🏆
+          {% elif footer_theme.theme == 'annual' %}🎉
+          {% elif footer_theme.theme == 'exam' %}📝
+          {% elif footer_theme.theme == 'result' %}🌟
+          {% else %}🏫{% endif %}
+        </span>
+      </div>
+      {% endif %}
+
+      <div class="fe-headline">
+        <div class="fe-badge">
+          {% if footer_theme.theme == 'admission' %}🎓 Admissions
+          {% elif footer_theme.theme == 'sports' %}🏆 Sports Day
+          {% elif footer_theme.theme == 'annual' %}🎉 Annual Day
+          {% elif footer_theme.theme == 'exam' %}📝 Examinations
+          {% elif footer_theme.theme == 'result' %}🌟 Results
+          {% else %}📢 Announcement{% endif %}
+        </div>
+        {% if footer_theme.label %}
+        <h2 class="fe-title">{{ footer_theme.label }}</h2>
+        {% endif %}
+        {% if footer_theme.subtext %}
+        <p class="fe-sub">{{ footer_theme.subtext }}</p>
+        {% endif %}
+        {% if footer_theme.cta_text %}
+        <a href="{{ footer_theme.cta_url or url_for('public.contact') }}" class="fe-cta">
+          {{ footer_theme.cta_text }} <span class="fe-arrow">→</span>
+        </a>
+        {% endif %}
+      </div>
+    </div>
+
+    {# ── Divider ── #}
+    <div class="fe-divider"></div>
+
+    {# ── Regular footer columns below, themed ── #}
+    <div class="footer-grid fe-grid">
+      <div class="footer-brand">
+        <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="{{ school_name }} Logo" class="footer-logo-img">
+        <h3>{{ school_name }}</h3>
+        <p>{{ school_tagline }}. Shaping minds, building character, and preparing students for a lifetime of success.</p>
+        <div class="footer-social">
+          <a href="https://www.facebook.com/share/1GtWsNzRKn/" target="_blank" rel="noopener" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="#" aria-label="Twitter / X"><i class="fa-brands fa-x-twitter"></i></a>
+          <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+          <a href="#" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+          <a href="#" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="{{ url_for('public.about') }}">About Us</a></li>
+          <li><a href="{{ url_for('public.academics') }}">Academics</a></li>
+          <li><a href="{{ url_for('public.notices') }}">Notice Board</a></li>
+          <li><a href="{{ url_for('public.events') }}">Events</a></li>
+          <li><a href="{{ url_for('public.gallery') }}">Gallery</a></li>
+          <li><a href="{{ url_for('public.privacy_policy') }}">Privacy Policy</a></li>
+          <li><a href="{{ url_for('auth.login') }}" class="footer-admin-link"><i class="fa-solid fa-lock"></i> Admin Login</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>+2 Programmes</h4>
+        <ul>
+          <li><a href="{{ url_for('public.academics') }}"><i class="fa-solid fa-flask footer-li-icon"></i> Science</a></li>
+          <li><a href="{{ url_for('public.academics') }}"><i class="fa-solid fa-laptop-code footer-li-icon"></i> Computer Science</a></li>
+          <li><a href="{{ url_for('public.academics') }}"><i class="fa-solid fa-chart-line footer-li-icon"></i> Management</a></li>
+          <li><a href="{{ url_for('public.academics') }}"><i class="fa-solid fa-hotel footer-li-icon"></i> Hotel Management</a></li>
+          <li><a href="{{ url_for('public.downloads') }}"><i class="fa-solid fa-file-arrow-down footer-li-icon"></i> Downloads</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Contact Us</h4>
+        <ul class="contact-list">
+          <li><i class="fa-solid fa-location-dot"></i> Biratnagar-10, College Road</li>
+          <li><i class="fa-solid fa-phone"></i> <a href="tel:9805308807">9805308807</a></li>
+          <li><i class="fa-solid fa-phone"></i> <a href="tel:9842334007">9842334007</a></li>
+          <li><i class="fa-solid fa-phone"></i> <a href="tel:9810570644">9810570644</a></li>
+          <li><i class="fa-solid fa-envelope"></i> <a href="mailto:info@martyrsmemorial.edu.np">info@martyrsmemorial.edu.np</a></li>
+          <li><i class="fa-regular fa-clock"></i> Sun–Fri: 6am – 5pm</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div style="border-top:1px solid rgba(255,255,255,.1)">
+    <div class="container footer-bottom">
+      <span>© <span data-year></span> {{ school_name }}, Biratnagar-10. All rights reserved.</span>
+      <a href="{{ url_for('public.privacy_policy') }}" style="font-size:.78rem;color:rgba(255,255,255,.5);text-decoration:none" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.5)'"><i class="fa-solid fa-shield-halved" style="margin-right:.3rem;font-size:.7rem"></i>Privacy Policy</a>
+      <span>Developed by <a href="https://www.instagram.com/surajmehtahere_/" target="_blank" rel="noopener" style="color:rgba(255,255,255,.6);font-weight:700;text-decoration:none" onmouseover="this.style.color='#e1306c'" onmouseout="this.style.color='rgba(255,255,255,.6)'"><i class="fa-brands fa-instagram" style="margin-right:.3rem"></i>Suraj Mehta</a> &amp; Team</span>
+    </div>
+  </div>
+</footer>
+
+{% else %}
+{# ── DEFAULT FOOTER ── #}
 <footer class="footer">
   <div class="container">
     <div class="footer-grid">
@@ -261,6 +358,7 @@
     </div>
   </div>
 </footer>
+{% endif %}{# end event/default footer #}
 
 
 <!-- ══ WHATSAPP FLOAT BUTTON ══ -->

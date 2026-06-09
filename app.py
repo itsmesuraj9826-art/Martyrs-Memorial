@@ -497,14 +497,15 @@ class Topper(db.Model):
 
 
 class FooterTheme(db.Model):
-    """Controls the footer event banner — set by admin."""
+    """Controls the footer event theme — set by admin."""
     __tablename__ = 'footer_theme'
     id         = db.Column(db.Integer,     primary_key=True)
-    theme      = db.Column(db.String(30),  default='default')   # default | admission | sports | annual | exam
-    label      = db.Column(db.String(100), nullable=True)        # e.g. "Admissions Open 2083"
-    subtext    = db.Column(db.String(200), nullable=True)        # e.g. "Apply before Shrawan 15"
-    cta_text   = db.Column(db.String(60),  nullable=True)        # e.g. "Apply Now"
-    cta_url    = db.Column(db.String(255), nullable=True)        # e.g. "/contact"
+    theme      = db.Column(db.String(30),  default='default')
+    label      = db.Column(db.String(100), nullable=True)
+    subtext    = db.Column(db.String(200), nullable=True)
+    cta_text   = db.Column(db.String(60),  nullable=True)
+    cta_url    = db.Column(db.String(255), nullable=True)
+    image      = db.Column(db.String(500), nullable=True)   # event photo / poster
     is_active  = db.Column(db.Boolean,     default=False)
     updated_at = db.Column(db.DateTime,    default=utc_now, onupdate=utc_now)
 
@@ -725,11 +726,13 @@ class FooterThemeForm(FlaskForm):
         ('exam',      '📝 Exam Season'),
         ('result',    '🌟 Results Declared'),
     ])
-    label    = StringField('Banner Headline',    validators=[Optional(), Length(0, 100)])
-    subtext  = StringField('Banner Subtext',     validators=[Optional(), Length(0, 200)])
+    label    = StringField('Event Headline',     validators=[Optional(), Length(0, 100)])
+    subtext  = StringField('Subtext / Details',  validators=[Optional(), Length(0, 200)])
     cta_text = StringField('Button Text',        validators=[Optional(), Length(0, 60)])
     cta_url  = StringField('Button Link (URL)',  validators=[Optional(), Length(0, 255)])
-    is_active= BooleanField('Show banner on website', default=True)
+    image    = FileField('Event Photo / Poster', validators=[
+                 Optional(), FileAllowed(['png','jpg','jpeg','webp'], 'Images only.')])
+    is_active= BooleanField('Show event theme on website', default=True)
     submit   = SubmitField('Save Theme')
 
 
@@ -2002,6 +2005,10 @@ def footer_theme():
         current.cta_text  = form.cta_text.data or ''
         current.cta_url   = form.cta_url.data or ''
         current.is_active = form.is_active.data
+        if form.image.data and form.image.data.filename:
+            if current.image:
+                delete_file(current.image, 'misc')
+            current.image = save_file(form.image.data, 'misc', resize=(900, 600))
         db.session.commit()
         flash('Footer theme updated.', 'success')
         return redirect(url_for('admin.footer_theme'))
