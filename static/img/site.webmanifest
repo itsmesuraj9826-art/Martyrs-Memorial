@@ -1,0 +1,21 @@
+{
+  "name": "Martyrs' Memorial +2",
+  "short_name": "MM+2",
+  "description": "Premier +2 college in Biratnagar — Science, Management & Computer Science",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1a3570",
+  "icons": [
+    {
+      "src": "/static/img/favicon-32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/img/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
