@@ -31,7 +31,7 @@ from dotenv import load_dotenv
 load_dotenv()
 import uuid
 import unicodedata
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from functools import wraps
 from urllib.parse import quote_plus
 
@@ -67,7 +67,7 @@ def utc_now():
 
 def utc_now_naive():
     """Return current UTC datetime WITHOUT timezone (for comparing with DB naive columns)."""
-    return datetime.utcnow()
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 # ─────────────────────────────────────────────
@@ -2082,7 +2082,7 @@ def seed_database():
             title='Annual Sports Day 2025',
             description='Join us for an exciting day of athletics, field events, and team sports.',
             location='School Sports Ground',
-            event_date=datetime.utcnow() + timedelta(days=30),
+            event_date=datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=30),
             is_published=True))
 
     if not Testimonial.query.first():
