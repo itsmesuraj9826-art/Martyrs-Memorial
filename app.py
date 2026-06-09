@@ -1246,7 +1246,7 @@ def notice_new():
     form = NoticeForm()
     if form.validate_on_submit():
         attachment = None
-        if form.attachment.data and form.attachment.data.filename:
+        if form.attachment.data and getattr(form.attachment.data, "filename", None):
             attachment = save_file(form.attachment.data, 'notices')
         notice = Notice(
             title=form.title.data, content=sanitize_html(form.content.data),
@@ -1266,7 +1266,7 @@ def notice_edit(notice_id):
     notice = Notice.query.get_or_404(notice_id)
     form   = NoticeForm(obj=notice)
     if form.validate_on_submit():
-        if form.attachment.data and form.attachment.data.filename:
+        if form.attachment.data and getattr(form.attachment.data, "filename", None):
             delete_file(notice.attachment, 'notices')
             notice.attachment = save_file(form.attachment.data, 'notices')
         notice.title        = form.title.data
@@ -1308,7 +1308,7 @@ def event_new():
     form = EventForm()
     if form.validate_on_submit():
         banner = None
-        if form.banner_image.data and form.banner_image.data.filename:
+        if form.banner_image.data and getattr(form.banner_image.data, "filename", None):
             banner = save_file(form.banner_image.data, 'events', resize=(1200, 600))
         event = Event(
             title=form.title.data, description=sanitize_html(form.description.data),
@@ -1328,7 +1328,7 @@ def event_edit(event_id):
     event = Event.query.get_or_404(event_id)
     form  = EventForm(obj=event)
     if form.validate_on_submit():
-        if form.banner_image.data and form.banner_image.data.filename:
+        if form.banner_image.data and getattr(form.banner_image.data, "filename", None):
             delete_file(event.banner_image, 'events')
             event.banner_image = save_file(form.banner_image.data, 'events', resize=(1200, 600))
         event.title        = form.title.data
@@ -1466,7 +1466,7 @@ def blog_new():
         while BlogPost.query.filter_by(slug=slug).first():
             slug = f'{base_slug}-{count}'; count += 1
         image = None
-        if form.featured_image.data and form.featured_image.data.filename:
+        if form.featured_image.data and getattr(form.featured_image.data, "filename", None):
             image = save_file(form.featured_image.data, 'blog', resize=(1200, 630))
         post = BlogPost(
             title=form.title.data, slug=slug, content=sanitize_html(form.content.data),
@@ -1486,7 +1486,7 @@ def blog_edit(post_id):
     post = BlogPost.query.get_or_404(post_id)
     form = BlogPostForm(obj=post)
     if form.validate_on_submit():
-        if form.featured_image.data and form.featured_image.data.filename:
+        if form.featured_image.data and getattr(form.featured_image.data, "filename", None):
             delete_file(post.featured_image, 'blog')
             post.featured_image = save_file(form.featured_image.data, 'blog', resize=(1200, 630))
         post.title        = form.title.data
@@ -1609,7 +1609,7 @@ def homepage_hero():
     form    = HomepageHeroForm(obj=content)
     if form.validate_on_submit():
         image = content.image if content else None
-        if form.image.data and form.image.data.filename:
+        if form.image.data and getattr(form.image.data, "filename", None):
             delete_file(image, 'misc')
             image = save_file(form.image.data, 'misc', resize=(1920, 900))
         if not content:
@@ -1642,7 +1642,7 @@ def homepage_section(section_name):
     }
     if form.validate_on_submit():
         image = content.image if content else None
-        if form.image.data and form.image.data.filename:
+        if form.image.data and getattr(form.image.data, "filename", None):
             delete_file(image, 'misc')
             image = save_file(form.image.data, 'misc', resize=(1200, 800))
         if not content:
@@ -1702,7 +1702,7 @@ def testimonial_new():
     form = TestimonialForm()
     if form.validate_on_submit():
         avatar = None
-        if form.avatar.data and form.avatar.data.filename:
+        if form.avatar.data and getattr(form.avatar.data, "filename", None):
             avatar = save_file(form.avatar.data, 'misc', resize=(200, 200))
         t = Testimonial(
             name=form.name.data, role=form.role.data,
@@ -1826,7 +1826,7 @@ def slide_edit(slide_id):
     form = SlideForm(obj=s)
     if form.validate_on_submit():
         img = s.image
-        if form.image.data and form.image.data.filename:
+        if form.image.data and getattr(form.image.data, "filename", None):
             delete_file(img, 'misc')
             img = save_file(form.image.data, 'misc', resize=(1920, 700))
         s.title      = form.title.data
@@ -1877,7 +1877,7 @@ def topper_new():
     form = TopperForm()
     if form.validate_on_submit():
         photo = (save_file(form.photo.data, 'toppers', resize=(400, 400))
-                 if form.photo.data and form.photo.data.filename else None)
+                 if form.photo.data and getattr(form.photo.data, "filename", None) else None)
         t = Topper(
             name=form.name.data, stream=form.stream.data,
             percentage=form.percentage.data or None, year=form.year.data,
@@ -1897,7 +1897,7 @@ def topper_edit(tid):
     t    = Topper.query.get_or_404(tid)
     form = TopperForm(obj=t)
     if form.validate_on_submit():
-        if form.photo.data and form.photo.data.filename:
+        if form.photo.data and getattr(form.photo.data, "filename", None):
             delete_file(t.photo, 'toppers')
             t.photo = save_file(form.photo.data, 'toppers', resize=(400, 400))
         t.name         = form.name.data
@@ -1936,7 +1936,7 @@ def homepage_popup():
         if form.validate_on_submit():
             enabled = request.form.get('popup_enabled') == '1'
             image   = content.image if content else None
-            if form.image.data and form.image.data.filename:
+            if form.image.data and getattr(form.image.data, "filename", None):
                 delete_file(image, 'misc')
                 image = save_file(form.image.data, 'misc', resize=(900, 700))
             if not content:
@@ -2011,10 +2011,12 @@ def footer_theme():
         current.cta_text  = form.cta_text.data or ''
         current.cta_url   = form.cta_url.data or ''
         current.is_active = form.is_active.data
-        if form.image.data and form.image.data.filename:
+        # Safe image check — handles None, empty FileStorage, and missing filename
+        img_file = form.image.data if form.image else None
+        if img_file and getattr(img_file, 'filename', None):
             if current.image:
                 delete_file(current.image, 'misc')
-            current.image = save_file(form.image.data, 'misc', resize=(900, 600))
+            current.image = save_file(img_file, 'misc', resize=(900, 600))
         db.session.commit()
         flash('Footer theme updated.', 'success')
         return redirect(url_for('admin.footer_theme'))
