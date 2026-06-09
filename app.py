@@ -2055,6 +2055,21 @@ def seed_database():
     db.create_all()
     print("✓ Database tables ready.")
 
+    # ── Migration: add missing columns to existing tables ──────────────────
+    with db.engine.connect() as conn:
+        from sqlalchemy import text
+
+        # Add footer_theme.image if missing
+        try:
+            conn.execute(text(
+                "ALTER TABLE footer_theme ADD COLUMN image VARCHAR(500)"
+            ))
+            conn.commit()
+            print("✓ Migration: added footer_theme.image column")
+        except Exception:
+            conn.rollback()
+            pass  # column already exists — fine
+
     admin = Admin.query.filter_by(username='msuraj24').first()
     if not admin:
         admin = Admin(username='msuraj24', email='msuraj24@tbc.edu.np', full_name='Site Administrator')
