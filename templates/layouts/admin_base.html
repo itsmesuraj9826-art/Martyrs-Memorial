@@ -90,6 +90,11 @@
             <span class="nav-icon">🏆</span> Toppers
           </a>
         </li>
+        <li>
+          <a href="{{ url_for('admin.footer_theme') }}" class="{% if 'footer_theme' in request.endpoint %}active{% endif %}">
+            <span class="nav-icon">🎨</span> Footer Theme
+          </a>
+        </li>
 
         <li>
           <a href="{{ url_for('admin.privacy_policy_admin') }}" class="{% if request.endpoint == 'admin.privacy_policy_admin' %}active{% endif %}">
