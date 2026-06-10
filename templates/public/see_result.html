@@ -28,10 +28,11 @@
           </label>
           <input type="text" name="symbol_number" class="form-control"
                  value="{{ request.form.get('symbol_number','') }}"
-                 placeholder="e.g. 1234567"
+                 placeholder="e.g. 0123456A"
                  style="font-size:1.1rem;padding:.8rem 1.1rem;text-align:center;
-                        letter-spacing:.1em;font-weight:600"
-                 autofocus required>
+                        letter-spacing:.1em;font-weight:600;text-transform:uppercase"
+                 autofocus required
+                 oninput="this.value = this.value.toUpperCase()">
         </div>
         <div class="form-group" style="margin-bottom:1.5rem">
           <label style="font-weight:600;font-size:.9rem;margin-bottom:.4rem;display:block">

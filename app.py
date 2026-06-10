@@ -1195,7 +1195,7 @@ def see_result():
     if form.validate_on_submit():
         searched = True
         result   = SEEResult.query.filter_by(
-            symbol_number=form.symbol_number.data.strip(),
+            symbol_number=form.symbol_number.data.strip().upper(),
             year=form.year.data,
             is_published=True
         ).first()
@@ -2143,7 +2143,7 @@ def see_result_new():
     form = SEEResultForm()
     if form.validate_on_submit():
         r = SEEResult(
-            symbol_number=form.symbol_number.data.strip(),
+            symbol_number=form.symbol_number.data.strip().upper(),
             student_name=form.student_name.data,
             school_name=form.school_name.data,
             district=form.district.data,
@@ -2171,7 +2171,7 @@ def see_results_bulk():
     reader = csv.DictReader(stream)
     count  = 0; skipped = 0
     for row in reader:
-        sym = row.get('symbol_number','').strip()
+        sym = row.get('symbol_number','').strip().upper()
         yr  = row.get('year','2083').strip()
         if not sym or SEEResult.query.filter_by(symbol_number=sym, year=yr).first():
             skipped += 1; continue
@@ -2196,7 +2196,7 @@ def see_result_edit(rid):
     r    = SEEResult.query.get_or_404(rid)
     form = SEEResultForm(obj=r)
     if form.validate_on_submit():
-        r.symbol_number = form.symbol_number.data.strip()
+        r.symbol_number = form.symbol_number.data.strip().upper()
         r.student_name  = form.student_name.data
         r.school_name   = form.school_name.data
         r.district      = form.district.data

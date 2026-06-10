@@ -139,8 +139,8 @@
 <script>
 function downloadSampleCSV() {
   var csv = 'symbol_number,student_name,school_name,district,gpa,division,year\n';
-  csv += '1234567,Ram Bahadur Thapa,Martyrs Memorial Secondary School,Morang,3.80,Distinction,2083\n';
-  csv += '1234568,Sita Kumari Rai,Biratnagar Secondary School,Morang,3.60,A+,2083\n';
+  csv += '0123456A,Ram Bahadur Thapa,Martyrs Memorial Secondary School,Morang,3.80,Distinction,2083\n';
+  csv += '0123457B,Sita Kumari Rai,Biratnagar Secondary School,Morang,3.60,A+,2083\n';
   var blob = new Blob([csv], {type:'text/csv'});
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);

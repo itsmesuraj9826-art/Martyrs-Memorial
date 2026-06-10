@@ -15,7 +15,9 @@
             <label>Symbol Number *</label>
             <input type="text" name="symbol_number" class="form-control" required
                    value="{{ result.symbol_number if result else '' }}"
-                   placeholder="e.g. 1234567">
+                   placeholder="e.g. 0123456A"
+                   style="text-transform:uppercase"
+                   oninput="this.value = this.value.toUpperCase()">
           </div>
           <div class="form-group">
             <label>Year *</label>
