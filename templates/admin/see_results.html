@@ -1,0 +1,122 @@
+{% extends 'layouts/admin_base.html' %}
+{% block title %}SEE Results{% endblock %}
+{% block page_title %}SEE Results{% endblock %}
+
+{% block content %}
+<div class="page-actions">
+  <form method="GET" style="display:flex;gap:.75rem;flex:1;flex-wrap:wrap">
+    <input type="text" name="q" value="{{ q }}" placeholder="Search symbol or name…"
+           class="search-input" style="max-width:260px">
+    <select name="year" class="search-select" style="min-width:120px">
+      <option value="">All Years</option>
+      {% for y in years %}
+      <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }} BS</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-primary btn-sm">Search</button>
+    {% if q or year %}<a href="{{ url_for('admin.see_results') }}" class="btn btn-sm btn-outline">Clear</a>{% endif %}
+  </form>
+  <div style="display:flex;gap:.75rem">
+    <a href="{{ url_for('admin.see_result_new') }}" class="btn btn-primary btn-sm">+ Add Result</a>
+    <!-- Bulk import -->
+    <form method="POST" action="{{ url_for('admin.see_results_bulk') }}"
+          enctype="multipart/form-data" style="display:inline">
+      {{ csrf_token_field() }}
+      <label class="btn btn-outline btn-sm" style="cursor:pointer;margin:0">
+        📥 Import CSV
+        <input type="file" name="csv_file" accept=".csv" style="display:none"
+               onchange="this.closest('form').submit()">
+      </label>
+    </form>
+  </div>
+</div>
+
+<!-- CSV format hint -->
+<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;
+            padding:.75rem 1.1rem;margin-bottom:1.5rem;font-size:.82rem;color:#1e40af">
+  <strong>CSV format:</strong>
+  symbol_number, student_name, school_name, district, gpa, division, year
+  &nbsp;·&nbsp; Duplicates are skipped automatically.
+  <a href="#" onclick="downloadSampleCSV()" style="margin-left:.5rem;font-weight:600">Download sample</a>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h3>Results ({{ pagination.total }} total)</h3>
+  </div>
+  <div class="card-body p-0">
+    {% if pagination.items %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Symbol No.</th>
+          <th>Student Name</th>
+          <th>School</th>
+          <th>District</th>
+          <th>GPA</th>
+          <th>Division</th>
+          <th>Year</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in pagination.items %}
+        <tr>
+          <td><strong>{{ r.symbol_number }}</strong></td>
+          <td>{{ r.student_name }}</td>
+          <td class="text-muted small">{{ r.school_name or '—' }}</td>
+          <td class="text-muted small">{{ r.district or '—' }}</td>
+          <td><strong style="color:#d4920a">{{ r.gpa or '—' }}</strong></td>
+          <td>
+            <span class="badge-{{ 'success' if r.division in ['Distinction','A+','A'] else 'info' if r.division in ['B+','B'] else 'secondary' }}
+                  badge">{{ r.division or '—' }}</span>
+          </td>
+          <td>{{ r.year }}</td>
+          <td>
+            {% if r.is_published %}<span class="badge badge-success">Live</span>
+            {% else %}<span class="badge badge-secondary">Hidden</span>{% endif %}
+          </td>
+          <td>
+            <div class="actions">
+              <a href="{{ url_for('admin.see_result_edit', rid=r.id) }}" class="btn btn-sm btn-outline">Edit</a>
+              <form method="POST" action="{{ url_for('admin.see_result_delete', rid=r.id) }}"
+                    style="display:inline" onsubmit="return confirm('Delete this result?')">
+                {{ csrf_token_field() }}
+                <button type="submit" class="btn btn-sm btn-danger">Del</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% if pagination.pages > 1 %}
+    <div class="table-pagination">
+      {% if pagination.has_prev %}<a href="?page={{ pagination.prev_num }}&q={{ q }}&year={{ year }}" class="btn btn-sm btn-outline">← Prev</a>{% endif %}
+      <span>Page {{ pagination.page }} of {{ pagination.pages }}</span>
+      {% if pagination.has_next %}<a href="?page={{ pagination.next_num }}&q={{ q }}&year={{ year }}" class="btn btn-sm btn-outline">Next →</a>{% endif %}
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="empty-text">
+      <span>📋</span>
+      <p>No results yet. Add one or import a CSV.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+function downloadSampleCSV() {
+  var csv = 'symbol_number,student_name,school_name,district,gpa,division,year\n';
+  csv += '1234567,Ram Bahadur Thapa,Martyrs Memorial Secondary School,Morang,3.80,Distinction,2083\n';
+  csv += '1234568,Sita Kumari Rai,Biratnagar Secondary School,Morang,3.60,A+,2083\n';
+  var blob = new Blob([csv], {type:'text/csv'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'see_results_sample.csv';
+  a.click();
+}
+</script>
+{% endblock %}

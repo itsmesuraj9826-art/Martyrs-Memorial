@@ -127,6 +127,7 @@
         </ul>
       </li>
       <li><a href="{{ url_for('public.downloads') }}" class="{% if request.endpoint == 'public.downloads' %}active{% endif %}">Downloads</a></li>
+      <li><a href="{{ url_for('public.see_result') }}" class="{% if request.endpoint == 'public.see_result' %}active{% endif %}" style="color:var(--c-gold);font-weight:700">🎓 SEE Result</a></li>
       <li><a href="{{ url_for('public.contact') }}" class="{% if request.endpoint == 'public.contact' %}active{% endif %}">Contact</a></li>
     </ul>
     <!-- Mobile tap-outside overlay -->
@@ -178,7 +179,7 @@
     <div class="fe-hero">
       {% if footer_theme.image %}
       <div class="fe-img-wrap">
-        <img src="{{ img_src(footer_theme.image, 'misc') }}" alt="{{ footer_theme.label }}" class="fe-img">
+        <img src="{{ img_src(footer_theme.image, 'misc') }}" alt="{{ footer_theme.label }}" class="fe-img" loading="lazy">
       </div>
       {% else %}
       <div class="fe-img-wrap fe-img-placeholder">
@@ -394,6 +395,16 @@
 <!-- ══ END WHATSAPP ══ -->
 
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script>
+// ── PWA Service Worker registration ──
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/static/js/service-worker.js')
+      .then(function(reg) { console.log('SW registered:', reg.scope); })
+      .catch(function(err) { console.log('SW failed:', err); });
+  });
+}
+</script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>
