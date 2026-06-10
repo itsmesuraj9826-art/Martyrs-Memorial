@@ -26,19 +26,37 @@
 
   <!-- Centered text content -->
   <div class="hero-content">
-    <div class="hero-eyebrow">
-      <span>Est. 1990</span>
-      <span>·</span>
-      <span>Welcome to {{ school_name }}</span>
+
+    <!-- Admission badge — single, focused -->
+    <div class="hero-admission-badge">
+      <span class="hab-pulse"></span>
+      Admissions Open — Academic Year 2083
     </div>
-    <h1>
-      Welcome to
-      <em>{{ school_name }}</em>
+
+    <h1 class="hero-h1">
+      <span class="hero-h1-name">{{ school_name }}</span>
+      <span class="hero-h1-tagline">98% Pass Rate · 35 Years of Excellence</span>
     </h1>
-    <p>{{ hero.content if hero and hero.content else 'A premier institution committed to holistic education, nurturing bright minds and building tomorrow\'s leaders in an inspiring environment.' }}</p>
+
+    <p class="hero-sub">
+      Science · Computer Science · Management · Hotel Management<br>
+      <span class="hero-sub-light">Biratnagar's trusted +2 college since 1990</span>
+    </p>
+
     <div class="hero-actions">
-      <a href="{{ url_for('public.about') }}" class="btn btn-gold btn-lg">Discover Our Story</a>
-      <a href="{{ url_for('public.contact') }}" class="btn btn-outline-white btn-lg">Get in Touch</a>
+      <a href="{{ url_for('public.contact') }}" class="btn btn-gold btn-lg hero-cta-main">
+        Apply for Admission <span class="hero-cta-arrow">→</span>
+      </a>
+      <a href="/see-result" class="btn btn-outline-white btn-lg">🎓 Check SEE Result</a>
+    </div>
+
+    <!-- Trust strip — replaces the separate stats block visually -->
+    <div class="hero-trust">
+      <div class="ht-item"><strong>1500+</strong><span>Students</span></div>
+      <div class="ht-sep"></div>
+      <div class="ht-item"><strong>120+</strong><span>Teachers</span></div>
+      <div class="ht-sep"></div>
+      <div class="ht-item"><strong>4</strong><span>Streams</span></div>
     </div>
   </div>
 
@@ -75,6 +93,48 @@
     <div class="stat-item" data-animate="fadeIn" data-delay="4">
       <span class="stat-number" data-target="98">0</span><span class="stat-suffix">%</span>
       <span class="stat-label">Pass Rate</span>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════ WHY CHOOSE US — admission conversion trio ═══════ -->
+<section class="section why-us-section">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-badge">Why Martyrs' Memorial</span>
+      <h2>Built for Your Success</h2>
+      <p>Three reasons parents and students across Biratnagar choose us</p>
+    </div>
+
+    <div class="why-grid">
+      <div class="why-card" data-animate="fadeIn" data-delay="1">
+        <div class="why-icon why-icon-gold">🏆</div>
+        <h3>Proven Results</h3>
+        <p>98% pass rate with consistent NEB board toppers across all streams, year after year.</p>
+        <a href="#toppers" class="why-link">See our toppers →</a>
+      </div>
+
+      <div class="why-card why-card-featured" data-animate="fadeIn" data-delay="2">
+        <div class="why-featured-tag">Most Popular</div>
+        <div class="why-icon why-icon-navy">🔬</div>
+        <h3>4 Career Streams</h3>
+        <p>Science (Bio &amp; Math), Computer Science, Management and Hotel Management — pathways for every ambition.</p>
+        <a href="{{ url_for('public.academics') }}" class="why-link">Explore programmes →</a>
+      </div>
+
+      <div class="why-card" data-animate="fadeIn" data-delay="3">
+        <div class="why-icon why-icon-green">👨‍🏫</div>
+        <h3>Expert Faculty</h3>
+        <p>120+ dedicated teachers with years of board-exam experience guiding every student personally.</p>
+        <a href="{{ url_for('public.about') }}" class="why-link">Meet the team →</a>
+      </div>
+    </div>
+
+    <div class="section-cta">
+      <a href="{{ url_for('public.contact') }}" class="btn btn-gold btn-lg">
+        Apply for Admission 2083 →
+      </a>
     </div>
   </div>
 </section>
@@ -332,7 +392,7 @@
     <div class="topper-panel {% if loop.first %}active{% endif %}"
          id="panel-{{ key }}" data-animate="fadeInUp">
       <div class="topper-row" id="row-{{ key }}">
-        {% for t in toppers_by_stream[key][:10] %}
+        {% for t in toppers_by_stream[key] %}
         <div class="topper-card">
           <div class="topper-rank-badge">#{{ t.rank }}</div>
           <div class="topper-photo-wrap stream-{{ cls }}">
@@ -516,7 +576,7 @@
   if (heroEl) {
     heroEl.addEventListener('touchstart', function(e){ touchX = e.touches[0].clientX; }, {passive:true});
     heroEl.addEventListener('touchend',   function(e){
-      var diff =      var diff = touchX - e.changedTouches[0].clientX;
+      var diff = touchX - e.changedTouches[0].clientX;
       if (Math.abs(diff) > 50) { goTo(diff > 0 ? current+1 : current-1); resetAuto(); }
     }, {passive:true});
   }
