@@ -3,6 +3,35 @@
 {% block page_title %}SEE Results{% endblock %}
 
 {% block content %}
+
+<!-- ── Public visibility toggle ── -->
+{% set enabled = setting('see_result_enabled', '0') == '1' %}
+<div class="card" style="margin-bottom:1.5rem;border-left:4px solid {{ '#22c55e' if enabled else '#94a3b8' }}">
+  <div class="card-body" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:1.1rem 1.5rem">
+    <div style="display:flex;align-items:center;gap:.85rem">
+      <div style="width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;
+                  background:{{ '#dcfce7' if enabled else '#f1f5f9' }}">
+        {{ '👁️' if enabled else '🙈' }}
+      </div>
+      <div>
+        <div style="font-weight:700;font-size:.95rem;color:#1e293b">
+          SEE Result Checker is {{ 'LIVE — visible to public' if enabled else 'HIDDEN from public' }}
+        </div>
+        <div style="font-size:.8rem;color:#64748b">
+          {{ 'Students can check results at /see-result. The gold button shows in the navbar.' if enabled
+             else 'The page returns 404 and the navbar button is hidden. Enable when results are ready.' }}
+        </div>
+      </div>
+    </div>
+    <form method="POST" action="{{ url_for('admin.see_results_toggle') }}">
+      {{ csrf_token_field() }}
+      <button type="submit" class="btn {{ 'btn-danger' if enabled else 'btn-primary' }}">
+        {{ '🙈 Hide from Public' if enabled else '👁️ Make Visible' }}
+      </button>
+    </form>
+  </div>
+</div>
+
 <div class="page-actions">
   <form method="GET" style="display:flex;gap:.75rem;flex:1;flex-wrap:wrap">
     <input type="text" name="q" value="{{ q }}" placeholder="Search symbol or name…"

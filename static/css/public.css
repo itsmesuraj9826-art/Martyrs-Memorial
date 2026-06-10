@@ -2196,3 +2196,52 @@ body.dark-mode .why-icon-green { background: #0d2818 !important; }
   .why-grid { grid-template-columns: 1fr; gap: 1.5rem; max-width: 460px; margin-left: auto; margin-right: auto; }
   .why-card-featured { order: -1; }
 }
+
+/* ── SEE Result nav pill button — no wrap, stands out ── */
+.nav-links .nav-see-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  white-space: nowrap;
+  background: var(--c-gold);
+  color: var(--c-ink) !important;
+  font-weight: 700;
+  font-size: .82rem;
+  padding: .45rem 1.1rem !important;
+  border-radius: 999px;
+  letter-spacing: .02em;
+  transition: all var(--transition);
+  box-shadow: 0 2px 10px rgba(212,146,10,.35);
+}
+
+.nav-links .nav-see-btn:hover {
+  background: var(--c-gold-light);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(212,146,10,.5);
+  color: var(--c-ink) !important;
+}
+
+.nav-links .nav-see-btn.active {
+  background: var(--c-gold-light);
+}
+
+/* No underline indicator on the pill */
+.nav-links .nav-see-btn::after { display: none !important; }
+
+/* Dark mode — same gold pill works on dark navbar */
+body.dark-mode .nav-links .nav-see-btn {
+  background: var(--c-gold);
+  color: #0b1d3a !important;
+}
+
+/* Mobile menu — full-width pill */
+@media(max-width: 768px) {
+  .nav-links .nav-see-btn {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin: .5rem 0;
+    padding: .7rem 1rem !important;
+    font-size: .9rem;
+  }
+}

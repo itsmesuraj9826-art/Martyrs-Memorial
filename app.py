@@ -510,6 +510,47 @@ class FooterTheme(db.Model):
     updated_at = db.Column(db.DateTime,    default=utc_now, onupdate=utc_now)
 
 
+class SEEResult(db.Model):
+    """SEE result records searchable by symbol number."""
+    __tablename__ = 'see_results'
+    id            = db.Column(db.Integer,      primary_key=True)
+    symbol_number = db.Column(db.String(20),   nullable=False, index=True)
+    student_name  = db.Column(db.String(150),  nullable=False)
+    school_name   = db.Column(db.String(200),  nullable=True)
+    district      = db.Column(db.String(100),  nullable=True)
+    gpa           = db.Column(db.Numeric(4,2), nullable=True)
+    division      = db.Column(db.String(30),   nullable=True)
+    year          = db.Column(db.String(10),   nullable=False, default='2083')
+    is_published  = db.Column(db.Boolean,      default=True)
+    created_at    = db.Column(db.DateTime,     default=utc_now)
+
+
+class SiteSetting(db.Model):
+    """Simple key-value store for site-wide toggles (admin controlled)."""
+    __tablename__ = 'site_settings'
+    id    = db.Column(db.Integer,     primary_key=True)
+    key   = db.Column(db.String(80),  unique=True, nullable=False, index=True)
+    value = db.Column(db.String(255), nullable=True)
+
+
+def get_setting(key, default=''):
+    try:
+        s = SiteSetting.query.filter_by(key=key).first()
+        return s.value if s else default
+    except Exception:
+        db.session.rollback()
+        return default
+
+
+def set_setting(key, value):
+    s = SiteSetting.query.filter_by(key=key).first()
+    if not s:
+        s = SiteSetting(key=key)
+        db.session.add(s)
+    s.value = value
+    db.session.commit()
+
+
 # ─────────────────────────────────────────────
 # 5. FORMS
 # ─────────────────────────────────────────────
@@ -736,6 +777,32 @@ class FooterThemeForm(FlaskForm):
     submit   = SubmitField('Save Theme')
 
 
+class SEEResultSearchForm(FlaskForm):
+    symbol_number = StringField('Symbol Number', validators=[DataRequired(), Length(1, 20)])
+    year          = SelectField('Year', choices=[
+        ('2083','2083'), ('2082','2082'), ('2081','2081'), ('2080','2080')
+    ], default='2083')
+    submit        = SubmitField('Check Result')
+
+
+class SEEResultForm(FlaskForm):
+    symbol_number = StringField('Symbol Number',  validators=[DataRequired(), Length(1, 20)])
+    student_name  = StringField('Student Name',   validators=[DataRequired(), Length(1, 150)])
+    school_name   = StringField('School Name',    validators=[Optional(), Length(0, 200)])
+    district      = StringField('District',       validators=[Optional(), Length(0, 100)])
+    gpa           = StringField('GPA',            validators=[Optional(), Length(0, 6)])
+    division      = SelectField('Division', choices=[
+        ('','— Select —'),('Distinction','Distinction'),
+        ('A+','A+'),('A','A'),('B+','B+'),('B','B'),
+        ('C+','C+'),('C','C'),('D','D'),('E','E (Not Passed)')
+    ])
+    year          = SelectField('Year', choices=[
+        ('2083','2083'),('2082','2082'),('2081','2081'),('2080','2080')
+    ], default='2083')
+    is_published  = BooleanField('Published', default=True)
+    submit        = SubmitField('Save Result')
+
+
 # ─────────────────────────────────────────────
 # 6. CONTEXT PROCESSORS & TEMPLATE GLOBALS
 # ─────────────────────────────────────────────
@@ -813,6 +880,12 @@ def img_src(path_or_url, subfolder='misc'):
         return path_or_url
     # Bare filename — legacy local storage
     return f'/static/uploads/{subfolder}/{path_or_url}'
+
+
+@app.template_global()
+def setting(key, default=''):
+    """Template access to site settings: {{ setting('see_result_enabled') }}"""
+    return get_setting(key, default)
 
 
 @app.template_global()
@@ -984,10 +1057,27 @@ def news_detail(slug):
     return render_template('public/news_detail.html', post=post)
 
 
+_contact_rate = {}
+
+def _rate_limit_ok(ip, max_per_hour=5):
+    import time
+    now   = time.time()
+    times = [t for t in _contact_rate.get(ip, []) if now - t < 3600]
+    _contact_rate[ip] = times
+    if len(times) >= max_per_hour:
+        return False
+    _contact_rate[ip].append(now)
+    return True
+
+
 @public_bp.route('/contact', methods=['GET', 'POST'])
 def contact():
     form = ContactForm()
     if form.validate_on_submit():
+        ip = request.headers.get('X-Forwarded-For', request.remote_addr or '').split(',')[0].strip()
+        if not _rate_limit_ok(ip):
+            flash('Too many submissions. Please wait an hour before trying again.', 'warning')
+            return redirect(url_for('public.contact'))
         msg = ContactMessage(
             name=form.name.data, email=form.email.data, phone=form.phone.data,
             subject=form.subject.data, message=form.message.data)
@@ -1092,6 +1182,25 @@ def notice_attachment(notice_id):
         return redirect(notice.attachment)
     folder = os.path.join(app.config['UPLOAD_FOLDER'], 'notices')
     return send_from_directory(folder, os.path.basename(notice.attachment), as_attachment=True)
+
+
+@public_bp.route('/see-result', methods=['GET', 'POST'])
+def see_result():
+    # Admin-controlled visibility
+    if get_setting('see_result_enabled', '0') != '1':
+        abort(404)
+    form     = SEEResultSearchForm()
+    result   = None
+    searched = False
+    if form.validate_on_submit():
+        searched = True
+        result   = SEEResult.query.filter_by(
+            symbol_number=form.symbol_number.data.strip(),
+            year=form.year.data,
+            is_published=True
+        ).first()
+    return render_template('public/see_result.html', form=form,
+                           result=result, searched=searched)
 
 
 @public_bp.route('/privacy-policy')
@@ -1994,6 +2103,123 @@ def notifications():
     return redirect(url_for('admin.messages', read='unread'))
 
 
+# ── SEE Results ──────────────────────────────────────────────────────────────
+
+@admin_bp.route('/see-results/toggle-visibility', methods=['POST'])
+@_require_admin
+def see_results_toggle():
+    current = get_setting('see_result_enabled', '0')
+    new_val = '0' if current == '1' else '1'
+    set_setting('see_result_enabled', new_val)
+    flash('SEE Result checker is now ' + ('VISIBLE to public.' if new_val == '1' else 'HIDDEN from public.'),
+          'success' if new_val == '1' else 'info')
+    return redirect(url_for('admin.see_results'))
+
+
+@admin_bp.route('/see-results')
+@_require_admin
+def see_results():
+    page  = request.args.get('page', 1, type=int)
+    year  = request.args.get('year', '')
+    q     = request.args.get('q', '')
+    query = SEEResult.query
+    if year:
+        query = query.filter_by(year=year)
+    if q:
+        query = query.filter(
+            db.or_(SEEResult.symbol_number.ilike('%' + q + '%'),
+                   SEEResult.student_name.ilike('%' + q + '%'))
+        )
+    pagination = query.order_by(SEEResult.symbol_number.asc()).paginate(
+        page=page, per_page=50, error_out=False)
+    years = [r[0] for r in db.session.query(SEEResult.year).distinct().all()]
+    return render_template('admin/see_results.html', pagination=pagination,
+                           year=year, q=q, years=years)
+
+
+@admin_bp.route('/see-results/new', methods=['GET', 'POST'])
+@_require_admin
+def see_result_new():
+    form = SEEResultForm()
+    if form.validate_on_submit():
+        r = SEEResult(
+            symbol_number=form.symbol_number.data.strip(),
+            student_name=form.student_name.data,
+            school_name=form.school_name.data,
+            district=form.district.data,
+            gpa=form.gpa.data or None,
+            division=form.division.data,
+            year=form.year.data,
+            is_published=form.is_published.data,
+        )
+        db.session.add(r)
+        db.session.commit()
+        flash('Result added.', 'success')
+        return redirect(url_for('admin.see_results'))
+    return render_template('admin/see_result_form.html', form=form, title='Add Result', result=None)
+
+
+@admin_bp.route('/see-results/bulk-import', methods=['POST'])
+@_require_admin
+def see_results_bulk():
+    import csv, io
+    file = request.files.get('csv_file')
+    if not file or not file.filename.endswith('.csv'):
+        flash('Please upload a valid CSV file.', 'danger')
+        return redirect(url_for('admin.see_results'))
+    stream = io.StringIO(file.stream.read().decode('utf-8-sig'))
+    reader = csv.DictReader(stream)
+    count  = 0; skipped = 0
+    for row in reader:
+        sym = row.get('symbol_number','').strip()
+        yr  = row.get('year','2083').strip()
+        if not sym or SEEResult.query.filter_by(symbol_number=sym, year=yr).first():
+            skipped += 1; continue
+        db.session.add(SEEResult(
+            symbol_number=sym,
+            student_name=row.get('student_name','').strip(),
+            school_name=row.get('school_name','').strip(),
+            district=row.get('district','').strip(),
+            gpa=row.get('gpa','').strip() or None,
+            division=row.get('division','').strip(),
+            year=yr, is_published=True,
+        ))
+        count += 1
+    db.session.commit()
+    flash(f'Imported {count} results. Skipped {skipped}.', 'success')
+    return redirect(url_for('admin.see_results'))
+
+
+@admin_bp.route('/see-results/<int:rid>/edit', methods=['GET', 'POST'])
+@_require_admin
+def see_result_edit(rid):
+    r    = SEEResult.query.get_or_404(rid)
+    form = SEEResultForm(obj=r)
+    if form.validate_on_submit():
+        r.symbol_number = form.symbol_number.data.strip()
+        r.student_name  = form.student_name.data
+        r.school_name   = form.school_name.data
+        r.district      = form.district.data
+        r.gpa           = form.gpa.data or None
+        r.division      = form.division.data
+        r.year          = form.year.data
+        r.is_published  = form.is_published.data
+        db.session.commit()
+        flash('Result updated.', 'success')
+        return redirect(url_for('admin.see_results'))
+    return render_template('admin/see_result_form.html', form=form, title='Edit Result', result=r)
+
+
+@admin_bp.route('/see-results/<int:rid>/delete', methods=['POST'])
+@_require_admin
+def see_result_delete(rid):
+    r = SEEResult.query.get_or_404(rid)
+    db.session.delete(r)
+    db.session.commit()
+    flash('Result deleted.', 'success')
+    return redirect(url_for('admin.see_results'))
+
+
 # ── Footer Theme ──────────────────────────────────────────────────────────────
 
 @admin_bp.route('/footer-theme', methods=['GET', 'POST'])
@@ -2021,6 +2247,68 @@ def footer_theme():
         flash('Footer theme updated.', 'success')
         return redirect(url_for('admin.footer_theme'))
     return render_template('admin/footer_theme.html', form=form, current=current)
+
+
+# ─────────────────────────────────────────────
+# 10b. SITEMAP + ROBOTS.TXT
+# ─────────────────────────────────────────────
+
+@public_bp.route('/sitemap.xml')
+def sitemap():
+    from flask import make_response
+    pages = []
+    base  = request.host_url.rstrip('/')
+    static_routes = [
+        ('/', '1.0', 'daily'),
+        ('/about', '0.9', 'weekly'),
+        ('/academics', '0.9', 'weekly'),
+        ('/notices', '0.8', 'daily'),
+        ('/events', '0.8', 'weekly'),
+        ('/gallery', '0.7', 'weekly'),
+        ('/news', '0.7', 'weekly'),
+        ('/contact', '0.8', 'monthly'),
+        ('/downloads', '0.6', 'weekly'),
+        ('/see-result', '0.9', 'daily'),
+    ]
+    for route, priority, freq in static_routes:
+        pages.append('<url><loc>' + base + route + '</loc>'
+                     + '<changefreq>' + freq + '</changefreq>'
+                     + '<priority>' + priority + '</priority></url>')
+    try:
+        posts = BlogPost.query.filter_by(is_published=True).order_by(BlogPost.created_at.desc()).limit(50).all()
+        for p in posts:
+            mod = ('<lastmod>' + p.updated_at.strftime('%Y-%m-%d') + '</lastmod>') if p.updated_at else ''
+            pages.append('<url><loc>' + base + '/news/' + p.slug + '</loc>' + mod
+                         + '<changefreq>monthly</changefreq><priority>0.6</priority></url>')
+    except Exception:
+        pass
+    xml  = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    xml += '\n'.join(pages)
+    xml += '\n</urlset>'
+    resp = make_response(xml)
+    resp.headers['Content-Type'] = 'application/xml'
+    return resp
+
+
+@public_bp.route('/static/js/service-worker.js')
+def service_worker():
+    from flask import send_from_directory, make_response
+    resp = make_response(send_from_directory(
+        os.path.join(app.static_folder, 'js'), 'service-worker.js'))
+    resp.headers['Service-Worker-Allowed'] = '/'
+    resp.headers['Cache-Control'] = 'no-cache'
+    return resp
+
+
+@public_bp.route('/robots.txt')
+def robots_txt():
+    from flask import make_response
+    base = request.host_url.rstrip('/')
+    txt  = 'User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /auth/\n\nSitemap: ' + base + '/sitemap.xml\n'
+    resp = make_response(txt)
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
 
 
 # ─────────────────────────────────────────────
