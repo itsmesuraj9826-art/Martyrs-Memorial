@@ -127,7 +127,7 @@
         </ul>
       </li>
       <li><a href="{{ url_for('public.downloads') }}" class="{% if request.endpoint == 'public.downloads' %}active{% endif %}">Downloads</a></li>
-      <li><a href="{{ url_for('public.see_result') }}" class="{% if request.endpoint == 'public.see_result' %}active{% endif %}" style="color:var(--c-gold);font-weight:700">🎓 SEE Result</a></li>
+      <li><a href="/see-result" class="{% if request.endpoint == 'public.see_result' %}active{% endif %}" style="color:var(--c-gold);font-weight:700">🎓 SEE Result</a></li>
       <li><a href="{{ url_for('public.contact') }}" class="{% if request.endpoint == 'public.contact' %}active{% endif %}">Contact</a></li>
     </ul>
     <!-- Mobile tap-outside overlay -->
