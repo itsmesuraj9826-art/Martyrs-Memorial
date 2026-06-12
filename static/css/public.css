@@ -2255,3 +2255,174 @@ body.dark-mode .nav-links .nav-see-btn {
 body.dark-mode .why-icon-gold  i { color: var(--c-gold-light); }
 body.dark-mode .why-icon-navy  i { color: #7aa0d4; }
 body.dark-mode .why-icon-green i { color: #4ade80; }
+
+/* ══════════════════════════════════════════════════════
+   FACILITY PHOTO LIGHTBOX
+   ══════════════════════════════════════════════════════ */
+
+/* Clickable card state */
+.facility-card.facility-clickable {
+  cursor: pointer;
+  position: relative;
+}
+
+.facility-card.facility-clickable:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--c-gold);
+}
+
+.facility-photo-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  margin-top: .85rem;
+  font-size: .72rem;
+  font-weight: 700;
+  color: var(--c-gold);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity .25s, transform .25s;
+}
+
+.facility-card.facility-clickable:hover .facility-photo-hint {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Always show hint on touch devices (no hover) */
+@media (hover: none) {
+  .facility-photo-hint { opacity: .85; transform: none; }
+}
+
+/* ── Overlay ── */
+.flb-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 12, 28, .92);
+  z-index: 99999;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  backdrop-filter: blur(6px);
+}
+
+.flb-overlay.flb-open {
+  display: flex;
+  animation: flbFade .2s ease both;
+}
+
+@keyframes flbFade { from { opacity: 0 } to { opacity: 1 } }
+
+.flb-box {
+  width: 100%;
+  max-width: 860px;
+  display: flex;
+  flex-direction: column;
+  animation: flbZoom .25s cubic-bezier(.22,1,.36,1) both;
+}
+
+@keyframes flbZoom {
+  from { transform: scale(.94); opacity: 0 }
+  to   { transform: scale(1);   opacity: 1 }
+}
+
+.flb-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: .85rem;
+}
+
+.flb-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  color: #fff;
+}
+
+.flb-close {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,.12);
+  color: #fff;
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition: background .2s, transform .2s;
+  line-height: 1;
+}
+
+.flb-close:hover {
+  background: var(--c-gold);
+  color: var(--c-ink);
+  transform: rotate(90deg);
+}
+
+.flb-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,.35);
+  border-radius: 16px;
+  overflow: hidden;
+  min-height: 280px;
+  max-height: 65vh;
+}
+
+.flb-img {
+  max-width: 100%;
+  max-height: 65vh;
+  object-fit: contain;
+  display: block;
+  transition: opacity .25s ease;
+}
+
+.flb-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,.14);
+  color: #fff;
+  font-size: 1.6rem;
+  cursor: pointer;
+  transition: background .2s;
+  z-index: 2;
+  line-height: 1;
+}
+
+.flb-nav:hover { background: var(--c-gold); color: var(--c-ink); }
+.flb-prev { left: .85rem; }
+.flb-next { right: .85rem; }
+
+.flb-caption {
+  margin-top: .75rem;
+  color: rgba(255,255,255,.8);
+  font-size: .88rem;
+  text-align: center;
+  min-height: 1.2em;
+}
+
+.flb-count {
+  margin-top: .25rem;
+  color: var(--c-gold);
+  font-size: .78rem;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: .08em;
+}
+
+@media (max-width: 600px) {
+  .flb-stage { min-height: 200px; max-height: 55vh; }
+  .flb-img   { max-height: 55vh; }
+  .flb-nav   { width: 38px; height: 38px; font-size: 1.3rem; }
+  .flb-title { font-size: 1.05rem; }
+}

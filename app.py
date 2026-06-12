@@ -2277,6 +2277,34 @@ def footer_theme():
 # 10b. SITEMAP + ROBOTS.TXT
 # ─────────────────────────────────────────────
 
+@public_bp.route('/api/facility-albums')
+def api_facility_albums():
+    """Returns {album_name_lower: album_id} for published albums — used by facility lightbox."""
+    from flask import jsonify
+    try:
+        albums = GalleryAlbum.query.filter_by(is_published=True).all()
+        return jsonify({a.name.strip().lower(): a.id for a in albums})
+    except Exception:
+        db.session.rollback()
+        return jsonify({})
+
+
+@public_bp.route('/api/facility-photos/<int:album_id>')
+def api_facility_photos(album_id):
+    """Returns photos of a published album as JSON — used by facility lightbox."""
+    from flask import jsonify
+    album = GalleryAlbum.query.filter_by(id=album_id, is_published=True).first()
+    if not album:
+        return jsonify({'name': '', 'photos': []})
+    photos = []
+    for img in album.images.order_by(GalleryImage.sort_order.asc()).all():
+        src = img.filename
+        if src and not src.startswith('http') and not src.startswith('/'):
+            src = '/static/uploads/gallery/' + src
+        photos.append({'src': src, 'caption': img.caption or ''})
+    return jsonify({'name': album.name, 'photos': photos})
+
+
 @public_bp.route('/sitemap.xml')
 def sitemap():
     from flask import make_response
