@@ -2245,3 +2245,13 @@ body.dark-mode .nav-links .nav-see-btn {
     font-size: .9rem;
   }
 }
+
+/* ── Why-card FA icon colours (replacing emojis) ── */
+.why-icon i { font-size: 1.6rem; }
+.why-icon-gold  i { color: var(--c-gold); }
+.why-icon-navy  i { color: var(--c-navy); }
+.why-icon-green i { color: #16a34a; }
+
+body.dark-mode .why-icon-gold  i { color: var(--c-gold-light); }
+body.dark-mode .why-icon-navy  i { color: #7aa0d4; }
+body.dark-mode .why-icon-green i { color: #4ade80; }
