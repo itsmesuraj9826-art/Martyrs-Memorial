@@ -211,7 +211,8 @@
   </div>
 </section>
 
-<!-- ═══ FACILITIES ═══ -->
+<!-- ═══ FACILITIES — database-driven, managed from Admin → Facilities ═══ -->
+{% if facilities %}
 <section class="section bg-light" id="facilities">
   <div class="container">
     <div class="section-header" data-animate="fadeInUp">
@@ -220,25 +221,19 @@
       <p>Everything our students need to learn, grow, and thrive.</p>
     </div>
     <div class="facilities-grid" data-animate="fadeInUp">
-      {% for fa_icon, gradient, name, desc in [
-        ('fa-microscope',     'linear-gradient(135deg,#0f9b8e,#43cea2)',  'Science Labs',    'State-of-the-art laboratories for Physics, Chemistry and Biology.'),
-        ('fa-desktop',        'linear-gradient(135deg,#2980b9,#6dd5fa)',  'Computer Labs',   'Modern computing with high-speed internet and latest software.'),
-        ('fa-book-open',      'linear-gradient(135deg,#834d9b,#d04ed6)',  'Library',         'A rich collection of books, journals and digital resources.'),
-        ('fa-futbol',         'linear-gradient(135deg,#56ab2f,#a8e063)',  'Sports Ground',   'Full-size grounds and indoor sports facilities.'),
-        ('fa-palette',        'linear-gradient(135deg,#f7971e,#ffd200)',  'Arts Centre',     'Dedicated spaces for visual arts, music and creative expression.'),
-        ('fa-utensils',       'linear-gradient(135deg,#c94b4b,#4b134f)',  'Cafeteria',       'Hygienic, nutritious meals in a clean dining hall.')
-      ] %}
+      {% for f in facilities %}
       <div class="facility-card">
-        <div class="facility-icon-wrap" style="background:{{ gradient }}">
-          <i class="fa-solid {{ fa_icon }}"></i>
+        <div class="facility-icon-wrap" style="background:{{ f.color or '#1a3570' }}">
+          <i class="{{ f.icon or 'fa-solid fa-school' }}"></i>
         </div>
-        <h3>{{ name }}</h3>
-        <p>{{ desc }}</p>
+        <h3>{{ f.name }}</h3>
+        {% if f.description %}<p>{{ f.description }}</p>{% endif %}
       </div>
       {% endfor %}
     </div>
   </div>
 </section>
+{% endif %}
 
 <!-- ═══ WHY CHOOSE US ═══ -->
 <section class="section">

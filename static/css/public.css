@@ -2426,3 +2426,49 @@ body.dark-mode .why-icon-green i { color: #4ade80; }
   .flb-nav   { width: 38px; height: 38px; font-size: 1.3rem; }
   .flb-title { font-size: 1.05rem; }
 }
+
+/* ══════════════════════════════════════════════════════
+   GALLERY — compact mobile layout (2-up album cards)
+   ══════════════════════════════════════════════════════ */
+@media(max-width: 768px){
+  .albums-grid{
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: .85rem !important;
+  }
+  .album-cover{
+    height: 130px !important;
+  }
+  .album-overlay-name{
+    font-size: .8rem !important;
+  }
+  .album-overlay{
+    padding: .6rem .7rem !important;
+  }
+  /* "N photos" pill — smaller */
+  .album-overlay .badge,
+  .album-photo-count,
+  .album-overlay span{
+    font-size: .62rem !important;
+    padding: .18rem .55rem !important;
+  }
+  .album-info{
+    padding: .6rem .7rem !important;
+  }
+  .album-info h3{ font-size: .82rem !important; }
+  .album-info p{ font-size: .7rem !important; }
+
+  /* Photos inside an album — 2-up squares */
+  .gallery-grid{
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: .75rem !important;
+  }
+  .gallery-thumb{
+    aspect-ratio: 1 / 1;
+    height: auto !important;
+  }
+}
+
+@media(max-width: 380px){
+  .album-cover{ height: 110px !important; }
+  .album-overlay-name{ font-size: .72rem !important; }
+}
