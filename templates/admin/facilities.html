@@ -1,0 +1,69 @@
+{% extends 'layouts/admin_base.html' %}
+{% block title %}Facilities{% endblock %}
+{% block page_title %}Facilities{% endblock %}
+
+{% block content %}
+<div class="page-actions">
+  <p style="font-size:.85rem;color:#64748b">
+    These cards appear in the "Our Facilities" section on the Academics page.
+    💡 Tip: create a Gallery album with the <strong>same name</strong> as a facility to make its card open a photo lightbox.
+  </p>
+  <a href="{{ url_for('admin.facility_new') }}" class="btn btn-primary btn-sm">+ Add Facility</a>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    {% if facilities %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th style="width:60px">Icon</th>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Order</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for f in facilities %}
+        <tr>
+          <td>
+            <div style="width:42px;height:42px;border-radius:50%;display:flex;align-items:center;
+                        justify-content:center;background:{{ f.color }};color:#fff;font-size:1rem">
+              <i class="{{ f.icon }}"></i>
+            </div>
+          </td>
+          <td><strong>{{ f.name }}</strong></td>
+          <td class="text-muted small">{{ (f.description or '')[:70] }}{% if f.description and f.description|length > 70 %}…{% endif %}</td>
+          <td>{{ f.sort_order }}</td>
+          <td>
+            {% if f.is_published %}<span class="badge badge-success">Live</span>
+            {% else %}<span class="badge badge-secondary">Hidden</span>{% endif %}
+          </td>
+          <td>
+            <div class="actions">
+              <a href="{{ url_for('admin.facility_edit', fid=f.id) }}" class="btn btn-sm btn-outline">Edit</a>
+              <form method="POST" action="{{ url_for('admin.facility_delete', fid=f.id) }}"
+                    style="display:inline" onsubmit="return confirm('Remove {{ f.name }}?')">
+                {{ csrf_token_field() }}
+                <button type="submit" class="btn btn-sm btn-danger">Del</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-text">
+      <span>🏫</span>
+      <p>No facilities yet. Add your first one.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Font Awesome for icon preview in admin -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+{% endblock %}

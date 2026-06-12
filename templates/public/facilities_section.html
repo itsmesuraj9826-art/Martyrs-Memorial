@@ -1,0 +1,29 @@
+<!-- ════════════════════════════════════════════════════
+     OUR FACILITIES — database-driven, admin managed
+     HOW TO USE:
+     1. Save this file as templates/public/_facilities_section.html
+     2. In templates/public/academics.html, find your existing
+        hardcoded "Our Facilities" section (the grid of
+        facility cards: Science Labs, Computer Labs, etc.)
+     3. DELETE that whole hardcoded grid of cards and put
+        this single line in its place:
+
+        {% include 'public/_facilities_section.html' %}
+
+     The section auto-hides if admin unpublishes everything.
+════════════════════════════════════════════════════ -->
+{% if facilities %}
+<div class="facilities-grid">
+  {% for f in facilities %}
+  <div class="facility-card">
+    <div class="facility-icon" style="background:{{ f.color }}">
+      <i class="{{ f.icon }}"></i>
+    </div>
+    <h3>{{ f.name }}</h3>
+    {% if f.description %}
+    <p>{{ f.description }}</p>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}

@@ -551,6 +551,19 @@ def set_setting(key, value):
     db.session.commit()
 
 
+class Facility(db.Model):
+    """School facilities — fully admin managed."""
+    __tablename__ = 'facilities'
+    id           = db.Column(db.Integer,     primary_key=True)
+    name         = db.Column(db.String(150), nullable=False)
+    description  = db.Column(db.Text,        nullable=True)
+    icon         = db.Column(db.String(80),  default='fa-solid fa-school')
+    color        = db.Column(db.String(20),  default='#1a3570')
+    sort_order   = db.Column(db.Integer,     default=0)
+    is_published = db.Column(db.Boolean,     default=True)
+    created_at   = db.Column(db.DateTime,    default=utc_now)
+
+
 # ─────────────────────────────────────────────
 # 5. FORMS
 # ─────────────────────────────────────────────
@@ -803,6 +816,49 @@ class SEEResultForm(FlaskForm):
     submit        = SubmitField('Save Result')
 
 
+FACILITY_ICONS = [
+    ('fa-solid fa-flask-vial',       '🧪 Science Lab'),
+    ('fa-solid fa-desktop',          '🖥️ Computer Lab'),
+    ('fa-solid fa-book-open',        '📖 Library'),
+    ('fa-solid fa-futbol',           '⚽ Sports'),
+    ('fa-solid fa-palette',          '🎨 Arts'),
+    ('fa-solid fa-utensils',         '🍴 Cafeteria'),
+    ('fa-solid fa-bus',              '🚌 Transport'),
+    ('fa-solid fa-house-medical',    '🏥 Health / First Aid'),
+    ('fa-solid fa-wifi',             '📶 Wi-Fi'),
+    ('fa-solid fa-video',            '📹 Smart Classroom'),
+    ('fa-solid fa-music',            '🎵 Music Room'),
+    ('fa-solid fa-flask',            '⚗️ Chemistry Lab'),
+    ('fa-solid fa-dna',              '🧬 Biology Lab'),
+    ('fa-solid fa-bolt',             '⚡ Physics Lab'),
+    ('fa-solid fa-building-shield',  '🛡️ Security / CCTV'),
+    ('fa-solid fa-school',           '🏫 General'),
+]
+
+FACILITY_COLORS = [
+    ('#10b981', 'Teal Green'),
+    ('#3b82f6', 'Sky Blue'),
+    ('#a855f7', 'Purple'),
+    ('#65a30d', 'Lime Green'),
+    ('#f59e0b', 'Amber Gold'),
+    ('#9f1239', 'Maroon'),
+    ('#1a3570', 'School Navy'),
+    ('#d4920a', 'School Gold'),
+    ('#0891b2', 'Cyan'),
+    ('#e8453c', 'School Red'),
+]
+
+
+class FacilityForm(FlaskForm):
+    name         = StringField('Facility Name', validators=[DataRequired(), Length(1, 150)])
+    description  = TextAreaField('Short Description', validators=[Optional(), Length(0, 300)])
+    icon         = SelectField('Icon',   choices=FACILITY_ICONS)
+    color        = SelectField('Colour', choices=FACILITY_COLORS)
+    sort_order   = IntegerField('Sort Order', validators=[Optional()], default=0)
+    is_published = BooleanField('Published', default=True)
+    submit       = SubmitField('Save Facility')
+
+
 # ─────────────────────────────────────────────
 # 6. CONTEXT PROCESSORS & TEMPLATE GLOBALS
 # ─────────────────────────────────────────────
@@ -982,9 +1038,11 @@ def about():
 
 @public_bp.route('/academics')
 def academics():
-    syllabi   = Download.query.filter_by(is_published=True, category='syllabus').order_by(Download.created_at.desc()).all()
-    calendars = Download.query.filter_by(is_published=True, category='calendar').order_by(Download.created_at.desc()).all()
-    return render_template('public/academics.html', syllabi=syllabi, calendars=calendars)
+    syllabi    = Download.query.filter_by(is_published=True, category='syllabus').order_by(Download.created_at.desc()).all()
+    calendars  = Download.query.filter_by(is_published=True, category='calendar').order_by(Download.created_at.desc()).all()
+    facilities = Facility.query.filter_by(is_published=True).order_by(Facility.sort_order.asc(), Facility.id.asc()).all()
+    return render_template('public/academics.html', syllabi=syllabi, calendars=calendars,
+                           facilities=facilities)
 
 
 @public_bp.route('/notices')
@@ -2127,6 +2185,60 @@ def notifications():
     return redirect(url_for('admin.messages', read='unread'))
 
 
+# ── Facilities ───────────────────────────────────────────────────────────────
+
+@admin_bp.route('/facilities')
+@_require_admin
+def facilities():
+    items = Facility.query.order_by(Facility.sort_order.asc(), Facility.id.asc()).all()
+    return render_template('admin/facilities.html', facilities=items)
+
+
+@admin_bp.route('/facilities/new', methods=['GET', 'POST'])
+@_require_admin
+def facility_new():
+    form = FacilityForm()
+    if form.validate_on_submit():
+        f = Facility(
+            name=form.name.data, description=form.description.data,
+            icon=form.icon.data, color=form.color.data,
+            sort_order=form.sort_order.data or 0,
+            is_published=form.is_published.data)
+        db.session.add(f)
+        db.session.commit()
+        flash(f.name + ' added to facilities.', 'success')
+        return redirect(url_for('admin.facilities'))
+    return render_template('admin/facility_form.html', form=form, title='Add Facility', facility=None)
+
+
+@admin_bp.route('/facilities/<int:fid>/edit', methods=['GET', 'POST'])
+@_require_admin
+def facility_edit(fid):
+    f    = Facility.query.get_or_404(fid)
+    form = FacilityForm(obj=f)
+    if form.validate_on_submit():
+        f.name         = form.name.data
+        f.description  = form.description.data
+        f.icon         = form.icon.data
+        f.color        = form.color.data
+        f.sort_order   = form.sort_order.data or 0
+        f.is_published = form.is_published.data
+        db.session.commit()
+        flash(f.name + ' updated.', 'success')
+        return redirect(url_for('admin.facilities'))
+    return render_template('admin/facility_form.html', form=form, title='Edit Facility', facility=f)
+
+
+@admin_bp.route('/facilities/<int:fid>/delete', methods=['POST'])
+@_require_admin
+def facility_delete(fid):
+    f = Facility.query.get_or_404(fid)
+    db.session.delete(f)
+    db.session.commit()
+    flash(f.name + ' removed.', 'success')
+    return redirect(url_for('admin.facilities'))
+
+
 # ── SEE Results ──────────────────────────────────────────────────────────────
 
 @admin_bp.route('/see-results/toggle-visibility', methods=['POST'])
@@ -2524,6 +2636,21 @@ def seed_database():
                 name=name, stream=stream, percentage=pct,
                 year='2082', rank=rank, is_published=True, sort_order=rank))
         print(f"  Seeded {len(_dummy)} dummy toppers.")
+
+    # Seed the six original facilities (only when table is empty)
+    if not Facility.query.first():
+        _facs = [
+            ('Science Labs',  'State-of-the-art laboratories for Physics, Chemistry and Biology.', 'fa-solid fa-flask-vial', '#10b981', 1),
+            ('Computer Labs', 'Modern computing with high-speed internet and latest software.',    'fa-solid fa-desktop',    '#3b82f6', 2),
+            ('Library',       'A rich collection of books, journals and digital resources.',       'fa-solid fa-book-open',  '#a855f7', 3),
+            ('Sports Ground', 'Full-size grounds and indoor sports facilities.',                   'fa-solid fa-futbol',     '#65a30d', 4),
+            ('Arts Centre',   'Dedicated spaces for visual arts, music and creative expression.',  'fa-solid fa-palette',    '#f59e0b', 5),
+            ('Cafeteria',     'Hygienic, nutritious meals in a clean dining hall.',                'fa-solid fa-utensils',   '#9f1239', 6),
+        ]
+        for name, desc, icon, color, order in _facs:
+            db.session.add(Facility(name=name, description=desc, icon=icon,
+                                    color=color, sort_order=order, is_published=True))
+        print("  Seeded 6 default facilities.")
 
     # Seed default footer theme row
     if not FooterTheme.query.first():
