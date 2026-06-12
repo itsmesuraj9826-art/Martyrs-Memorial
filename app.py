@@ -2359,6 +2359,23 @@ def see_result_delete(rid):
     return redirect(url_for('admin.see_results'))
 
 
+# ── SEO Settings ─────────────────────────────────────────────────────────────
+
+@admin_bp.route('/seo', methods=['GET', 'POST'])
+@_require_admin
+def seo_settings():
+    if request.method == 'POST':
+        set_setting('seo_title',       request.form.get('seo_title', '').strip())
+        set_setting('seo_description', request.form.get('seo_description', '').strip())
+        set_setting('seo_keywords',    request.form.get('seo_keywords', '').strip())
+        flash('SEO settings saved. Google will pick up changes on its next crawl (typically within days).', 'success')
+        return redirect(url_for('admin.seo_settings'))
+    return render_template('admin/seo_settings.html',
+                           seo_title=get_setting('seo_title', ''),
+                           seo_description=get_setting('seo_description', ''),
+                           seo_keywords=get_setting('seo_keywords', ''))
+
+
 # ── Footer Theme ──────────────────────────────────────────────────────────────
 
 @admin_bp.route('/footer-theme', methods=['GET', 'POST'])

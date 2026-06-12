@@ -1,0 +1,92 @@
+{% extends 'layouts/admin_base.html' %}
+{% block title %}SEO Settings{% endblock %}
+{% block page_title %}SEO Settings{% endblock %}
+
+{% block content %}
+<div style="max-width:760px">
+
+  <!-- Google preview -->
+  <div class="card" style="margin-bottom:1.5rem">
+    <div class="card-header"><h3>How your site appears on Google</h3></div>
+    <div class="card-body">
+      <div style="font-family:Arial,sans-serif;padding:1rem;background:#fff;border:1px solid #e2e8f0;border-radius:10px">
+        <div style="font-size:.8rem;color:#202124;margin-bottom:.15rem">martyrs-memorial.onrender.com</div>
+        <div id="pvTitle" style="font-size:1.18rem;color:#1a0dab;margin-bottom:.2rem;cursor:pointer">
+          {{ seo_title or (school_name ~ ' — ' ~ school_tagline) }}
+        </div>
+        <div id="pvDesc" style="font-size:.85rem;color:#4d5156;line-height:1.5">
+          {{ seo_description or 'Premier +2 college in Biratnagar offering Science, Management & Computer Science. 98% pass rate. Admissions open for 2083.' }}
+        </div>
+      </div>
+      <p style="font-size:.75rem;color:#94a3b8;margin-top:.6rem">Live preview — updates as you type below.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><h3>Search Engine Settings</h3></div>
+    <div class="card-body">
+      <form method="POST">
+        {{ csrf_token_field() }}
+
+        <div class="form-group">
+          <label>Site Title <span style="font-weight:400;color:#94a3b8">(shows as the blue link on Google · ~60 characters)</span></label>
+          <input type="text" name="seo_title" id="inTitle" class="form-control" maxlength="70"
+                 value="{{ seo_title }}"
+                 placeholder="Martyrs' Memorial +2 — Best NEB College in Biratnagar">
+          <div style="font-size:.72rem;color:#94a3b8;margin-top:.3rem"><span id="cntTitle">0</span>/70 characters</div>
+        </div>
+
+        <div class="form-group">
+          <label>Meta Description <span style="font-weight:400;color:#94a3b8">(the grey text under the link · ~160 characters)</span></label>
+          <textarea name="seo_description" id="inDesc" class="form-control" rows="3" maxlength="170"
+                    placeholder="Top +2 college in Biratnagar offering Science, Management, CS & Hotel Management. 98% NEB pass rate. Admissions open for 2083 — apply today.">{{ seo_description }}</textarea>
+          <div style="font-size:.72rem;color:#94a3b8;margin-top:.3rem"><span id="cntDesc">0</span>/170 characters</div>
+        </div>
+
+        <div class="form-group">
+          <label>Keywords <span style="font-weight:400;color:#94a3b8">(comma-separated)</span></label>
+          <textarea name="seo_keywords" class="form-control" rows="2"
+                    placeholder="+2 college Biratnagar, NEB college, Science stream, SEE result 2083">{{ seo_keywords }}</textarea>
+          <div style="margin-top:.5rem;padding:.65rem .9rem;background:#fef9c3;border:1px solid #fde047;border-radius:8px;font-size:.76rem;color:#854d0e">
+            ⚠️ Honest note: Google has ignored the keywords tag since 2009 — it won't boost ranking. It's kept here for other search engines and internal reference. Ranking comes from your title, description, content, and Search Console.
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">💾 Save SEO Settings</button>
+        <p style="font-size:.78rem;color:#64748b;margin-top:.75rem">Leave any field empty to use the built-in default.</p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Ranking checklist -->
+  <div class="card" style="margin-top:1.5rem">
+    <div class="card-header"><h3>What actually gets you to the top of Google</h3></div>
+    <div class="card-body" style="font-size:.85rem;color:#475569;line-height:1.9">
+      ✅ Sitemap &amp; robots.txt — <strong>already live</strong> on your site<br>
+      ✅ Structured data (school name, address, phones) — <strong>already live</strong><br>
+      ☐ <strong>Submit sitemap to <a href="https://search.google.com/search-console" target="_blank" style="color:#2563eb">Google Search Console</a></strong> — the single biggest step, takes 10 minutes<br>
+      ☐ Create a free <a href="https://business.google.com" target="_blank" style="color:#2563eb">Google Business Profile</a> — puts you on Google Maps for "college near me"<br>
+      ☐ Post notices &amp; blog regularly — fresh content = better ranking<br>
+      ☐ Ask partner schools / local sites to link to you — backlinks build authority
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var t = document.getElementById('inTitle'), d = document.getElementById('inDesc');
+  var pt = document.getElementById('pvTitle'), pd = document.getElementById('pvDesc');
+  var ct = document.getElementById('cntTitle'), cd = document.getElementById('cntDesc');
+  function upd(){
+    ct.textContent = t.value.length;
+    cd.textContent = d.value.length;
+    if(t.value.trim()) pt.textContent = t.value;
+    if(d.value.trim()) pd.textContent = d.value;
+  }
+  t.addEventListener('input', upd);
+  d.addEventListener('input', upd);
+  upd();
+})();
+</script>
+{% endblock %}

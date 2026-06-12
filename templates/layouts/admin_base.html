@@ -101,6 +101,11 @@
           </a>
         </li>
         <li>
+          <a href="{{ url_for('admin.seo_settings') }}" class="{% if 'seo' in request.endpoint %}active{% endif %}">
+            <span class="nav-icon">🔍</span> SEO Settings
+          </a>
+        </li>
+        <li>
           <a href="{{ url_for('admin.facilities') }}" class="{% if 'facilit' in request.endpoint %}active{% endif %}">
             <span class="nav-icon">🏫</span> Facilities
           </a>

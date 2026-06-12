@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- ══ Primary SEO ══ -->
-  <title>{% block title %}{{ school_name }} — {{ school_tagline }}{% endblock %}</title>
-  <meta name="description"       content="{% block meta_description %}{{ school_name }} — {{ school_tagline }}. Offering Science, Computer Science, Management and Hotel Management programmes for Grades 11 & 12 in Biratnagar, Nepal. Admissions open for 2083.{% endblock %}">
-  <meta name="keywords"          content="{% block meta_keywords %}Martyrs Memorial, Martyrs Memorial +2, +2 college Biratnagar, NEB college Nepal, Science stream Biratnagar, Management stream, Computer Science +2, Biratnagar college, SEE result 2083, NEB 2083{% endblock %}">
+  <title>{% block title %}{{ setting('seo_title') or (school_name ~ ' — ' ~ school_tagline) }}{% endblock %}</title>
+  <meta name="description"       content="{% block meta_description %}{{ setting('seo_description') or (school_name ~ ' — ' ~ school_tagline ~ '. Offering Science, Computer Science, Management and Hotel Management programmes for Grades 11 & 12 in Biratnagar, Nepal. Admissions open for 2083.') }}{% endblock %}">
+  <meta name="keywords"          content="{% block meta_keywords %}{{ setting('seo_keywords') or 'Martyrs Memorial, Martyrs Memorial +2, +2 college Biratnagar, NEB college Nepal, Science stream Biratnagar, Management stream, Computer Science +2, Biratnagar college, SEE result 2083, NEB 2083' }}{% endblock %}">
   <meta name="robots"            content="index, follow">
   <meta name="author"            content="{{ school_name }}">
   <meta name="theme-color"       content="#1a3570">
