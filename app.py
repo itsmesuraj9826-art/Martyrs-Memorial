@@ -1029,11 +1029,14 @@ def about():
                      .filter_by(is_published=True)
                      .order_by(BoardMember.sort_order.asc(), BoardMember.name.asc())
                      .all())
+    facilities = Facility.query.filter_by(is_published=True).order_by(
+        Facility.sort_order.asc(), Facility.id.asc()).all()
     return render_template('public/about.html',
                            about=_get_section('about'),
                            principal=_get_section('principal'),
                            mission=_get_section('mission'),
-                           board_members=board_members)
+                           board_members=board_members,
+                           facilities=facilities)
 
 
 @public_bp.route('/academics')

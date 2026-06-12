@@ -3,6 +3,74 @@
 {% block page_title %}Toppers Gallery{% endblock %}
 
 {% block content %}
+
+<!-- ════════════════════════════════════════════════════
+     HALL OF FAME — PUBLIC VISIBILITY CONTROLS
+════════════════════════════════════════════════════ -->
+{% set t_enabled = toppers_enabled | default(false) %}
+{% set e_streams = enabled_streams | default([]) %}
+<div class="card" style="margin-bottom:1.5rem;border-left:4px solid {{ '#22c55e' if t_enabled else '#94a3b8' }}">
+  <div class="card-body" style="padding:1.25rem 1.5rem">
+
+    <form method="POST" action="{{ url_for('admin.toppers_visibility') }}">
+      {{ csrf_token_field() }}
+
+      <!-- Master toggle row -->
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1.25rem">
+        <div style="display:flex;align-items:center;gap:.85rem">
+          <div style="width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;
+                      background:{{ '#dcfce7' if t_enabled else '#f1f5f9' }}">
+            {{ '🏆' if t_enabled else '🙈' }}
+          </div>
+          <div>
+            <div style="font-weight:700;font-size:.95rem;color:#1e293b">
+              Hall of Fame is {{ 'LIVE on the landing page' if t_enabled else 'HIDDEN from public' }}
+            </div>
+            <div style="font-size:.8rem;color:#64748b">
+              {{ 'Visitors see the toppers section with the streams selected below.' if t_enabled
+                 else 'The toppers section does not appear on the website at all.' }}
+            </div>
+          </div>
+        </div>
+
+        <label style="display:flex;align-items:center;gap:.6rem;cursor:pointer;
+                      padding:.6rem 1.1rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px">
+          <input type="checkbox" name="toppers_enabled" value="1"
+                 {% if t_enabled %}checked{% endif %}
+                 style="width:18px;height:18px;accent-color:#16a34a;cursor:pointer">
+          <span style="font-weight:700;font-size:.88rem">Show on website</span>
+        </label>
+      </div>
+
+      <!-- Per-stream checkboxes -->
+      <div style="border-top:1px solid #f1f5f9;padding-top:1.1rem">
+        <div style="font-weight:700;font-size:.85rem;color:#1e293b;margin-bottom:.75rem">
+          Which streams' toppers should the public see?
+        </div>
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap">
+          {% for key, label in stream_labels.items() %}
+          <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;
+                        padding:.5rem 1rem;border-radius:999px;font-size:.82rem;font-weight:600;
+                        border:1.5px solid {{ '#16a34a' if key in e_streams else '#e2e8f0' }};
+                        background:{{ '#f0fdf4' if key in e_streams else '#fff' }};
+                        color:{{ '#166534' if key in e_streams else '#475569' }}">
+            <input type="checkbox" name="streams" value="{{ key }}"
+                   {% if key in e_streams %}checked{% endif %}
+                   style="width:15px;height:15px;accent-color:#16a34a;cursor:pointer">
+            {{ label }}
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div style="margin-top:1.25rem">
+        <button type="submit" class="btn btn-primary">💾 Save Visibility Settings</button>
+      </div>
+    </form>
+
+  </div>
+</div>
+
 <div class="page-actions">
   <span></span>
   <a href="{{ url_for('admin.topper_new') }}" class="btn btn-primary">+ Add Topper</a>
@@ -37,7 +105,12 @@
             {% endif %}
           </td>
           <td><strong>{{ t.name }}</strong></td>
-          <td>{{ stream_labels.get(t.stream, t.stream) }}</td>
+          <td>
+            {{ stream_labels.get(t.stream, t.stream) }}
+            {% if t_enabled and t.stream in e_streams %}
+            <span class="badge badge-success" style="margin-left:.35rem;font-size:.62rem">Live</span>
+            {% endif %}
+          </td>
           <td>{{ t.percentage or '—' }}%</td>
           <td>{{ t.year }}</td>
           <td>{{ t.rank }}</td>
