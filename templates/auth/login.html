@@ -3,162 +3,404 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Login | {{ school_name }}</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin Login — {{ school_name }}</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/logo.svg') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous">
   <style>
     :root {
-      --c-green:      #2d5a27;
-      --c-green-dark: #1a2e1a;
-      --c-amber:      #f4a826;
-      --c-amber-lt:   #fff8e8;
-    }
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{
-      min-height:100vh;display:flex;align-items:center;justify-content:center;
-      font-family:'DM Sans',system-ui,sans-serif;
-      background: linear-gradient(135deg, #1a2e1a 0%, #2d5a27 50%, #1e3d1a 100%);
-      padding:1.5rem;
-    }
-    /* Subtle pattern overlay */
-    body::before{
-      content:'';position:fixed;inset:0;
-      background-image:repeating-linear-gradient(
-        45deg,rgba(255,255,255,.015) 0px,rgba(255,255,255,.015) 1px,
-        transparent 1px,transparent 30px);
-      pointer-events:none;
-    }
-    .login-wrapper{width:100%;max-width:440px;position:relative;z-index:1}
-    .login-card{
-      background:#fff;border-radius:20px;padding:2.75rem 2.5rem;
-      box-shadow:0 32px 80px rgba(0,0,0,.35);
-    }
-    .login-header{text-align:center;margin-bottom:2rem}
-    .login-header .icon-wrap{
-      width:72px;height:72px;border-radius:16px;
-      background:linear-gradient(135deg,var(--c-green),#3a7032);
-      display:flex;align-items:center;justify-content:center;
-      font-size:2rem;margin:0 auto 1.25rem;
-      box-shadow:0 8px 24px rgba(45,90,39,.35);
-    }
-    .login-header h1{
-      font-family:'DM Serif Display',Georgia,serif;
-      font-size:1.75rem;color:var(--c-green-dark);font-weight:400;
-      margin-bottom:.3rem;
-    }
-    .login-header p{color:#6b7a52;font-size:.88rem;font-weight:500;letter-spacing:.04em;text-transform:uppercase}
-
-    .alert{
-      padding:.85rem 1.1rem;border-radius:10px;font-size:.88rem;
-      font-weight:500;margin-bottom:1.25rem;
-    }
-    .alert-danger,.alert-error{background:#fee2e2;color:#991b1b;border-left:3px solid #ef4444}
-    .alert-success{background:#dcfce7;color:#166534;border-left:3px solid #22c55e}
-    .alert-info{background:#dbeafe;color:#1e40af;border-left:3px solid #3b82f6}
-    .alert-warning{background:#fef9c3;color:#854d0e;border-left:3px solid #f59e0b}
-
-    .form-group{margin-bottom:1.25rem}
-    .form-group label{display:block;font-weight:600;font-size:.85rem;color:#374151;margin-bottom:.45rem}
-    .form-control{
-      width:100%;padding:.72rem 1rem;border:1.5px solid #d4e4cc;
-      border-radius:10px;font-size:.95rem;font-family:inherit;
-      color:#1a2e1a;background:#fff;transition:border-color .2s,box-shadow .2s;
-    }
-    .form-control:focus{outline:none;border-color:var(--c-green);box-shadow:0 0 0 3px rgba(45,90,39,.12)}
-    .form-error{color:#dc2626;font-size:.78rem;margin-top:.3rem;display:block}
-
-    .password-wrapper{position:relative}
-    .password-wrapper .form-control{padding-right:3rem}
-    .password-toggle{
-      position:absolute;right:.75rem;top:50%;transform:translateY(-50%);
-      background:none;border:none;cursor:pointer;font-size:1.1rem;color:#6b7a52;
-      padding:.25rem;transition:color .2s;
-    }
-    .password-toggle:hover{color:var(--c-green)}
-
-    .form-group-inline{display:flex;align-items:center;gap:.5rem;margin-bottom:1.5rem;font-size:.88rem;color:#374151}
-    .form-group-inline input[type=checkbox]{
-      width:16px;height:16px;accent-color:var(--c-green);cursor:pointer;
+      --c-ink:        #0b1d3a;
+      --c-navy:       #1a3570;
+      --c-navy-mid:   #1e52a0;
+      --c-gold:       #d4920a;
+      --c-gold-light: #f0b429;
+      --c-border:     #c8d8f0;
     }
 
-    .btn-login{
-      width:100%;padding:.85rem;border:none;border-radius:10px;
-      background:linear-gradient(135deg,var(--c-green),#3a7032);
-      color:#fff;font-size:.95rem;font-weight:700;
-      font-family:inherit;cursor:pointer;letter-spacing:.04em;
-      transition:all .25s;box-shadow:0 4px 16px rgba(45,90,39,.3);
-    }
-    .btn-login:hover{
-      background:linear-gradient(135deg,#1a2e1a,var(--c-green));
-      transform:translateY(-1px);box-shadow:0 8px 24px rgba(45,90,39,.4);
-    }
-    .btn-login:active{transform:translateY(0)}
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    .auth-links{
-      display:flex;justify-content:space-between;align-items:center;
-      margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid #e8f5e3;
-      font-size:.84rem;
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      background:
+        radial-gradient(ellipse at 20% -10%, rgba(30,82,160,.45) 0%, transparent 55%),
+        radial-gradient(ellipse at 110% 110%, rgba(212,146,10,.18) 0%, transparent 50%),
+        linear-gradient(155deg, #0b1d3a 0%, #122a52 55%, #0b1d3a 100%);
+      position: relative;
+      overflow: hidden;
     }
-    .auth-links a{color:var(--c-green);font-weight:500;text-decoration:none;transition:color .2s}
-    .auth-links a:hover{color:var(--c-amber)}
 
-    .divider{display:flex;align-items:center;gap:.75rem;margin:1.5rem 0}
-    .divider::before,.divider::after{content:'';flex:1;height:1px;background:#e8f5e3}
-    .divider span{font-size:.75rem;color:#6b7a52;letter-spacing:.06em;text-transform:uppercase}
+    /* Diagonal stripe texture like the event footer */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        -50deg,
+        rgba(255,255,255,.015) 0px,
+        rgba(255,255,255,.015) 2px,
+        transparent 2px,
+        transparent 16px
+      );
+      pointer-events: none;
+    }
+
+    /* Floating gold orbs */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(70px);
+      opacity: .25;
+      pointer-events: none;
+      animation: float 9s ease-in-out infinite;
+    }
+    .orb-1 { width: 280px; height: 280px; background: var(--c-gold); top: -90px; right: -60px; }
+    .orb-2 { width: 220px; height: 220px; background: var(--c-navy-mid); bottom: -70px; left: -50px; animation-delay: 3s; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) }
+      50%       { transform: translateY(-22px) }
+    }
+
+    .login-wrapper {
+      width: 100%;
+      max-width: 430px;
+      position: relative;
+      z-index: 1;
+      animation: cardIn .5s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(24px) scale(.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .login-card {
+      background: #fff;
+      border-radius: 22px;
+      padding: 2.75rem 2.5rem 2.25rem;
+      box-shadow:
+        0 24px 64px rgba(0,0,0,.45),
+        0 0 0 1px rgba(255,255,255,.06);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Gold top accent bar */
+    .login-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--c-gold), var(--c-gold-light), var(--c-gold));
+    }
+
+    .login-header { text-align: center; margin-bottom: 2rem; }
+
+    .login-logo {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 1rem;
+      display: block;
+      filter: drop-shadow(0 6px 16px rgba(232,69,60,.3));
+    }
+
+    .login-header h1 {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 1.55rem;
+      color: var(--c-ink);
+      margin-bottom: .3rem;
+      line-height: 1.25;
+    }
+
+    .login-header .login-sub {
+      color: #4a6fa5;
+      font-size: .88rem;
+    }
+
+    .admin-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      margin-top: .75rem;
+      padding: .28rem .9rem;
+      border: 1.5px solid var(--c-gold);
+      color: var(--c-gold);
+      border-radius: 999px;
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .admin-tag::before {
+      content: '';
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--c-gold);
+    }
+
+    /* Flash messages */
+    .flash {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .75rem;
+      padding: .8rem 1rem;
+      border-radius: 10px;
+      font-size: .85rem;
+      font-weight: 500;
+      margin-bottom: 1.25rem;
+      animation: cardIn .3s ease both;
+    }
+    .flash-success { background: #dcfce7; color: #166534; border-left: 4px solid #22c55e; }
+    .flash-danger, .flash-error { background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
+    .flash-warning { background: #fef9c3; color: #854d0e; border-left: 4px solid #f59e0b; }
+    .flash-info { background: #dbeafe; color: #1e40af; border-left: 4px solid #3b82f6; }
+    .flash button { background: none; border: none; font-size: 1.1rem; color: inherit; opacity: .6; cursor: pointer; }
+
+    /* Form */
+    .form-group { margin-bottom: 1.25rem; }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      font-size: .85rem;
+      color: var(--c-ink);
+      margin-bottom: .45rem;
+    }
+
+    .input-wrap { position: relative; }
+
+    .input-wrap .input-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      font-size: .9rem;
+      pointer-events: none;
+      transition: color .2s;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: .8rem 1rem .8rem 2.6rem;
+      border: 1.5px solid var(--c-border);
+      border-radius: 10px;
+      font-size: .95rem;
+      font-family: inherit;
+      color: var(--c-ink);
+      background: #fff;
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--c-gold);
+      box-shadow: 0 0 0 3.5px rgba(212,146,10,.14);
+    }
+
+    .form-control:focus ~ .input-icon,
+    .input-wrap:focus-within .input-icon { color: var(--c-gold); }
+
+    .password-toggle {
+      position: absolute;
+      right: .9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: .9rem;
+      padding: .25rem;
+      transition: color .2s;
+    }
+    .password-toggle:hover { color: var(--c-navy); }
+
+    /* Remember + forgot row */
+    .form-row-split {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: .5rem;
+    }
+
+    .remember-label {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-size: .84rem;
+      color: #4a6fa5;
+      cursor: pointer;
+      user-select: none;
+    }
+    .remember-label input {
+      width: 16px; height: 16px;
+      accent-color: var(--c-gold);
+      cursor: pointer;
+    }
+
+    .forgot-link {
+      font-size: .82rem;
+      color: var(--c-navy);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color .2s;
+    }
+    .forgot-link:hover { color: var(--c-gold); }
+
+    /* Submit */
+    .btn-login {
+      width: 100%;
+      padding: .85rem;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--c-navy), var(--c-navy-mid));
+      color: #fff;
+      font-family: inherit;
+      font-size: .95rem;
+      font-weight: 700;
+      letter-spacing: .03em;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .2s;
+      box-shadow: 0 4px 16px rgba(26,53,112,.35);
+    }
+    .btn-login:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(26,53,112,.45);
+    }
+    .btn-login:active { transform: translateY(0); }
+
+    /* Back link */
+    .back-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .45rem;
+      margin-top: 1.5rem;
+      font-size: .84rem;
+      color: rgba(255,255,255,.55);
+      text-decoration: none;
+      transition: color .2s;
+    }
+    .back-link:hover { color: var(--c-gold-light); }
+
+    /* Footer note */
+    .login-foot {
+      text-align: center;
+      margin-top: 1.5rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid #eef2fa;
+      font-size: .72rem;
+      color: #94a3b8;
+    }
+
+    .form-error { color: #ef4444; font-size: .78rem; margin-top: .3rem; display: block; }
+
+    @media(max-width: 480px) {
+      .login-card { padding: 2.25rem 1.5rem 1.75rem; border-radius: 18px; }
+      .login-header h1 { font-size: 1.35rem; }
+    }
   </style>
 </head>
 <body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
 <div class="login-wrapper">
   <div class="login-card">
+
     <div class="login-header">
-      <div class="icon-wrap">🎓</div>
+      <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="{{ school_name }}" class="login-logo">
       <h1>{{ school_name }}</h1>
-      <p>Admin Portal</p>
+      <p class="login-sub">{{ school_tagline }}</p>
+      <span class="admin-tag">Admin Portal</span>
     </div>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, message in messages %}
-        <div class="alert alert-{{ category }}">{{ message }}</div>
+        <div class="flash flash-{{ category }}">
+          <span>{{ message }}</span>
+          <button onclick="this.parentElement.remove()">×</button>
+        </div>
         {% endfor %}
       {% endif %}
     {% endwith %}
 
-    <form method="POST" action="{{ url_for('auth.login') }}">
+    <form method="POST" novalidate>
       {{ form.hidden_tag() }}
+
       <div class="form-group">
-        {{ form.username.label }}
-        {{ form.username(class="form-control", placeholder="Enter your username", autocomplete="username") }}
-        {% for e in form.username.errors %}<span class="form-error">{{ e }}</span>{% endfor %}
-      </div>
-      <div class="form-group">
-        {{ form.password.label }}
-        <div class="password-wrapper">
-          {{ form.password(class="form-control", placeholder="Enter your password", autocomplete="current-password", id="loginPwd") }}
-          <button type="button" class="password-toggle" onclick="togglePwd('loginPwd',this)">👁</button>
+        <label for="username">Username</label>
+        <div class="input-wrap">
+          <i class="fa-solid fa-user input-icon"></i>
+          {{ form.username(class="form-control", id="username", placeholder="Enter your username", autocomplete="username", autofocus=True) }}
         </div>
-        {% for e in form.password.errors %}<span class="form-error">{{ e }}</span>{% endfor %}
+        {% for err in form.username.errors %}<span class="form-error">{{ err }}</span>{% endfor %}
       </div>
-      <div class="form-group-inline">
-        {{ form.remember_me() }}
-        {{ form.remember_me.label }}
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="input-wrap">
+          <i class="fa-solid fa-lock input-icon"></i>
+          {{ form.password(class="form-control", id="password", placeholder="Enter your password", autocomplete="current-password") }}
+          <button type="button" class="password-toggle" id="pwToggle" aria-label="Show password">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+        </div>
+        {% for err in form.password.errors %}<span class="form-error">{{ err }}</span>{% endfor %}
       </div>
-      <button type="submit" class="btn-login">Log In</button>
+
+      <div class="form-row-split">
+        <label class="remember-label">
+          {{ form.remember_me() }}
+          Remember me
+        </label>
+        <a href="{{ url_for('auth.forgot_password') }}" class="forgot-link">Forgot password?</a>
+      </div>
+
+      <button type="submit" class="btn-login">
+        <i class="fa-solid fa-right-to-bracket" style="margin-right:.45rem"></i>Log In
+      </button>
     </form>
 
-    <div class="auth-links">
-      <a href="{{ url_for('public.index') }}">← Back to website</a>
-      <a href="{{ url_for('auth.forgot_password') }}">Forgot password?</a>
+    <div class="login-foot">
+      🔒 Secure area — authorised personnel only
     </div>
   </div>
+
+  <a href="{{ url_for('public.index') }}" class="back-link">
+    <i class="fa-solid fa-arrow-left"></i> Back to website
+  </a>
 </div>
+
 <script>
-function togglePwd(id, btn) {
-  const inp = document.getElementById(id);
-  inp.type = inp.type === 'password' ? 'text' : 'password';
-  btn.textContent = inp.type === 'password' ? '👁' : '🙈';
-}
+  // Password show/hide
+  (function(){
+    var btn = document.getElementById('pwToggle');
+    var pw  = document.getElementById('password');
+    if(!btn || !pw) return;
+    btn.addEventListener('click', function(){
+      var show = pw.type === 'password';
+      pw.type  = show ? 'text' : 'password';
+      btn.innerHTML = show
+        ? '<i class="fa-solid fa-eye-slash"></i>'
+        : '<i class="fa-solid fa-eye"></i>';
+    });
+  })();
 </script>
+
 </body>
 </html>

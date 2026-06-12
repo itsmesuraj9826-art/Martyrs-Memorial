@@ -943,13 +943,15 @@ def index():
     testimonials    = (Testimonial.query.filter_by(is_published=True)
                        .order_by(Testimonial.sort_order.asc()).limit(6).all())
 
-    _streams = ['science_bio', 'science_math', 'management', 'law', 'arts']
+    # Hall of Fame — admin controlled (master toggle + per-stream)
     toppers_by_stream = {}
-    for s in _streams:
-        toppers_by_stream[s] = (Topper.query
-                                .filter_by(is_published=True, stream=s)
-                                .order_by(Topper.sort_order.asc(), Topper.rank.asc())
-                                .limit(20).all())
+    if get_setting('toppers_enabled', '0') == '1':
+        _enabled = [s for s in get_setting('toppers_streams', '').split(',') if s]
+        for s in _enabled:
+            toppers_by_stream[s] = (Topper.query
+                                    .filter_by(is_published=True, stream=s)
+                                    .order_by(Topper.sort_order.asc(), Topper.rank.asc())
+                                    .limit(20).all())
 
     try:
         popup_show = bool(popup and popup.extra_data and popup.extra_data.get('enabled'))
@@ -1977,7 +1979,29 @@ STREAM_LABELS = {
 @_require_admin
 def toppers():
     all_toppers = Topper.query.order_by(Topper.stream, Topper.sort_order, Topper.rank).all()
-    return render_template('admin/toppers.html', toppers=all_toppers, stream_labels=STREAM_LABELS)
+    toppers_enabled = get_setting('toppers_enabled', '0') == '1'
+    enabled_streams = [s for s in get_setting('toppers_streams', '').split(',') if s]
+    return render_template('admin/toppers.html', toppers=all_toppers,
+                           stream_labels=STREAM_LABELS,
+                           toppers_enabled=toppers_enabled,
+                           enabled_streams=enabled_streams)
+
+
+@admin_bp.route('/toppers/visibility', methods=['POST'])
+@_require_admin
+def toppers_visibility():
+    enabled = '1' if request.form.get('toppers_enabled') == '1' else '0'
+    streams = request.form.getlist('streams')
+    valid   = [s for s in streams if s in STREAM_LABELS]
+    set_setting('toppers_enabled', enabled)
+    set_setting('toppers_streams', ','.join(valid))
+    if enabled == '1' and valid:
+        flash(f'Hall of Fame is LIVE with {len(valid)} stream(s) visible.', 'success')
+    elif enabled == '1' and not valid:
+        flash('Hall of Fame enabled but NO streams selected — nothing will show. Select at least one stream.', 'warning')
+    else:
+        flash('Hall of Fame is now HIDDEN from the public.', 'info')
+    return redirect(url_for('admin.toppers'))
 
 
 @admin_bp.route('/toppers/new', methods=['GET', 'POST'])
