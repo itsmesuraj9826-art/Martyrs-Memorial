@@ -52,6 +52,7 @@ from flask_wtf.csrf import CSRFProtect
 from flask_wtf.file import FileField, FileAllowed, MultipleFileField
 from markupsafe import Markup
 from werkzeug.utils import secure_filename
+from werkzeug.urls import url_parse
 from wtforms import (StringField, PasswordField, TextAreaField, BooleanField,
                      SelectField, DateField, DateTimeLocalField, IntegerField,
                      SubmitField)
@@ -143,6 +144,7 @@ app.config.update(
     ALLOWED_DOC_EXTENSIONS         = ALLOWED_DOC_EXTS,
     PERMANENT_SESSION_LIFETIME     = timedelta(hours=2),
     SESSION_COOKIE_HTTPONLY        = True,
+    SESSION_COOKIE_SECURE          = True,
     SESSION_COOKIE_SAMESITE        = 'Lax',
     POSTS_PER_PAGE                 = 10,
     SCHOOL_NAME                    = SCHOOL_NAME,
@@ -570,7 +572,7 @@ class Facility(db.Model):
 
 class LoginForm(FlaskForm):
     username    = StringField('Username',  validators=[DataRequired(), Length(1, 80)])
-    password    = PasswordField('Password', validators=[DataRequired()])
+    password    = PasswordField('Password', validators=[DataRequired(), Length(1, 128)])
     remember_me = BooleanField('Remember Me')
     submit      = SubmitField('Log In')
 
@@ -1121,6 +1123,7 @@ def news_detail(slug):
 
 
 _contact_rate = {}
+_login_rate   = {}
 
 def _rate_limit_ok(ip, max_per_hour=5):
     import time
@@ -1130,6 +1133,17 @@ def _rate_limit_ok(ip, max_per_hour=5):
     if len(times) >= max_per_hour:
         return False
     _contact_rate[ip].append(now)
+    return True
+
+def _login_rate_limit_ok(ip, max_per_hour=10):
+    """Separate rate limiter for login attempts — stricter than contact form."""
+    import time
+    now   = time.time()
+    times = [t for t in _login_rate.get(ip, []) if now - t < 3600]
+    _login_rate[ip] = times
+    if len(times) >= max_per_hour:
+        return False
+    _login_rate[ip].append(now)
     return True
 
 
@@ -1280,14 +1294,21 @@ def privacy_policy():
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('admin.dashboard'))
+    ip = request.remote_addr
     form = LoginForm()
     if form.validate_on_submit():
+        if not _login_rate_limit_ok(ip):
+            flash('Too many login attempts. Please try again later.', 'danger')
+            return render_template('auth/login.html', form=form)
         admin = Admin.query.filter_by(username=form.username.data).first()
         if admin and admin.is_active and admin.check_password(form.password.data):
             login_user(admin, remember=form.remember_me.data)
             admin.last_login = utc_now()
             db.session.commit()
             next_page = request.args.get('next')
+            # Reject absolute URLs to prevent open-redirect phishing
+            if next_page and url_parse(next_page).netloc != '':
+                next_page = None
             flash('Welcome back!', 'success')
             return redirect(next_page or url_for('admin.dashboard'))
         flash('Invalid username or password.', 'danger')
