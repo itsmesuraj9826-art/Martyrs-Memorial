@@ -2647,32 +2647,22 @@ def seed_database():
     db.create_all()
     print("✓ Database tables ready.")
 
-    # ── Migration: add missing columns to existing tables ──────────────────
-    with db.engine.connect() as conn:
-        from sqlalchemy import text
+    # ── Migrations — each runs in its own AUTOCOMMIT connection so a failure
+    #    in one does not poison the connection state for the others. ──────────
+    from sqlalchemy import text as _text
 
-        # Add footer_theme.image if missing
+    _ddl_statements = [
+        ("footer_theme",    "ALTER TABLE footer_theme ADD COLUMN image VARCHAR(500)"),
+        ("homepage_title",  "ALTER TABLE homepage_content ALTER COLUMN title TYPE TEXT"),
+        ("homepage_sub",    "ALTER TABLE homepage_content ALTER COLUMN subtitle TYPE TEXT"),
+    ]
+    for _label, _sql in _ddl_statements:
         try:
-            conn.execute(text(
-                "ALTER TABLE footer_theme ADD COLUMN image VARCHAR(500)"
-            ))
-            conn.commit()
-            print("✓ Migration: added footer_theme.image column")
-        except Exception:
-            conn.rollback()
-            pass  # column already exists — fine
-
-        # Widen homepage_content.title and .subtitle from VARCHAR(255) to TEXT
-        for col in ('title', 'subtitle'):
-            try:
-                conn.execute(text(
-                    f"ALTER TABLE homepage_content ALTER COLUMN {col} TYPE TEXT"
-                ))
-                conn.commit()
-                print(f"✓ Migration: homepage_content.{col} widened to TEXT")
-            except Exception:
-                conn.rollback()
-                pass  # already TEXT or column missing — fine
+            with db.engine.connect().execution_options(isolation_level="AUTOCOMMIT") as _c:
+                _c.execute(_text(_sql))
+            print(f"✓ Migration: {_label}")
+        except Exception as _e:
+            pass  # already applied — fine
 
     admin = Admin.query.filter_by(username='msuraj24').first()
     if not admin:
