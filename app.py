@@ -48,7 +48,7 @@ from flask_wtf.csrf import CSRFProtect
 from flask_wtf.file import FileField, FileAllowed, MultipleFileField
 from markupsafe import Markup
 from werkzeug.utils import secure_filename
-from werkzeug.urls import url_parse
+from urllib.parse import urlparse as url_parse
 from werkzeug.security import generate_password_hash, check_password_hash
 from wtforms import (StringField, PasswordField, TextAreaField, BooleanField,
                      SelectField, DateField, DateTimeLocalField, IntegerField,
