@@ -12,12 +12,8 @@ MySQL Setup (run once in MySQL Workbench or CLI):
 Then run this file:
     python app.py
 
-On first run it will create all tables and seed the default admin:
-    URL  : http://localhost:5000
-    Admin: http://localhost:5000/auth/login
-    User : msuraj24  |  Password: suraj@123
-
-Change the password immediately after first login!
+On first run it will create all tables and seed the default admin.
+Change the default password immediately after first login!
 """
 
 # ─────────────────────────────────────────────
@@ -53,6 +49,7 @@ from flask_wtf.file import FileField, FileAllowed, MultipleFileField
 from markupsafe import Markup
 from werkzeug.utils import secure_filename
 from werkzeug.urls import url_parse
+from werkzeug.security import generate_password_hash, check_password_hash
 from wtforms import (StringField, PasswordField, TextAreaField, BooleanField,
                      SelectField, DateField, DateTimeLocalField, IntegerField,
                      SubmitField)
@@ -96,7 +93,7 @@ else:
 
 # ── Database ──────────────────────────────────────────────────────────────────
 DB_USER     = os.environ.get('DB_USER',     'root')
-DB_PASSWORD = os.environ.get('DB_PASSWORD', 'suraj@123')
+DB_PASSWORD = os.environ.get('DB_PASSWORD', '')   # no hardcoded default — must be set in .env
 DB_HOST     = os.environ.get('DB_HOST',     'localhost')
 DB_NAME     = os.environ.get('DB_NAME',     'school_website')
 
@@ -123,17 +120,35 @@ SCHOOL_TAGLINE = os.environ.get('SCHOOL_TAGLINE', 'Biratnagar-10, College Road')
 MAIL_SERVER_HOST  = os.environ.get('MAIL_SERVER',   'smtp.gmail.com')
 MAIL_SERVER_PORT  = int(os.environ.get('MAIL_PORT', '587'))
 MAIL_USE_TLS_VAL  = True
-MAIL_USERNAME_VAL = os.environ.get('MAIL_USERNAME', 'surajmehta9826@gmail.com')
-MAIL_PASSWORD_VAL = os.environ.get('MAIL_PASSWORD', 'akzynlwaajmdvxkg')
+MAIL_USERNAME_VAL = os.environ.get('MAIL_USERNAME')   # no hardcoded default
+MAIL_PASSWORD_VAL = os.environ.get('MAIL_PASSWORD')   # no hardcoded default
 MAIL_RECEIVER     = os.environ.get('MAIL_RECEIVER', 'surajmehta9826@gmail.com')
 
 
 # ─────────────────────────────────────────────
 # 2. FLASK APP + EXTENSIONS
 # ─────────────────────────────────────────────
+# Fail-fast on missing SECRET_KEY in production.
+_is_debug = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
+_secret_key = os.environ.get('SECRET_KEY')
+if not _secret_key:
+    if _is_debug:
+        import warnings
+        _secret_key = 'dev-secret-DO-NOT-USE-IN-PRODUCTION'
+        warnings.warn(
+            'SECRET_KEY is not set — using an insecure dev default. '
+            'Set SECRET_KEY in .env before deploying.',
+            stacklevel=0,
+        )
+    else:
+        raise RuntimeError(
+            'SECRET_KEY environment variable is not set. '
+            'Generate one with: python -c "import secrets; print(secrets.token_hex(32))"'
+        )
+
 app = Flask(__name__)
 app.config.update(
-    SECRET_KEY                     = os.environ.get('SECRET_KEY', 'dev-secret-change-in-production'),
+    SECRET_KEY                     = _secret_key,
     SQLALCHEMY_DATABASE_URI        = DATABASE_URL,
     SQLALCHEMY_TRACK_MODIFICATIONS = False,
     WTF_CSRF_ENABLED               = True,
@@ -271,7 +286,7 @@ _ALLOWED_TAGS = [
     'thead', 'tr', 'u', 'ul',
 ]
 _ALLOWED_ATTRS = {
-    '*':   ['class', 'style'],
+    '*':   ['class'],          # 'style' removed — allows CSS injection / data exfiltration
     'a':   ['href', 'title', 'target', 'rel'],
     'img': ['src', 'alt', 'title', 'width', 'height'],
     'td':  ['colspan', 'rowspan'],
@@ -303,17 +318,15 @@ class Admin(UserMixin, db.Model):
     reset_token_expiry = db.Column(db.DateTime,    nullable=True)
 
     def set_password(self, password):
-        from werkzeug.security import generate_password_hash
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
-        from werkzeug.security import check_password_hash
         return check_password_hash(self.password_hash, password)
 
 
 @login_manager.user_loader
 def load_user(user_id):
-    return Admin.query.get(int(user_id))
+    return db.session.get(Admin, int(user_id))
 
 
 class Notice(db.Model):
@@ -580,7 +593,7 @@ class LoginForm(FlaskForm):
 class ChangePasswordForm(FlaskForm):
     current_password = PasswordField('Current Password', validators=[DataRequired()])
     new_password     = PasswordField('New Password',
-                                     validators=[DataRequired(), Length(min=8)])
+                                     validators=[DataRequired(), Length(min=8, max=128)])
     confirm_password = PasswordField('Confirm New Password',
                                      validators=[DataRequired(),
                                                  EqualTo('new_password', message='Passwords must match.')])
@@ -658,6 +671,7 @@ class BlogPostForm(FlaskForm):
         Optional(), FileAllowed(['png', 'jpg', 'jpeg', 'gif', 'webp'], 'Images only.')])
     is_published   = BooleanField('Publish', default=True)
     is_featured    = BooleanField('Feature on Homepage')
+    update_slug    = BooleanField('Regenerate URL slug from title')
     submit         = SubmitField('Save Post')
 
 
@@ -707,7 +721,7 @@ class ForgotPasswordForm(FlaskForm):
 
 class ResetPasswordForm(FlaskForm):
     new_password     = PasswordField('New Password',
-                                     validators=[DataRequired(), Length(min=8)])
+                                     validators=[DataRequired(), Length(min=8, max=128)])
     confirm_password = PasswordField('Confirm Password',
                                      validators=[DataRequired(),
                                                  EqualTo('new_password', message='Passwords must match.')])
@@ -1117,13 +1131,16 @@ def news():
 @public_bp.route('/news/<slug>')
 def news_detail(slug):
     post        = BlogPost.query.filter_by(slug=slug, is_published=True).first_or_404()
-    post.views += 1
+    # Atomic increment — avoids race condition under concurrent requests
+    BlogPost.query.filter_by(id=post.id).update({'views': BlogPost.views + 1})
     db.session.commit()
+    post.views += 1  # reflect in template without re-querying
     return render_template('public/news_detail.html', post=post)
 
 
 _contact_rate = {}
 _login_rate   = {}
+_see_rate     = {}
 
 def _rate_limit_ok(ip, max_per_hour=5):
     import time
@@ -1144,6 +1161,17 @@ def _login_rate_limit_ok(ip, max_per_hour=10):
     if len(times) >= max_per_hour:
         return False
     _login_rate[ip].append(now)
+    return True
+
+def _see_rate_limit_ok(ip, max_per_hour=30):
+    """Rate limiter for SEE result lookups — prevents symbol-number enumeration."""
+    import time
+    now   = time.time()
+    times = [t for t in _see_rate.get(ip, []) if now - t < 3600]
+    _see_rate[ip] = times
+    if len(times) >= max_per_hour:
+        return False
+    _see_rate[ip].append(now)
     return True
 
 
@@ -1191,8 +1219,11 @@ def _send_contact_email(form):
             f"Message:\n{form.message.data}\n\n"
             f"---\nReceived at {utc_now().strftime('%Y-%m-%d %H:%M UTC')}\n"
         )
+        # Strip newlines to prevent SMTP header injection
+        safe_subject = form.subject.data.replace('\r', '').replace('\n', ' ').strip()
+        safe_name    = form.name.data.replace('\r', '').replace('\n', ' ').strip()
         email_msg = MailMessage(
-            subject=f"[Contact Form] {form.subject.data} — from {form.name.data}",
+            subject=f"[Contact Form] {safe_subject} — from {safe_name}",
             recipients=[receiver],
             body=body,
             reply_to=form.email.data,
@@ -1213,7 +1244,7 @@ def _send_autoreply_email(form):
             f"and will get back to you within 1–2 business days.\n\n"
             f"Your message details:\nSubject : {form.subject.data}\n\n"
             f"---\nThis is an automated reply. Please do not reply to this email.\n"
-            f"{school} | info@martyrsmemorial.edu.np\n"
+            f"{school}\n"
         )
         email_msg = MailMessage(
             subject=f"Thank you for contacting {school}",
@@ -1241,7 +1272,8 @@ def downloads():
 @public_bp.route('/downloads/<int:file_id>/get')
 def download_file(file_id):
     dl = Download.query.filter_by(id=file_id, is_published=True).first_or_404()
-    dl.download_count += 1
+    # Atomic increment — avoids race condition under concurrent requests
+    Download.query.filter_by(id=dl.id).update({'download_count': Download.download_count + 1})
     db.session.commit()
     if dl.filename and dl.filename.startswith('http'):
         return redirect(dl.filename)
@@ -1270,6 +1302,11 @@ def see_result():
     result   = None
     searched = False
     if form.validate_on_submit():
+        ip = request.headers.get('X-Forwarded-For', request.remote_addr or '').split(',')[0].strip()
+        if not _see_rate_limit_ok(ip):
+            flash('Too many lookups. Please wait before searching again.', 'warning')
+            return render_template('public/see_result.html', form=form,
+                                   result=None, searched=False)
         searched = True
         result   = SEEResult.query.filter_by(
             symbol_number=form.symbol_number.data.strip().upper(),
@@ -1294,7 +1331,7 @@ def privacy_policy():
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('admin.dashboard'))
-    ip = request.remote_addr
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr or '').split(',')[0].strip()
     form = LoginForm()
     if form.validate_on_submit():
         if not _login_rate_limit_ok(ip):
@@ -1303,7 +1340,7 @@ def login():
         admin = Admin.query.filter_by(username=form.username.data).first()
         if admin and admin.is_active and admin.check_password(form.password.data):
             login_user(admin, remember=form.remember_me.data)
-            admin.last_login = utc_now()
+            admin.last_login = utc_now_naive()
             db.session.commit()
             next_page = request.args.get('next')
             # Reject absolute URLs to prevent open-redirect phishing
@@ -1348,7 +1385,7 @@ def forgot_password():
         if admin:
             token                  = secrets.token_urlsafe(32)
             admin.reset_token      = token
-            admin.reset_token_expiry = utc_now() + timedelta(hours=1)
+            admin.reset_token_expiry = utc_now_naive() + timedelta(hours=1)
             db.session.commit()
             reset_url = url_for('auth.reset_password', token=token, _external=True)
             try:
@@ -1383,7 +1420,7 @@ def reset_password(token):
     if current_user.is_authenticated:
         return redirect(url_for('admin.dashboard'))
     admin = Admin.query.filter_by(reset_token=token).first()
-    if not admin or not admin.reset_token_expiry or admin.reset_token_expiry < utc_now():
+    if not admin or not admin.reset_token_expiry or admin.reset_token_expiry < utc_now_naive():
         flash('This reset link is invalid or has expired. Please request a new one.', 'danger')
         return redirect(url_for('auth.forgot_password'))
     form = ResetPasswordForm()
@@ -1612,7 +1649,8 @@ def album_images(album_id):
                     db.session.add(GalleryImage(album_id=album.id, filename=filename))
                     count += 1
         db.session.commit()
-        if count:
+        if count and not album.cover_image:
+            # Only auto-set cover when the album has no cover yet
             first = album.images.order_by(GalleryImage.id.asc()).first()
             if first:
                 album.cover_image = first.filename
@@ -1621,6 +1659,17 @@ def album_images(album_id):
         return redirect(url_for('admin.album_images', album_id=album_id))
     images = album.images.order_by(GalleryImage.sort_order.asc()).all()
     return render_template('admin/album_images.html', album=album, images=images, form=form)
+
+
+@admin_bp.route('/gallery/images/<int:image_id>/set-cover', methods=['POST'])
+@_require_admin
+def image_set_cover(image_id):
+    image = GalleryImage.query.get_or_404(image_id)
+    album = GalleryAlbum.query.get_or_404(image.album_id)
+    album.cover_image = image.filename
+    db.session.commit()
+    flash('Cover photo updated.', 'success')
+    return redirect(url_for('admin.album_images', album_id=image.album_id))
 
 
 @admin_bp.route('/gallery/images/<int:image_id>/delete', methods=['POST'])
@@ -1688,6 +1737,12 @@ def blog_edit(post_id):
         post.category     = form.category.data
         post.is_published = form.is_published.data
         post.is_featured  = form.is_featured.data
+        if form.update_slug.data:
+            base_slug = slugify(form.title.data)
+            slug, count = base_slug, 1
+            while BlogPost.query.filter(BlogPost.slug == slug, BlogPost.id != post.id).first():
+                slug = f'{base_slug}-{count}'; count += 1
+            post.slug = slug
         db.session.commit()
         flash('Post updated.', 'success')
         return redirect(url_for('admin.blog'))
@@ -1907,6 +1962,28 @@ def testimonial_new():
     return render_template('admin/testimonial_form.html', form=form, title='Add Testimonial')
 
 
+@admin_bp.route('/testimonials/<int:t_id>/edit', methods=['GET', 'POST'])
+@_require_admin
+def testimonial_edit(t_id):
+    t    = Testimonial.query.get_or_404(t_id)
+    form = TestimonialForm(obj=t)
+    if form.validate_on_submit():
+        new_avatar = None
+        if form.avatar.data and getattr(form.avatar.data, "filename", None):
+            delete_file(t.avatar, 'misc')
+            new_avatar = save_file(form.avatar.data, 'misc', resize=(200, 200))
+        t.name    = form.name.data
+        t.role    = form.role.data
+        t.content = form.content.data
+        t.rating  = form.rating.data or 5
+        if new_avatar:
+            t.avatar = new_avatar
+        db.session.commit()
+        flash('Testimonial updated.', 'success')
+        return redirect(url_for('admin.testimonials'))
+    return render_template('admin/testimonial_form.html', form=form, title='Edit Testimonial', testimonial=t)
+
+
 @admin_bp.route('/testimonials/<int:t_id>/delete', methods=['POST'])
 @_require_admin
 def testimonial_delete(t_id):
@@ -1932,7 +2009,8 @@ def board_members():
 def board_member_new():
     form = BoardMemberForm()
     if form.validate_on_submit():
-        photo = save_file(form.photo.data, 'board', resize=(600, 600))
+        photo = (save_file(form.photo.data, 'board', resize=(600, 600))
+                 if form.photo.data and getattr(form.photo.data, 'filename', None) else None)
         m = BoardMember(
             name=form.name.data, position=form.position.data,
             category=form.category.data,
@@ -2473,8 +2551,10 @@ def sitemap():
         ('/news', '0.7', 'weekly'),
         ('/contact', '0.8', 'monthly'),
         ('/downloads', '0.6', 'weekly'),
-        ('/see-result', '0.9', 'daily'),
     ]
+    # Only include /see-result when the feature is enabled
+    if get_setting('see_result_enabled', '0') == '1':
+        static_routes.append(('/see-result', '0.9', 'daily'))
     for route, priority, freq in static_routes:
         pages.append('<url><loc>' + base + route + '</loc>'
                      + '<changefreq>' + freq + '</changefreq>'
@@ -2544,7 +2624,24 @@ app.register_blueprint(admin_bp, url_prefix='/admin')
 
 
 # ─────────────────────────────────────────────
-# 13. FIRST-RUN DB SEED
+# 13. HTTP SECURITY HEADERS
+# ─────────────────────────────────────────────
+@app.after_request
+def set_security_headers(response):
+    """Add security headers to every response."""
+    response.headers['X-Frame-Options']        = 'SAMEORIGIN'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-XSS-Protection']       = '1; mode=block'
+    response.headers['Referrer-Policy']        = 'strict-origin-when-cross-origin'
+    response.headers['Permissions-Policy']     = 'geolocation=(), microphone=(), camera=()'
+    # HSTS: only send over HTTPS; browsers will refuse plain HTTP for 1 year
+    if not app.debug:
+        response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    return response
+
+
+# ─────────────────────────────────────────────
+# 14. FIRST-RUN DB SEED
 # ─────────────────────────────────────────────
 def seed_database():
     db.create_all()
@@ -2567,10 +2664,11 @@ def seed_database():
 
     admin = Admin.query.filter_by(username='msuraj24').first()
     if not admin:
+        initial_pw = os.environ.get('ADMIN_INITIAL_PASSWORD', 'suraj@123')
         admin = Admin(username='msuraj24', email='msuraj24@tbc.edu.np', full_name='Site Administrator')
-        admin.set_password('suraj@123')
+        admin.set_password(initial_pw)
         db.session.add(admin)
-        print("✓ Default admin created  →  username: msuraj24  |  password: suraj@123")
+        print("✓ Default admin created. Log in and change the password immediately.")
     else:
         print("  Admin already exists — password unchanged.")
 

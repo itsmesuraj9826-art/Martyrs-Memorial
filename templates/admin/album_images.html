@@ -53,19 +53,27 @@
       </span>
     </h3>
     {% if images %}
-    <span style="font-size:.85rem;color:var(--text-muted)">Click × to delete a photo</span>
+    <span style="font-size:.85rem;color:var(--text-muted)">⭐ = current cover &nbsp;|&nbsp; Click × to delete</span>
     {% endif %}
   </div>
   <div class="card-body">
     {% if images %}
     <div class="admin-photo-grid">
       {% for img in images %}
-      <div class="admin-photo-item">
+      <div class="admin-photo-item {% if img.filename == album.cover_image %}is-cover{% endif %}">
         <img src="{{ img.filename if img.filename.startswith('http') else url_for('static', filename='uploads/gallery/' + img.filename) }}"
              alt="{{ img.caption or 'Photo' }}" loading="lazy">
+        {% if img.filename == album.cover_image %}
+        <div class="admin-photo-cover-badge" title="Current album cover">⭐ Cover</div>
+        {% endif %}
         {% if img.caption %}
         <div class="admin-photo-caption">{{ img.caption }}</div>
         {% endif %}
+        <form method="POST" action="{{ url_for('admin.image_set_cover', image_id=img.id) }}"
+              class="inline-form cover-form" title="Set as album cover">
+          {{ csrf_token_field() }}
+          <button type="submit" class="admin-photo-cover-btn" title="Set as cover">⭐</button>
+        </form>
         <form method="POST" action="{{ url_for('admin.image_delete', image_id=img.id) }}"
               class="inline-form" onsubmit="return confirm('Delete this photo?')">
           {{ csrf_token_field() }}
@@ -148,6 +156,22 @@
   transition:background .2s;line-height:1;
 }
 .admin-photo-delete:hover{background:#dc2626}
+.admin-photo-cover-btn{
+  position:absolute;top:5px;left:5px;
+  width:26px;height:26px;border-radius:50%;
+  background:rgba(0,0,0,.55);color:#fff;
+  border:none;cursor:pointer;font-size:.8rem;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .2s;line-height:1;
+}
+.admin-photo-cover-btn:hover{background:rgba(212,146,10,.9)}
+.admin-photo-cover-badge{
+  position:absolute;top:5px;left:5px;
+  background:rgba(212,146,10,.92);color:#fff;
+  font-size:.65rem;font-weight:700;padding:.15rem .4rem;
+  border-radius:6px;pointer-events:none;
+}
+.admin-photo-item.is-cover{border-color:#d4920a;box-shadow:0 0 0 2px #d4920a;}
 </style>
 
 <script>

@@ -44,6 +44,7 @@
           </td>
           <td>{{ t.content[:60] }}{% if t.content|length > 60 %}…{% endif %}</td>
           <td class="actions">
+            <a href="{{ url_for('admin.testimonial_edit', t_id=t.id) }}" class="btn btn-sm btn-outline">Edit</a>
             <form method="POST" action="{{ url_for('admin.testimonial_delete', t_id=t.id) }}"
                   class="inline-form" onsubmit="return confirm('Delete this testimonial?')">
               {{ csrf_token_field() }}

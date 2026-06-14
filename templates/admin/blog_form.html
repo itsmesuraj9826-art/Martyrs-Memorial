@@ -39,6 +39,14 @@
       <div class="form-checkboxes">
         <label class="checkbox-label">{{ form.is_published() }} {{ form.is_published.label.text }}</label>
         <label class="checkbox-label">{{ form.is_featured() }} {{ form.is_featured.label.text }}</label>
+        {% if post %}
+        <label class="checkbox-label" title="Changing the URL will break any existing links to this post">
+          {{ form.update_slug() }} {{ form.update_slug.label.text }}
+          <span style="font-size:.78rem;color:var(--text-muted);display:block;margin-top:.15rem">
+            Current URL: <code>/news/{{ post.slug }}</code>
+          </span>
+        </label>
+        {% endif %}
       </div>
       <div class="form-actions">
         <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
