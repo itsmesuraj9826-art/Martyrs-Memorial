@@ -141,15 +141,17 @@
             <div class="people-card">
               <div class="people-photo-wrap">
                 {% if m.photo %}
-                <img src="{{ m.photo }}"
-                     alt="{{ m.name }}" class="people-photo">
+                <img src="{{ m.photo }}" alt="{{ m.name }}" class="people-photo">
                 {% else %}
                 <div class="people-photo-placeholder"><i class="fa-solid fa-user"></i></div>
                 {% endif %}
+                <div class="people-photo-scrim"></div>
+                <div class="people-photo-label">
+                  <h4>{{ m.name }}</h4>
+                  <span class="people-role">{{ m.position }}</span>
+                </div>
               </div>
               <div class="people-info">
-                <h4>{{ m.name }}</h4>
-                <span class="people-role">{{ m.position }}</span>
                 {% if m.bio %}<p class="people-bio">{{ m.bio }}</p>{% endif %}
                 {% if m.phone or m.email %}
                 <div class="people-contacts">
@@ -177,20 +179,26 @@
           <div class="people-card">
             <div class="people-photo-wrap">
               <div class="people-photo-placeholder"><i class="fa-solid fa-user"></i></div>
+              <div class="people-photo-scrim"></div>
+              <div class="people-photo-label">
+                <h4>CM Shrestha</h4>
+                <span class="people-role">Principal</span>
+              </div>
             </div>
             <div class="people-info">
-              <h4>CM Shrestha</h4>
-              <span class="people-role">Principal</span>
               <p class="people-bio">Leading Martyrs' Memorial +2 with a vision for academic excellence and holistic student development.</p>
             </div>
           </div>
           <div class="people-card">
             <div class="people-photo-wrap">
               <div class="people-photo-placeholder"><i class="fa-solid fa-user"></i></div>
+              <div class="people-photo-scrim"></div>
+              <div class="people-photo-label">
+                <h4>Manish Adhikari</h4>
+                <span class="people-role">HOD — Chemistry</span>
+              </div>
             </div>
             <div class="people-info">
-              <h4>Manish Adhikari</h4>
-              <span class="people-role">HOD — Chemistry</span>
               <p class="people-bio">Guiding students through the fascinating world of chemistry with practical and conceptual clarity.</p>
             </div>
           </div>
