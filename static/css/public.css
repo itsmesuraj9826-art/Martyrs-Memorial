@@ -1271,6 +1271,7 @@ body.dark-mode .topper-row{scrollbar-color:var(--c-gold) #1e3a6e}
 .people-contacts i{font-size:.68rem}
 
 /* ── Dark mode overrides ── */
+[data-theme="dark"] .people-cat-icon{background:rgba(212,146,10,.18)}
 [data-theme="dark"] .people-card{
   background:#131c36;
   border-color:rgba(255,255,255,.07);
