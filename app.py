@@ -447,8 +447,8 @@ class HomepageContent(db.Model):
     __tablename__ = 'homepage_content'
     id            = db.Column(db.Integer,     primary_key=True)
     section       = db.Column(db.String(80),  unique=True, nullable=False)
-    title         = db.Column(db.String(255), nullable=True)
-    subtitle      = db.Column(db.String(255), nullable=True)
+    title         = db.Column(db.Text,        nullable=True)
+    subtitle      = db.Column(db.Text,        nullable=True)
     content       = db.Column(db.Text,        nullable=True)
     image         = db.Column(db.String(500), nullable=True)
     extra_data    = db.Column(db.JSON,        nullable=True)
@@ -2661,6 +2661,18 @@ def seed_database():
         except Exception:
             conn.rollback()
             pass  # column already exists — fine
+
+        # Widen homepage_content.title and .subtitle from VARCHAR(255) to TEXT
+        for col in ('title', 'subtitle'):
+            try:
+                conn.execute(text(
+                    f"ALTER TABLE homepage_content ALTER COLUMN {col} TYPE TEXT"
+                ))
+                conn.commit()
+                print(f"✓ Migration: homepage_content.{col} widened to TEXT")
+            except Exception:
+                conn.rollback()
+                pass  # already TEXT or column missing — fine
 
     admin = Admin.query.filter_by(username='msuraj24').first()
     if not admin:
