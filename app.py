@@ -78,6 +78,18 @@ CLOUDINARY_CLOUD_NAME = os.environ.get('CLOUDINARY_CLOUD_NAME')
 CLOUDINARY_API_KEY    = os.environ.get('CLOUDINARY_API_KEY')
 CLOUDINARY_API_SECRET = os.environ.get('CLOUDINARY_API_SECRET')
 
+# Also support CLOUDINARY_URL format: cloudinary://api_key:api_secret@cloud_name
+_cloudinary_url = os.environ.get('CLOUDINARY_URL', '')
+if _cloudinary_url.startswith('cloudinary://') and not all([CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET]):
+    try:
+        from urllib.parse import urlparse
+        _parsed = urlparse(_cloudinary_url)
+        CLOUDINARY_CLOUD_NAME = _parsed.hostname
+        CLOUDINARY_API_KEY    = _parsed.username
+        CLOUDINARY_API_SECRET = _parsed.password
+    except Exception:
+        pass
+
 CLOUDINARY_ENABLED = all([CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET])
 
 if CLOUDINARY_ENABLED:
