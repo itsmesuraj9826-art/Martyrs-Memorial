@@ -40,7 +40,6 @@
         </div>
 
         <div class="album-info">
-          <h3>{{ album.name }}</h3>
           {% if album.description %}
           <p>{{ album.description[:80] }}{% if album.description|length > 80 %}…{% endif %}</p>
           {% endif %}
