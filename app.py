@@ -163,6 +163,7 @@ app.config.update(
     SECRET_KEY                     = _secret_key,
     SQLALCHEMY_DATABASE_URI        = DATABASE_URL,
     SQLALCHEMY_TRACK_MODIFICATIONS = False,
+    SQLALCHEMY_ENGINE_OPTIONS      = {'pool_pre_ping': True, 'pool_recycle': 280},
     WTF_CSRF_ENABLED               = True,
     WTF_CSRF_TIME_LIMIT            = 3600,
     UPLOAD_FOLDER                  = UPLOAD_FOLDER,
